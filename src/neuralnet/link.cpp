@@ -1,13 +1,13 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:
-// Purpose:
-// Author: Nickolay Babbysh
-// Created: 15.05.19
-// Copyright: (c) NickWare Group
-// Licence: MIT licence
+// Name:        neuralnet/link.cpp
+// Purpose:     Neural net links class
+// Author:      Nickolay Babbysh
+// Created:     15.05.2019
+// Copyright:   (c) NickWare Group
+// Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../include/neuralnet.h"
+#include "../../include/inn/neuralnet.h"
 
 inn::NeuralNet::Link::Link(inn::LinkType _LT, int _LinkFromEID) {
     Latency = 0;

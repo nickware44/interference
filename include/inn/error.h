@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:
-// Purpose:
-// Author: Nickolay Babbysh
-// Created: 07.05.19
-// Copyright: (c) NickWare Group
-// Licence: MIT licence
+// Name:        inn/error.h
+// Purpose:     Error class header
+// Author:      Nickolay Babbysh
+// Created:     07.05.2019
+// Copyright:   (c) NickWare Group
+// Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef INTERFERENCE_ERROR_H

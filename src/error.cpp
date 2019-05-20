@@ -1,9 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:
-// Purpose:
-// Author: Nickolay Babbysh
-// Created: 07.05.19
-// Copyright: (c) NickWare Group
-// Licence: MIT licence
+// Name:        error.cpp
+// Purpose:     Error class
+// Author:      Nickolay Babbysh
+// Created:     07.05.2019
+// Copyright:   (c) NickWare Group
+// Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
-#include "../include/error.h"
+
+#include "../include/inn/error.h"

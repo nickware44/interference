@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:
-// Purpose:
-// Author: Nickolay Babbysh
-// Created: 07.05.19
-// Copyright: (c) NickWare Group
-// Licence: MIT licence
+// Name:        inn/position.h
+// Purpose:     Multidimensional position class header
+// Author:      Nickolay Babbysh
+// Created:     07.05.2019
+// Copyright:   (c) NickWare Group
+// Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef INTERFERENCE_POSITION_H

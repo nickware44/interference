@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:
-// Purpose:
-// Author: Nickolay Babbysh
-// Created: 29.04.19
-// Copyright: (c) NickWare Group
-// Licence: MIT licence
+// Name:        inn/neuron.h
+// Purpose:     Neuron main class header
+// Author:      Nickolay Babbysh
+// Created:     29.04.2019
+// Copyright:   (c) NickWare Group
+// Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
 #ifndef INTERFERENCE_NEURON_H

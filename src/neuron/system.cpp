@@ -1,13 +1,13 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:
-// Purpose:
-// Author: Nickolay Babbysh
-// Created: 29.04.19
-// Copyright: (c) NickWare Group
-// Licence: MIT licence
+// Name:        neuron/system.cpp
+// Purpose:     Main neuron
+// Author:      Nickolay Babbysh
+// Created:     29.04.2019
+// Copyright:   (c) NickWare Group
+// Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/neuron.h"
+#include "../../include/inn/neuron.h"
 
 std::vector<double> inn::Neuron::System::doCompareCPFunction(std::vector<inn::Position> CP, std::vector<inn::Position> CPf) {
     std::vector<double> R;

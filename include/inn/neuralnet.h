@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        
-// Purpose:     
+// Name:        inn/neuralnet.h
+// Purpose:     Neural net main class header
 // Author:      Nickolay Babbysh
 // Created:     12.05.2019
 // Copyright:   (c) NickWare Group

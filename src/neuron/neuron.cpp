@@ -1,13 +1,13 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:
-// Purpose:
-// Author: Nickolay Babbysh
-// Created: 29.04.19
-// Copyright: (c) NickWare Group
-// Licence: MIT licence
+// Name:        neuron/neuron.cpp
+// Purpose:     Neuron main class
+// Author:      Nickolay Babbysh
+// Created:     29.04.2019
+// Copyright:   (c) NickWare Group
+// Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/neuron.h"
+#include "../../include/inn/neuron.h"
 
 inn::Neuron::Neuron() {
     t = 0;

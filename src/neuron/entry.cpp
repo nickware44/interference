@@ -1,13 +1,13 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:
-// Purpose:
-// Author: Nickolay Babbysh
-// Created: 29.04.19
-// Copyright: (c) NickWare Group
-// Licence: MIT licence
+// Name:        neuron/entry.cpp
+// Purpose:     Neuron entry class
+// Author:      Nickolay Babbysh
+// Created:     29.04.2019
+// Copyright:   (c) NickWare Group
+// Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/neuron.h"
+#include "../../include/inn/neuron.h"
 
 inn::Neuron::Entry::Entry(const Entry &E) {
     for (unsigned long long i = 0; i < E.getSynapsesCount(); i++) {
