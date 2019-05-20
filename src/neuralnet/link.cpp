@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        neuralnet/link.cpp
-// Purpose:     Neural net links class
+// Purpose:     Neural net link class
 // Author:      Nickolay Babbysh
 // Created:     15.05.2019
 // Copyright:   (c) NickWare Group

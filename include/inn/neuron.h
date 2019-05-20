@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        inn/neuron.h
-// Purpose:     Neuron main class header
+// Purpose:     Neuron classes header
 // Author:      Nickolay Babbysh
 // Created:     29.04.2019
 // Copyright:   (c) NickWare Group

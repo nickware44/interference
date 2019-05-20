@@ -8,6 +8,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "../include/inn/position.h"
+#include "../include/inn/error.h"
 
 inn::Position::Position() {
     DimensionsCount = 0;
@@ -27,8 +28,7 @@ inn::Position::Position(unsigned int _Xm, std::vector<double> _X) {
     X = new double[DimensionsCount];
     for (int i = 0; i < DimensionsCount; i++) {
         if (_X[i] < 0 || _X[i] > Xm) {
-            // inn::Error
-            return;
+            throw inn::Error(inn::EX_POSITION_RANGES);
         }
         X[i] = _X[i];
     }
@@ -36,8 +36,7 @@ inn::Position::Position(unsigned int _Xm, std::vector<double> _X) {
 
 void inn::Position::setPosition(const inn::Position &P) {
     if (P.getDimensionsCount() < DimensionsCount) {
-        // inn::Error
-        return;
+        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
     }
     for (unsigned int i = 0; i < DimensionsCount; i++) X[i] = P.getPositionValue(i);
 }
@@ -49,8 +48,7 @@ void inn::Position::setPosition(std::vector<double> _X) {
     }
     for (int i = 0; i < DimensionsCount; i++) {
         if (_X[i] < 0 || _X[i] > Xm) {
-            // inn::Error
-            return;
+            throw inn::Error(inn::EX_POSITION_RANGES);
         }
         X[i] = _X[i];
     }
@@ -76,13 +74,12 @@ inn::Position::~Position() {
 inn::Position& inn::Position::operator=(const inn::Position &P) {
     if (this == &P) return *this;
     if (DimensionsCount != P.getDimensionsCount() || Xm != P.getXm()) {
-        // inn::Error
+        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
     }
     for (unsigned int i = 0; i < DimensionsCount; i++) {
         X[i] = P.getPositionValue(i);
         if (X[i] < 0 || X[i] > Xm) {
-            // inn::Error
-            return *this;
+            throw inn::Error(inn::EX_POSITION_RANGES);
         }
     }
     return *this;
@@ -90,8 +87,7 @@ inn::Position& inn::Position::operator=(const inn::Position &P) {
 
 const inn::Position operator+(const inn::Position &L, const inn::Position &R) {
     if (L.getDimensionsCount() != R.getDimensionsCount() || L.getXm() != R.getXm()) {
-        // inn::Error
-        return inn::Position();
+        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
     }
     std::vector<double> PV;
     for (unsigned int i = 0; i < L.getDimensionsCount(); i++) {
@@ -101,9 +97,11 @@ const inn::Position operator+(const inn::Position &L, const inn::Position &R) {
 }
 
 const inn::Position operator-(const inn::Position &L, const inn::Position &R) {
-    if (L.getDimensionsCount() != R.getDimensionsCount() || L.getXm() != R.getXm()) {
-        // inn::Error
-        return inn::Position();
+    if (L.getDimensionsCount() != R.getDimensionsCount()) {
+        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+    }
+    if (L.getXm() != R.getXm()) {
+        throw inn::Error(inn::EX_POSITION_RANGES);
     }
     std::vector<double> PV;
     for (unsigned int i = 0; i < L.getDimensionsCount(); i++) {
@@ -130,8 +128,7 @@ const inn::Position operator*(const inn::Position &P, double V) {
 
 const double inn::Position::getDistance(const inn::Position &L, const inn::Position &R) {
     if (L.getDimensionsCount() != R.getDimensionsCount()) {
-        // inn::Error
-        return -1;
+        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
     }
     double D = 0;
     for (unsigned int i = 0; i < L.getDimensionsCount(); i++) {

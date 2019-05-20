@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        neuron/system.cpp
-// Purpose:     Main neuron
+// Purpose:     Definitions of general math model functions
 // Author:      Nickolay Babbysh
 // Created:     29.04.2019
 // Copyright:   (c) NickWare Group

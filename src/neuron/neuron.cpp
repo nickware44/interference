@@ -8,6 +8,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "../../include/inn/neuron.h"
+#include "../../include/inn/error.h"
 
 inn::Neuron::Neuron() {
     t = 0;
@@ -45,24 +46,21 @@ void inn::Neuron::doCreateNewEntry() {
 
 void inn::Neuron::doCreateNewSynaps(unsigned int EID, Position Pos, unsigned int Tl) {
     if (Pos.getDimensionsCount() != DimensionsCount) {
-        // inn::Error
-        return;
+        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
     }
     Entries[EID] -> doAddSynaps(Pos, Tl, 0);
 }
 
 void inn::Neuron::doCreateNewSynaps(unsigned int EID, Position Pos, unsigned int Tl, unsigned int Type) {
     if (Pos.getDimensionsCount() != DimensionsCount) {
-        // inn::Error
-        return;
+        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
     }
     Entries[EID] -> doAddSynaps(Pos, Tl, Type);
 }
 
 void inn::Neuron::doCreateNewReceptor(Position Pos) {
     if (Pos.getDimensionsCount() != DimensionsCount) {
-        // inn::Error
-        return;
+        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
     }
     auto *R = new Receptor(Pos, 2);
     Receptors.push_back(R);
@@ -104,8 +102,7 @@ float inn::Neuron::doSignalsSend(std::vector<double> X) {
 
     P = 0;
     if (X.size() != Entries.size()) {
-        // inn::Error
-        return -1;
+        throw inn::Error(inn::EX_NEURON_INPUT);
     }
 
     for (int j = 0; j < Entries.size(); j++) Entries[j] -> doIn(X[j], t);
