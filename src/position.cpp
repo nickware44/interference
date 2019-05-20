@@ -85,7 +85,7 @@ inn::Position& inn::Position::operator=(const inn::Position &P) {
     return *this;
 }
 
-const inn::Position operator+(const inn::Position &L, const inn::Position &R) {
+const inn::Position inn::operator+(const inn::Position &L, const inn::Position &R) {
     if (L.getDimensionsCount() != R.getDimensionsCount() || L.getXm() != R.getXm()) {
         throw inn::Error(inn::EX_POSITION_DIMENSIONS);
     }
@@ -96,7 +96,7 @@ const inn::Position operator+(const inn::Position &L, const inn::Position &R) {
     return inn::Position(L.getXm(), PV);
 }
 
-const inn::Position operator-(const inn::Position &L, const inn::Position &R) {
+const inn::Position inn::operator-(const inn::Position &L, const inn::Position &R) {
     if (L.getDimensionsCount() != R.getDimensionsCount()) {
         throw inn::Error(inn::EX_POSITION_DIMENSIONS);
     }
@@ -110,7 +110,7 @@ const inn::Position operator-(const inn::Position &L, const inn::Position &R) {
     return inn::Position(L.getXm(), PV);
 }
 
-const inn::Position operator/(const inn::Position &P, double V) {
+const inn::Position inn::operator/(const inn::Position &P, double V) {
     std::vector<double> PV;
     for (unsigned int i = 0; i < P.getDimensionsCount(); i++) {
         PV.push_back(P.getPositionValue(i)/V);
@@ -118,7 +118,7 @@ const inn::Position operator/(const inn::Position &P, double V) {
     return inn::Position(P.getXm(), PV);
 }
 
-const inn::Position operator*(const inn::Position &P, double V) {
+const inn::Position inn::operator*(const inn::Position &P, double V) {
     std::vector<double> PV;
     for (unsigned int i = 0; i < P.getDimensionsCount(); i++) {
         PV.push_back(P.getPositionValue(i)*V);

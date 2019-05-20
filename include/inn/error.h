@@ -1,6 +1,6 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:        inn/error.h
-// Purpose:     Error class header
+// Purpose:     Exception system class header
 // Author:      Nickolay Babbysh
 // Created:     07.05.2019
 // Copyright:   (c) NickWare Group
@@ -18,13 +18,13 @@ namespace inn {
     enum {EX_NEURALNET_NEURONS, EX_NEURALNET_INPUT, EX_NEURALNET_ENTRIES, EX_NEURALNET_NEURON_ENTRIES,
             EX_NEURALNET_LINKTYPE, EX_NEURON_INPUT, EX_POSITION_RANGES, EX_POSITION_DIMENSIONS};
 
-    class Error {
+    class Error: public std::exception {
     private:
         ExceptionType ET;
     public:
         Error();
         explicit Error(ExceptionType);
-        const char* getInfo();
+        const char* what() const noexcept override;
         ~Error() = default;
     };
 }

@@ -19,10 +19,10 @@ void inn::NeuralNet::doAddNeuron(Neuron *N, std::vector<inn::LinkDefinition> Lin
     unsigned int ML, MLF = 0;
     inn::NeuralNet::LinkMapRange Range;
     for (auto L: LinkFromTo) {
-        if (i > N->getEntriesCount()) {
+        if (i >= N->getEntriesCount()) {
             throw inn::Error(inn::EX_NEURALNET_NEURON_ENTRIES);
         }
-        if (std::get<0>(L) == LINK_ENTRY2NEURON && std::get<1>(L) > EntriesCount) {
+        if (std::get<0>(L) == LINK_ENTRY2NEURON && std::get<1>(L) >= EntriesCount) {
             throw inn::Error(inn::EX_NEURALNET_ENTRIES);
         }
         switch (std::get<0>(L)) {
