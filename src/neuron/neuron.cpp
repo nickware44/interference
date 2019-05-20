@@ -39,9 +39,11 @@ inn::Neuron::Neuron(unsigned int _Xm, unsigned int _DimensionsCount) {
     P = 0;
 }
 
-void inn::Neuron::doCreateNewEntry() {
-    auto *E = new Entry();
-    Entries.push_back(E);
+void inn::Neuron::doCreateNewEntries(unsigned int EC) {
+    for (unsigned int i = 0; i < EC; i++) {
+        auto *E = new Entry();
+        Entries.push_back(E);
+    }
 }
 
 void inn::Neuron::doCreateNewSynaps(unsigned int EID, Position Pos, unsigned int Tl) {

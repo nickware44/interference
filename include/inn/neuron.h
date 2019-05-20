@@ -34,7 +34,7 @@ namespace inn {
         Neuron();
         Neuron(const inn::Neuron&);
         Neuron(unsigned int, unsigned int);
-        void doCreateNewEntry();
+        void doCreateNewEntries(unsigned int);
         void doCreateNewSynaps(unsigned int, inn::Position, unsigned int);
         void doCreateNewSynaps(unsigned int, inn::Position, unsigned int, unsigned int);
         void doCreateNewReceptor(inn::Position);

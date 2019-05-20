@@ -30,13 +30,14 @@ namespace inn {
         unsigned int getXm() const;
         double getPositionValue(unsigned int) const;
         inn::Position& operator= (const inn::Position&);
-        friend const inn::Position operator+(const inn::Position&, const inn::Position&);
-        friend const inn::Position operator-(const inn::Position&, const inn::Position&);
-        friend const inn::Position operator/(const inn::Position&, double);
-        friend const inn::Position operator*(const inn::Position&, double);
         static const double getDistance(const inn::Position&, const inn::Position&);
         ~Position();
     };
+
+    const inn::Position operator+(const inn::Position&, const inn::Position&);
+    const inn::Position operator-(const inn::Position&, const inn::Position&);
+    const inn::Position operator/(const inn::Position&, double);
+    const inn::Position operator*(const inn::Position&, double);
 }
 
 #endif //INTERFERENCE_POSITION_H
