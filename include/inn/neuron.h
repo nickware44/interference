@@ -50,6 +50,7 @@ namespace inn {
         unsigned long long getEntriesCount();
         unsigned int getSynapsesCount();
         unsigned long long getReceptorsCount();
+        unsigned int getXm();
         unsigned int getDimensionsCount();
         ~Neuron();
     };

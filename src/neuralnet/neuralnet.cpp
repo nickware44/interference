@@ -18,6 +18,7 @@ void inn::NeuralNet::doAddNeuron(Neuron *N, std::vector<inn::LinkDefinition> Lin
     int i = 0;
     unsigned int ML, MLF = 0;
     inn::NeuralNet::LinkMapRange Range;
+    inn::NeuralNet::Link *nL;
     for (auto L: LinkFromTo) {
         if (i >= N->getEntriesCount()) {
             throw inn::Error(inn::EX_NEURALNET_NEURON_ENTRIES);
@@ -31,19 +32,20 @@ void inn::NeuralNet::doAddNeuron(Neuron *N, std::vector<inn::LinkDefinition> Lin
                 break;
             case LINK_NEURON2NEURON:
                 ML = 0;
-                NeuronLinks.insert(std::pair<inn::Neuron*, inn::NeuralNet::Link>(N, inn::NeuralNet::Link(std::get<0>(L), std::get<2>(Neurons[std::get<1>(L)]))));
                 Range = NeuronLinks.equal_range(std::get<2>(Neurons[std::get<1>(L)]));
                 for (auto it = Range.first; it != Range.second; ++it)
                     if (it->second.getLatency() > ML) ML = it->second.getLatency();
-                if (ML > MLF) MLF = ML;
-                NeuronLinks.end()->second.setLatency(ML+1);
+                if (ML+1 > MLF) MLF = ML+1;
+                nL = new inn::NeuralNet::Link(std::get<0>(L), std::get<2>(Neurons[std::get<1>(L)]));
+                nL -> setLatency(ML+1);
+                NeuronLinks.insert(std::pair<inn::Neuron*, inn::NeuralNet::Link>(N, *nL));
                 break;
             default:
                 throw inn::Error(inn::EX_NEURALNET_LINKTYPE);
         }
         i++;
     }
-    Neurons.emplace_back(Neurons.size(), ML, N);
+    Neurons.emplace_back(Neurons.size(), MLF, N);
 }
 
 void inn::NeuralNet::doCreateNewEntries(unsigned int _EC) {
@@ -58,7 +60,7 @@ void inn::NeuralNet::doCreateNewOutput(unsigned int NID) {
 }
 
 void inn::NeuralNet::doPrepare() {
-    std::sort(Neurons.begin(), Neurons.end(), [](const std::tuple<unsigned int, unsigned int, inn::Neuron*> &N1, const std::tuple<unsigned int, unsigned int, inn::Neuron*> &N2) -> bool
+    std::sort(Neurons.begin(), Neurons.end(), [](const inn::NeuralNet::NeuronDefinition &N1, const inn::NeuralNet::NeuronDefinition &N2) -> bool
     {
         return std::get<1>(N1) > std::get<1>(N2);
     });

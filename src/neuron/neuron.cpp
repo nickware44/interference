@@ -229,6 +229,10 @@ unsigned long long inn::Neuron::getReceptorsCount() {
     return Receptors.size();
 }
 
+unsigned int inn::Neuron::getXm() {
+    return Xm;
+}
+
 unsigned int inn::Neuron::getDimensionsCount() {
     return DimensionsCount;
 }
