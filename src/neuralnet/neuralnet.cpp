@@ -96,3 +96,7 @@ inn::Neuron* inn::NeuralNet::getNeuron(unsigned int NID) {
     }
     for (auto N: Neurons) if (std::get<0>(N) == NID) return std::get<2>(N);
 }
+
+inn::NeuralNet::~NeuralNet() {
+    for (auto N: Neurons) delete std::get<2>(N);
+}

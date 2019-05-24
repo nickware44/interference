@@ -38,7 +38,7 @@ namespace inn {
         void doSignalSend(std::vector<double>);
         std::vector<double> doSignalReceive();
         inn::Neuron* getNeuron(unsigned int);
-        ~NeuralNet() = default;
+        ~NeuralNet();
     };
 
     class NeuralNet::Link {

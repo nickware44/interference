@@ -236,3 +236,8 @@ unsigned int inn::Neuron::getXm() {
 unsigned int inn::Neuron::getDimensionsCount() {
     return DimensionsCount;
 }
+
+inn::Neuron::~Neuron() {
+    for (auto E: Entries) delete E;
+    for (auto R: Receptors) delete R;
+}

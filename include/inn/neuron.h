@@ -67,7 +67,7 @@ namespace inn {
         void doClearSignal();
         inn::Neuron::Synaps* getSynaps(unsigned long long) const;
         unsigned long long getSynapsesCount() const;
-        ~Entry() = default;
+        ~Entry();
     };
 
     class Neuron::Synaps {

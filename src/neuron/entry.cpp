@@ -45,3 +45,7 @@ inn::Neuron::Synaps* inn::Neuron::Entry::getSynaps(unsigned long long SID) const
 unsigned long long inn::Neuron::Entry::getSynapsesCount() const {
     return Synapses.size();
 }
+
+inn::Neuron::Entry::~Entry() {
+    for (auto S: Synapses) delete S;
+}
