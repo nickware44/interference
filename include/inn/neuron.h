@@ -64,6 +64,7 @@ namespace inn {
         Entry(const inn::Neuron::Entry&);
         void doAddSynaps(inn::Position, unsigned int, int);
         void doIn(double, unsigned long long);
+        void doFinalize();
         void doClearSignal();
         inn::Neuron::Synaps* getSynaps(unsigned long long) const;
         unsigned long long getSynapsesCount() const;

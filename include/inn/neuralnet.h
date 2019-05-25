@@ -22,7 +22,7 @@ namespace inn {
     class NeuralNet {
     private:
         class Link;
-        typedef std::tuple<unsigned int, unsigned int, inn::Neuron*> NeuronDefinition;
+        typedef std::tuple<unsigned long long, unsigned int, inn::Neuron*> NeuronDefinition;
         typedef std::multimap<inn::Neuron*, inn::NeuralNet::Link> LinkMap;
         typedef std::pair<inn::NeuralNet::LinkMap::iterator, inn::NeuralNet::LinkMap::iterator> LinkMapRange;
         unsigned int EntriesCount;
@@ -33,11 +33,12 @@ namespace inn {
         NeuralNet();
         void doAddNeuron(Neuron*, std::vector<LinkDefinition>);
         void doCreateNewEntries(unsigned int);
-        void doCreateNewOutput(unsigned int);
+        void doCreateNewOutput(unsigned long long);
         void doPrepare();
+        void doFinalize();
         void doSignalSend(std::vector<double>);
         std::vector<double> doSignalReceive();
-        inn::Neuron* getNeuron(unsigned int);
+        inn::Neuron* getNeuron(unsigned long long);
         ~NeuralNet();
     };
 

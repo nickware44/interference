@@ -34,6 +34,13 @@ void inn::Neuron::Entry::doIn(double X, unsigned long long t) {
     }
 }
 
+void inn::Neuron::Entry::doFinalize() {
+    for (auto Sig: Signal)
+        for (auto S: Synapses) S -> doIn(Sig);
+    for (auto S: Synapses) S -> doClearGamma();
+    Signal.clear();
+}
+
 void inn::Neuron::Entry::doClearSignal() {
     Signal.clear();
 }

@@ -145,17 +145,9 @@ void inn::Neuron::doCreateCheckpoint() {
 }
 
 void inn::Neuron::doFinalize() {
-    for (auto R: Receptors) R -> doLock();
-
     t = 0;
-
-    for (auto E: Entries) {
-        E -> doClearSignal();
-        for (unsigned int j = 0; j < E->getSynapsesCount(); j++) {
-            Synaps *Sk = E -> getSynaps(j);
-            Sk -> doClearGamma();
-        }
-    }
+    for (auto R: Receptors) R -> doLock();
+    for (auto E: Entries) E -> doFinalize();
 }
 
 std::vector<double> inn::Neuron::doCompareCheckpoints() {

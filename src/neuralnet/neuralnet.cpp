@@ -52,7 +52,7 @@ void inn::NeuralNet::doCreateNewEntries(unsigned int _EC) {
     EntriesCount = _EC;
 }
 
-void inn::NeuralNet::doCreateNewOutput(unsigned int NID) {
+void inn::NeuralNet::doCreateNewOutput(unsigned long long NID) {
     if (NID >= Neurons.size()) {
         throw inn::Error(inn::EX_NEURALNET_NEURONS);
     }
@@ -64,6 +64,15 @@ void inn::NeuralNet::doPrepare() {
     {
         return std::get<1>(N1) > std::get<1>(N2);
     });
+}
+
+void inn::NeuralNet::doFinalize() {
+    if (Neurons.empty()) return;
+    std::vector<double> nX;
+    unsigned int Tl = std::get<1>(Neurons[0]);
+    for (unsigned int i = 0; i < EntriesCount; i++) nX.push_back(0);
+    for (unsigned int i = 0; i < Tl; i++) doSignalSend(nX);
+    for (auto N: Neurons) std::get<2>(N) -> doFinalize();
 }
 
 void inn::NeuralNet::doSignalSend(std::vector<double> X) {
@@ -90,7 +99,7 @@ std::vector<double> inn::NeuralNet::doSignalReceive() {
     return nY;
 }
 
-inn::Neuron* inn::NeuralNet::getNeuron(unsigned int NID) {
+inn::Neuron* inn::NeuralNet::getNeuron(unsigned long long NID) {
     if (NID >= Neurons.size()) {
         throw inn::Error(inn::EX_NEURALNET_NEURONS);
     }
