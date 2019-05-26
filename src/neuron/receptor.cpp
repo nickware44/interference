@@ -72,7 +72,7 @@ void inn::Neuron::Receptor::setPos(inn::Position _RPos) {
         Lf += inn::Position::getDistance(RPosf, _RPos);
         RPosf = _RPos;
     } else {
-        L += inn::Position::getDistance(RPosf, _RPos);
+        L += inn::Position::getDistance(RPos, _RPos);
         RPos = _RPos;
     }
 }

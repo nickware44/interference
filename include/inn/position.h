@@ -17,12 +17,13 @@
 namespace inn {
     class Position {
     private:
-        unsigned int DimensionsCount;
         unsigned int Xm;
+        unsigned int DimensionsCount;
         double *X;
     public:
         Position();
         Position(const inn::Position&);
+        Position(unsigned int, unsigned int);
         Position(unsigned int, std::vector<double>);
         void setPosition(const inn::Position&);
         void setPosition(std::vector<double>);

@@ -12,6 +12,7 @@
 
 #include <map>
 #include <algorithm>
+#include <tuple>
 #include "neuron.h"
 
 namespace inn {

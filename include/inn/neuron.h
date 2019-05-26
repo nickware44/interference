@@ -35,9 +35,8 @@ namespace inn {
         Neuron(const inn::Neuron&);
         Neuron(unsigned int, unsigned int);
         void doCreateNewEntries(unsigned int);
-        void doCreateNewSynaps(unsigned int, inn::Position, unsigned int);
-        void doCreateNewSynaps(unsigned int, inn::Position, unsigned int, unsigned int);
-        void doCreateNewReceptor(inn::Position);
+        void doCreateNewSynaps(unsigned int, std::vector<double>, unsigned int, unsigned int);
+        void doCreateNewReceptor(std::vector<double>);
         void doCreateNewReceptorCluster(double, double, double, inn::TopologyID);
         float doSignalsSend(std::vector<double>);
         bool doSignalReceive();
@@ -50,8 +49,8 @@ namespace inn {
         unsigned long long getEntriesCount();
         unsigned int getSynapsesCount();
         unsigned long long getReceptorsCount();
-        unsigned int getXm();
-        unsigned int getDimensionsCount();
+        unsigned int getXm() const;
+        unsigned int getDimensionsCount() const;
         ~Neuron();
     };
 

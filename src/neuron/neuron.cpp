@@ -1,3 +1,5 @@
+#include <utility>
+
 /////////////////////////////////////////////////////////////////////////////
 // Name:        neuron/neuron.cpp
 // Purpose:     Neuron main class
@@ -18,6 +20,9 @@ inn::Neuron::Neuron() {
 }
 
 inn::Neuron::Neuron(const Neuron &N) {
+    Xm = N.getXm();
+    DimensionsCount = N.getDimensionsCount();
+
     const auto NEntries = N.getEntries();
     const auto NReceptors = N.getReceptors();
 
@@ -46,24 +51,19 @@ void inn::Neuron::doCreateNewEntries(unsigned int EC) {
     }
 }
 
-void inn::Neuron::doCreateNewSynaps(unsigned int EID, Position Pos, unsigned int Tl) {
-    if (Pos.getDimensionsCount() != DimensionsCount) {
+void inn::Neuron::doCreateNewSynaps(unsigned int EID, std::vector<double> PosVector, unsigned int Tl, unsigned int Type = 0) {
+	if (PosVector.size() != DimensionsCount) {
         throw inn::Error(inn::EX_POSITION_DIMENSIONS);
-    }
-    Entries[EID] -> doAddSynaps(Pos, Tl, 0);
+	}
+	Position Pos(Xm, std::move(PosVector));
+	Entries[EID] -> doAddSynaps(Pos, Tl, Type);
 }
 
-void inn::Neuron::doCreateNewSynaps(unsigned int EID, Position Pos, unsigned int Tl, unsigned int Type) {
-    if (Pos.getDimensionsCount() != DimensionsCount) {
+void inn::Neuron::doCreateNewReceptor(std::vector<double> PosVector) {
+    if (PosVector.size() != DimensionsCount) {
         throw inn::Error(inn::EX_POSITION_DIMENSIONS);
     }
-    Entries[EID] -> doAddSynaps(Pos, Tl, Type);
-}
-
-void inn::Neuron::doCreateNewReceptor(Position Pos) {
-    if (Pos.getDimensionsCount() != DimensionsCount) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
-    }
+    Position Pos(Xm, std::move(PosVector));
     auto *R = new Receptor(Pos, 2);
     Receptors.push_back(R);
 }
@@ -75,7 +75,7 @@ void inn::Neuron::doCreateNewReceptorCluster(double x, double y, double D, Topol
         case 0:
             for (int i = 0; i < 9; i++) {
                 yr = s*sqrt(fabs(R*R-(xr-x)*(xr-x))) + y;
-                doCreateNewReceptor(Position(Xm, {xr, yr}));
+                doCreateNewReceptor({xr, yr});
                 if (xr == x + R) {
                     s = -1;
                 }
@@ -85,7 +85,7 @@ void inn::Neuron::doCreateNewReceptorCluster(double x, double y, double D, Topol
         case 1:
             yr = y - R;
             for (int i = 0; i < 36; i++) {
-                doCreateNewReceptor(Position(Xm, {xr, yr}));
+                doCreateNewReceptor({xr, yr});
                 xr += D / 5;
                 if (xr > x + R) {
                     yr += D / 5;
@@ -100,7 +100,7 @@ void inn::Neuron::doCreateNewReceptorCluster(double x, double y, double D, Topol
 
 float inn::Neuron::doSignalsSend(std::vector<double> X) {
     double FiSum, Fi, dFi;
-    Position RPos, SPos;
+    inn::Position RPos, SPos;
 
     P = 0;
     if (X.size() != Entries.size()) {
@@ -111,7 +111,7 @@ float inn::Neuron::doSignalsSend(std::vector<double> X) {
 
     for (auto R: Receptors) {
         FiSum = 0;
-        Position NewPos;
+        inn::Position NewPos(Xm, DimensionsCount);
         for (auto E: Entries) {
             for (unsigned int k = 0; k < E->getSynapsesCount(); k++) {
                 Synaps *S = E -> getSynaps(k);
@@ -132,7 +132,7 @@ float inn::Neuron::doSignalsSend(std::vector<double> X) {
 
     t++;
 
-    P /= Receptors.size();
+    if (!Receptors.empty()) P /= Receptors.size();
     return P;
 }
 
@@ -221,11 +221,11 @@ unsigned long long inn::Neuron::getReceptorsCount() {
     return Receptors.size();
 }
 
-unsigned int inn::Neuron::getXm() {
+unsigned int inn::Neuron::getXm() const {
     return Xm;
 }
 
-unsigned int inn::Neuron::getDimensionsCount() {
+unsigned int inn::Neuron::getDimensionsCount() const {
     return DimensionsCount;
 }
 
