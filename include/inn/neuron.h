@@ -61,7 +61,7 @@ namespace inn {
     public:
         Entry() = default;
         Entry(const inn::Neuron::Entry&);
-        void doAddSynaps(inn::Position, unsigned int, int);
+        void doAddSynaps(inn::Position, unsigned int, unsigned int, int);
         void doIn(double, unsigned long long);
         void doFinalize();
         void doClearSignal();
@@ -81,7 +81,7 @@ namespace inn {
     public:
         Synaps();
         Synaps(const inn::Neuron::Synaps&);
-        Synaps(inn::Position, unsigned long long, int);
+        Synaps(inn::Position, double, double, unsigned long long, int);
         void doIn(double);
         void doClearGamma();
         inn::Position getPos() const;
@@ -135,9 +135,10 @@ namespace inn {
         static double doCompareCPFunctionD(std::vector<inn::Position>, std::vector<inn::Position>);
         static double doCompareFunction(inn::Position, inn::Position, double, double);
         static double getGammaFunctionValue(double, double, double, double, int);
-        static double getFiFunctionValue(inn::Position, inn::Position, double, double);
+        static std::pair<double, double> getFiFunctionValue(double, double, double, double);
         static double getRcValue(double, double, double, double);
-        static inn::Position getNewPosition(inn::Position, inn::Position, double);
+        static inn::Position getNewPosition(inn::Position, inn::Position, double, double);
+        static double getLambdaValue(unsigned int);
         static double getFiVectorLength(double);
         ~System() = default;
     };

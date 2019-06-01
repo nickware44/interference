@@ -38,6 +38,9 @@ const char* inn::Error::what() const noexcept {
         case EX_NEURON_INPUT:
             Msg = std::string("EX_NEURON_INPUT ~ The number of input signals does not match the neuron entries count");
             break;
+        case EX_POSITION_OUT_RANGES:
+            Msg = std::string("EX_POSITION_OUT_RANGES ~ Coordinates out of ranges");
+            break;
         case EX_POSITION_RANGES:
             Msg = std::string("EX_POSITION_RANGES ~ Not equal coordinates ranges");
             break;
@@ -47,7 +50,7 @@ const char* inn::Error::what() const noexcept {
         default:
             Msg = std::string("No exception");
     }
-    char *S = new char[Msg.size()];
+    auto *S = new char[Msg.size()];
     sprintf(S, "%s", Msg.c_str());
     return S;
 }

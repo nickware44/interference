@@ -56,7 +56,7 @@ void inn::Neuron::doCreateNewSynaps(unsigned int EID, std::vector<double> PosVec
         throw inn::Error(inn::EX_POSITION_DIMENSIONS);
 	}
 	Position Pos(Xm, std::move(PosVector));
-	Entries[EID] -> doAddSynaps(Pos, Tl, Type);
+	Entries[EID] -> doAddSynaps(Pos, Xm, Tl, Type);
 }
 
 void inn::Neuron::doCreateNewReceptor(std::vector<double> PosVector) {
@@ -99,7 +99,8 @@ void inn::Neuron::doCreateNewReceptorCluster(double x, double y, double D, Topol
 }
 
 float inn::Neuron::doSignalsSend(std::vector<double> X) {
-    double FiSum, Fi, dFi;
+    double FiSum, Fi, dFi, D;
+    std::pair<double, double> FiValues;
     inn::Position RPos, SPos;
 
     P = 0;
@@ -118,9 +119,11 @@ float inn::Neuron::doSignalsSend(std::vector<double> X) {
                 if (R->isLocked()) RPos = R -> getPosf();
                 else RPos = R -> getPos();
                 SPos = S -> getPos();
-                Fi = System::getFiFunctionValue(RPos, SPos, S->getLambda(), S->getGamma());
-                dFi = System::getFiFunctionValue(RPos, SPos, S->getLambda(), S->getdGamma());
-                if (dFi > 0) NewPos = NewPos + System::getNewPosition(RPos, SPos, System::getFiVectorLength(dFi));
+                D = inn::Position::getDistance(SPos, RPos);
+                FiValues = System::getFiFunctionValue(S->getLambda(), S->getGamma(), S->getdGamma(), D);
+                Fi = FiValues.first;
+                dFi = FiValues.second;
+                if (dFi > 0) NewPos = NewPos + System::getNewPosition(RPos, SPos, System::getFiVectorLength(dFi), D);
                 FiSum += Fi;
             }
         }

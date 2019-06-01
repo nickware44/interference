@@ -31,8 +31,11 @@ inn::Neuron::Synaps::Synaps(const Synaps &S) {
     dGamma = S.getdGamma();
 }
 
-inn::Neuron::Synaps::Synaps(inn::Position _SPos, unsigned long long _Tl, int _Type) {
+inn::Neuron::Synaps::Synaps(inn::Position _SPos, double _k1, double _Lambda, unsigned long long _Tl, int _Type) {
     SPos = _SPos;
+    k1 = _k1;
+    k2 = k1 * 1e-2;
+    Lambda = _Lambda;
     Tl = _Tl;
     NeurotransmitterType = _Type;
     Gamma = 0;

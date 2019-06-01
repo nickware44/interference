@@ -36,7 +36,7 @@ inn::Position::Position(unsigned int _Xm, std::vector<double> _X) {
     X = new double[DimensionsCount];
     for (int i = 0; i < DimensionsCount; i++) {
         if (_X[i] < 0 || _X[i] > Xm) {
-            throw inn::Error(inn::EX_POSITION_RANGES);
+            throw inn::Error(inn::EX_POSITION_OUT_RANGES);
         }
         X[i] = _X[i];
     }
@@ -55,7 +55,7 @@ void inn::Position::setPosition(std::vector<double> _X) {
     }
     for (int i = 0; i < DimensionsCount; i++) {
         if (_X[i] < 0 || _X[i] > Xm) {
-            throw inn::Error(inn::EX_POSITION_RANGES);
+            throw inn::Error(inn::EX_POSITION_OUT_RANGES);
         }
         X[i] = _X[i];
     }

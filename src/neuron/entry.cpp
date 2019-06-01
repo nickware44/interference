@@ -16,9 +16,8 @@ inn::Neuron::Entry::Entry(const Entry &E) {
     }
 }
 
-void inn::Neuron::Entry::doAddSynaps(inn::Position SPos, unsigned int Tl, int Type)
-{
-    auto *S = new Synaps(SPos, Tl, Type);
+void inn::Neuron::Entry::doAddSynaps(inn::Position SPos, unsigned int Xm, unsigned int Tl, int Type) {
+	auto *S = new Synaps(SPos, 1, inn::Neuron::System::getLambdaValue(Xm), Tl, Type);
     Synapses.push_back(S);
 }
 

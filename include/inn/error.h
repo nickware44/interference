@@ -12,11 +12,12 @@
 
 #include <iostream>
 #include <exception>
+#include <vector>
 
 namespace inn {
     typedef unsigned int ExceptionType;
     enum {EX_NEURALNET_NEURONS, EX_NEURALNET_INPUT, EX_NEURALNET_ENTRIES, EX_NEURALNET_NEURON_ENTRIES,
-            EX_NEURALNET_LINKTYPE, EX_NEURON_INPUT, EX_POSITION_RANGES, EX_POSITION_DIMENSIONS};
+            EX_NEURALNET_LINKTYPE, EX_NEURON_INPUT, EX_POSITION_OUT_RANGES, EX_POSITION_RANGES, EX_POSITION_DIMENSIONS};
 
     class Error: public std::exception {
     private:
@@ -25,7 +26,6 @@ namespace inn {
         Error();
         explicit Error(ExceptionType);
         const char* what() const noexcept override;
-        ~Error() = default;
     };
 }
 

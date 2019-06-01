@@ -37,8 +37,9 @@ double inn::Neuron::System::getGammaFunctionValue(double oG, double k1, double k
     return nGamma;
 }
 
-double inn::Neuron::System::getFiFunctionValue(inn::Position S, inn::Position R, double Lambda, double Gamma) {
-    return Gamma * Lambda * exp(-Lambda*inn::Position::getDistance(S, R));
+std::pair<double, double> inn::Neuron::System::getFiFunctionValue(double Lambda, double Gamma, double dGamma, double D) {
+    double E = Lambda * exp(-Lambda*D);
+    return std::make_pair(Gamma*E, dGamma*E);
 }
 
 double inn::Neuron::System::getRcValue(double k3, double Rs, double Fi, double dFi) {
@@ -47,8 +48,12 @@ double inn::Neuron::System::getRcValue(double k3, double Rs, double Fi, double d
     return Rs;
 }
 
-inn::Position inn::Neuron::System::getNewPosition(inn::Position R, inn::Position S, double FiL) {
-    return (R-S) / inn::Position::getDistance(S, R) * FiL;
+inn::Position inn::Neuron::System::getNewPosition(inn::Position R, inn::Position S, double FiL, double D) {
+    return (R-S) / D * FiL;
+}
+
+double inn::Neuron::System::getLambdaValue(unsigned int Xm) {
+    return pow(10, -(log(Xm)/log(2)-6));
 }
 
 double inn::Neuron::System::getFiVectorLength(double dFi) {
