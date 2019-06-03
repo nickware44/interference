@@ -41,6 +41,7 @@ namespace inn {
         float doSignalsSend(std::vector<double>);
         bool doSignalReceive();
         void doFinalize();
+        void doReinit();
         void doCreateCheckpoint();
         double doComparePattern();
         double doComparePattern(bool);
@@ -49,6 +50,7 @@ namespace inn {
         unsigned long long getEntriesCount();
         unsigned int getSynapsesCount();
         unsigned long long getReceptorsCount();
+        unsigned long long getTime() const;
         unsigned int getXm() const;
         unsigned int getDimensionsCount() const;
         ~Neuron();
@@ -111,6 +113,7 @@ namespace inn {
         bool doCheckActive();
         void doLock();
         void doUnlock();
+        void doReset();
         void doSavePos();
         void doUpdateSensitivityValue();
         void setPos(inn::Position);
@@ -133,7 +136,7 @@ namespace inn {
         System() = default;
         static std::vector<double> doCompareCPFunction(std::vector<inn::Position>, std::vector<inn::Position>);
         static double doCompareCPFunctionD(std::vector<inn::Position>, std::vector<inn::Position>);
-        static double doCompareFunction(inn::Position, inn::Position, double, double);
+        static double doCompareFunction(inn::Position, inn::Position);
         static double getGammaFunctionValue(double, double, double, double, int);
         static std::pair<double, double> getFiFunctionValue(double, double, double, double);
         static double getRcValue(double, double, double, double);

@@ -148,9 +148,13 @@ void inn::Neuron::doCreateCheckpoint() {
 }
 
 void inn::Neuron::doFinalize() {
-    t = 0;
-    for (auto R: Receptors) R -> doLock();
     for (auto E: Entries) E -> doFinalize();
+    for (auto R: Receptors) R -> doLock();
+}
+
+void inn::Neuron::doReinit() {
+    t = 0;
+    for (auto R: Receptors) R -> doReset();
 }
 
 std::vector<double> inn::Neuron::doCompareCheckpoints() {
@@ -187,12 +191,13 @@ double inn::Neuron::doComparePattern(bool WCP) {
         if (R->isLocked()) {
             RPos = R -> getPos();
             RPosf = R -> getPosf();
-            CP = R -> getCP();
-            CPf = R -> getCPf();
+            //CP = R -> getCP();
+            //CPf = R -> getCPf();
             //unsigned long L = CP.size();
-            //if (CPf.size() < L) L = CPf.size();
-            double Rc = System::doCompareFunction(RPos, RPosf, R->getL(), R->getLf());
-            if (WCP) Rc += System::doCompareCPFunctionD(CP, CPf);
+			//if (CPf.size() < L) L = CPf.size();
+			//ShowMessage("~"+AnsiString(RPosf.getPositionValue(0)));
+            double Rc = System::doCompareFunction(RPos, RPosf);
+            //if (WCP) Rc += System::doCompareCPFunctionD(CP, CPf);
             //Rc /= L + 1;
             Result += Rc;
         }
@@ -222,6 +227,10 @@ unsigned int inn::Neuron::getSynapsesCount() {
 
 unsigned long long inn::Neuron::getReceptorsCount() {
     return Receptors.size();
+}
+
+unsigned long long inn::Neuron::getTime() const {
+    return t;
 }
 
 unsigned int inn::Neuron::getXm() const {

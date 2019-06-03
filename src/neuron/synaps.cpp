@@ -34,7 +34,7 @@ inn::Neuron::Synaps::Synaps(const Synaps &S) {
 inn::Neuron::Synaps::Synaps(inn::Position _SPos, double _k1, double _Lambda, unsigned long long _Tl, int _Type) {
     SPos = _SPos;
     k1 = _k1;
-    k2 = k1 * 1e-2;
+	k2 = k1 * 9e-1;
     Lambda = _Lambda;
     Tl = _Tl;
     NeurotransmitterType = _Type;

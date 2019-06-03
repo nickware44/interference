@@ -13,6 +13,7 @@
 #include <iostream>
 #include <exception>
 #include <vector>
+#include <string>
 
 namespace inn {
     typedef unsigned int ExceptionType;
@@ -22,9 +23,11 @@ namespace inn {
     class Error: public std::exception {
     private:
         ExceptionType ET;
+        std::vector<double> ED;
     public:
         Error();
         explicit Error(ExceptionType);
+        explicit Error(ExceptionType, std::vector<double>);
         const char* what() const noexcept override;
     };
 }

@@ -17,6 +17,11 @@ inn::Error::Error(ExceptionType _ET) {
     ET = _ET;
 }
 
+inn::Error::Error(ExceptionType _ET, std::vector<double> _ED) {
+    ET = _ET;
+	ED = std::move(_ED);
+}
+
 const char* inn::Error::what() const noexcept {
     std::string Msg;
     switch (ET) {
@@ -39,7 +44,7 @@ const char* inn::Error::what() const noexcept {
             Msg = std::string("EX_NEURON_INPUT ~ The number of input signals does not match the neuron entries count");
             break;
         case EX_POSITION_OUT_RANGES:
-            Msg = std::string("EX_POSITION_OUT_RANGES ~ Coordinates out of ranges");
+			Msg = std::string("EX_POSITION_OUT_RANGES ~ Coordinates out of range ("+std::to_string(ED[0])+" < 0 || "+std::to_string(ED[0])+" > "+std::to_string(ED[1])+")");
             break;
         case EX_POSITION_RANGES:
             Msg = std::string("EX_POSITION_RANGES ~ Not equal coordinates ranges");

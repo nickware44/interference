@@ -17,7 +17,7 @@ inn::Neuron::Entry::Entry(const Entry &E) {
 }
 
 void inn::Neuron::Entry::doAddSynaps(inn::Position SPos, unsigned int Xm, unsigned int Tl, int Type) {
-	auto *S = new Synaps(SPos, 1, inn::Neuron::System::getLambdaValue(Xm), Tl, Type);
+	auto *S = new Synaps(SPos, 0.8, inn::Neuron::System::getLambdaValue(Xm), Tl, Type);
     Synapses.push_back(S);
 }
 
@@ -34,8 +34,8 @@ void inn::Neuron::Entry::doIn(double X, unsigned long long t) {
 }
 
 void inn::Neuron::Entry::doFinalize() {
-    for (auto Sig: Signal)
-        for (auto S: Synapses) S -> doIn(Sig);
+    //for (auto Sig: Signal)
+        //for (auto S: Synapses) S -> doIn(Sig);
     for (auto S: Synapses) S -> doClearGamma();
     Signal.clear();
 }

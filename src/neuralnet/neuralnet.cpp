@@ -75,6 +75,10 @@ void inn::NeuralNet::doFinalize() {
     for (auto N: Neurons) std::get<2>(N) -> doFinalize();
 }
 
+void inn::NeuralNet::doReinit() {
+    for (auto N: Neurons) std::get<2>(N) -> doReinit();
+}
+
 void inn::NeuralNet::doSignalSend(std::vector<double> X) {
     std::vector<double> nX;
     for (auto N: Neurons) {
@@ -85,8 +89,7 @@ void inn::NeuralNet::doSignalSend(std::vector<double> X) {
                     throw inn::Error(inn::EX_NEURALNET_INPUT);
                 }
                 nX.push_back(X[it->second.getLinkFromEID()]);
-            }
-            else nX.push_back(it->second.getLinkFromE()->doSignalReceive());
+            } else nX.push_back(it->second.getLinkFromE()->doSignalReceive());
         }
         std::get<2>(N) -> doSignalsSend(nX);
         nX.clear();

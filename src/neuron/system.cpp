@@ -26,7 +26,7 @@ double inn::Neuron::System::doCompareCPFunctionD(std::vector<inn::Position> CP, 
     return R;
 }
 
-double inn::Neuron::System::doCompareFunction(inn::Position R, inn::Position Rf, double, double) {
+double inn::Neuron::System::doCompareFunction(inn::Position R, inn::Position Rf) {
     return inn::Position::getDistance(R, Rf);
 }
 

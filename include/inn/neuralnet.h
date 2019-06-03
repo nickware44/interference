@@ -37,6 +37,7 @@ namespace inn {
         void doCreateNewOutput(unsigned long long);
         void doPrepare();
         void doFinalize();
+        void doReinit();
         void doSignalSend(std::vector<double>);
         std::vector<double> doSignalReceive();
         inn::Neuron* getNeuron(unsigned long long);

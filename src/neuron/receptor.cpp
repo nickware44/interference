@@ -47,15 +47,19 @@ bool inn::Neuron::Receptor::doCheckActive() {
 }
 
 void inn::Neuron::Receptor::doLock() {
-    CPf.clear();
-    RPosf = RPos0;
-    Rs = 0.1;
     Locked = true;
-    Lf = 0;
 }
 
 void inn::Neuron::Receptor::doUnlock() {
     Locked = false;
+}
+
+void inn::Neuron::Receptor::doReset() {
+    CPf.clear();
+    RPosf = RPos0;
+    Rs = 0.01;
+    Lf = 0;
+    Fi = 0;
 }
 
 void inn::Neuron::Receptor::doSavePos() {
@@ -70,10 +74,10 @@ void inn::Neuron::Receptor::doUpdateSensitivityValue() {
 void inn::Neuron::Receptor::setPos(inn::Position _RPos) {
     if (Locked) {
         Lf += inn::Position::getDistance(RPosf, _RPos);
-        RPosf = _RPos;
+        RPosf = RPosf + _RPos;
     } else {
         L += inn::Position::getDistance(RPos, _RPos);
-        RPos = _RPos;
+        RPos = RPos + _RPos;
     }
 }
 
