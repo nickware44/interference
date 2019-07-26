@@ -12,7 +12,7 @@ Version 1.1.0
 ### REQUIREMENTS
 - CMake 3.12 or newer
 - g++ 7.4.0 or newer (MinGW under Windows)
-- [LodePNG library](https://github.com/lvandeve/lodepng) (for building inn_vision sample only)
+- [LodePNG library](https://github.com/lvandeve/lodepng) (for building inn_vision example only)
 
 ----------------------------------------------------------------
 ### LICENCE
