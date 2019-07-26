@@ -10,7 +10,9 @@
 #include "../../include/inn/neuron.h"
 
 inn::Neuron::Synaps::Synaps() {
-    SPos = inn::Position();
+    SPos = new inn::Position();
+    ok1 = 0;
+    ok2 = 0;
     k1 = 0;
     k2 = 0;
     Lambda = 0;
@@ -18,25 +20,40 @@ inn::Neuron::Synaps::Synaps() {
     NeurotransmitterType = 0;
     Gamma = 0;
     dGamma = 0;
+    QCounter = -1;
+    QSize = 0;
 }
 
 inn::Neuron::Synaps::Synaps(const Synaps &S) {
     SPos = S.getPos();
-    k1 = S.getk1();
-    k2 = S.getk2();
+    ok1 = S.getk1();
+    ok2 = S.getk2();
+    k1 = ok1;
+    k2 = ok2;
     Lambda = S.getLambda();
     Tl = S.getTl();
     NeurotransmitterType = S.getNeurotransmitterType();
     Gamma = S.getGamma();
     dGamma = S.getdGamma();
+    QCounter = -1;
+    QSize = 0;
+    GammaQ.reserve(inn::Neuron::System::getGammaQMaxSizeValue(Lambda));
 }
 
-inn::Neuron::Synaps::Synaps(inn::Position _SPos, unsigned long long _Tl, int _Type) {
+inn::Neuron::Synaps::Synaps(inn::Position *_SPos, double _k1, double _Lambda, unsigned long long _Tl, int _Type) {
     SPos = _SPos;
+    ok1 = _k1;
+    ok2 = ok1 * 9e-1;
+    k1 = ok1;
+	k2 = ok2;
+    Lambda = _Lambda;
     Tl = _Tl;
     NeurotransmitterType = _Type;
     Gamma = 0;
     dGamma = 0;
+    QCounter = -1;
+    QSize = 0;
+    GammaQ.reserve(inn::Neuron::System::getGammaQMaxSizeValue(Lambda));
 }
 
 void inn::Neuron::Synaps::doIn(double X) {
@@ -45,12 +62,51 @@ void inn::Neuron::Synaps::doIn(double X) {
     Gamma = nGamma;
 }
 
-void inn::Neuron::Synaps::doClearGamma() {
-    Gamma = 0;
-    dGamma = 0;
+void inn::Neuron::Synaps::doSendToQueue(double X) {
+    double GammaLast = !QSize ? 0 : GammaQ[QSize-1];
+    double nGamma = inn::Neuron::System::getGammaFunctionValue(GammaLast, k1, k2, X, NeurotransmitterType);
+    GammaQ[QSize] = nGamma;
+    QSize++;
 }
 
-inn::Position inn::Neuron::Synaps::getPos() const {
+bool inn::Neuron::Synaps::doInFromQueue(unsigned long long tT) {
+    if (tT >= QSize) return false;
+    if (tT == QCounter) return true;
+    double nGamma = GammaQ[tT];
+    dGamma = nGamma - Gamma;
+    Gamma = nGamma;
+    QCounter = tT;
+    return true;
+}
+
+void inn::Neuron::Synaps::doPrepare() {
+    ok1 = k1;
+    ok2 = k2;
+}
+
+void inn::Neuron::Synaps::doReset() {
+    Gamma = 0;
+    dGamma = 0;
+    QCounter = 0;
+    QSize = 0;
+    GammaQ.clear();
+    k1 = ok1;
+    k2 = ok2;
+}
+
+void inn::Neuron::Synaps::setk1(double _k1) {
+    k1 = _k1;
+}
+
+void inn::Neuron::Synaps::setk2(double _k2) {
+    k2 = _k2;
+}
+
+void inn::Neuron::Synaps::setNeurotransmitterType(int _NTType) {
+    NeurotransmitterType = _NTType;
+}
+
+inn::Position* inn::Neuron::Synaps::getPos() const {
     return SPos;
 }
 
@@ -80,4 +136,8 @@ double inn::Neuron::Synaps::getGamma() const {
 
 double inn::Neuron::Synaps::getdGamma() const {
     return dGamma;
+}
+
+unsigned long long inn::Neuron::Synaps::getQSize() {
+    return QSize;
 }

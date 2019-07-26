@@ -17,8 +17,14 @@ inn::Error::Error(ExceptionType _ET) {
     ET = _ET;
 }
 
+inn::Error::Error(ExceptionType _ET, std::vector<double> _ED) {
+    ET = _ET;
+	ED = std::move(_ED);
+}
+
 const char* inn::Error::what() const noexcept {
     std::string Msg;
+    char *B;
     switch (ET) {
         case EX_NEURALNET_NEURONS:
             Msg = std::string("EX_NEURALNET_NEURONS ~ Out of neuron list");
@@ -38,6 +44,15 @@ const char* inn::Error::what() const noexcept {
         case EX_NEURON_INPUT:
             Msg = std::string("EX_NEURON_INPUT ~ The number of input signals does not match the neuron entries count");
             break;
+        case EX_NEURON_ENTRIES:
+            Msg = std::string("EX_NEURON_ENTRIES ~ Out of entry list");
+            break;
+        case EX_NEURON_RECEPTORS:
+            Msg = std::string("EX_NEURON_RECEPTORS ~ Out of receptor list");
+            break;
+        case EX_POSITION_OUT_RANGES:
+			Msg = std::string("EX_POSITION_OUT_RANGES ~ Coordinates out of range ("+std::to_string(ED[0])+" < 0 || "+std::to_string(ED[0])+" > "+std::to_string(ED[1])+")");
+            break;
         case EX_POSITION_RANGES:
             Msg = std::string("EX_POSITION_RANGES ~ Not equal coordinates ranges");
             break;
@@ -47,7 +62,7 @@ const char* inn::Error::what() const noexcept {
         default:
             Msg = std::string("No exception");
     }
-    char *S = new char[Msg.size()];
+    auto *S = new char[Msg.size()];
     sprintf(S, "%s", Msg.c_str());
     return S;
 }

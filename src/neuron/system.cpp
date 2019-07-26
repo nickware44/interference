@@ -9,7 +9,7 @@
 
 #include "../../include/inn/neuron.h"
 
-std::vector<double> inn::Neuron::System::doCompareCPFunction(std::vector<inn::Position> CP, std::vector<inn::Position> CPf) {
+std::vector<double> inn::Neuron::System::doCompareCPFunction(std::vector<inn::Position*> CP, std::vector<inn::Position*> CPf) {
     std::vector<double> R;
     unsigned long long L = CP.size();
     if (CPf.size() < L) L = CPf.size();
@@ -18,7 +18,7 @@ std::vector<double> inn::Neuron::System::doCompareCPFunction(std::vector<inn::Po
     return R;
 }
 
-double inn::Neuron::System::doCompareCPFunctionD(std::vector<inn::Position> CP, std::vector<inn::Position> CPf) {
+double inn::Neuron::System::doCompareCPFunctionD(std::vector<inn::Position*> CP, std::vector<inn::Position*> CPf) {
     double R = 0;
     unsigned long long L = CP.size();
     if (CPf.size() < L) L = CPf.size();
@@ -26,19 +26,34 @@ double inn::Neuron::System::doCompareCPFunctionD(std::vector<inn::Position> CP, 
     return R;
 }
 
-double inn::Neuron::System::doCompareFunction(inn::Position R, inn::Position Rf, double, double) {
+double inn::Neuron::System::doCompareFunction(inn::Position *R, inn::Position *Rf) {
     return inn::Position::getDistance(R, Rf);
 }
 
 double inn::Neuron::System::getGammaFunctionValue(double oG, double k1, double k2, double Xt, int Type) {
     double nGamma;
-    if (!Type) nGamma = oG + (k1*Xt - (1-Xt)*oG*k2);
-    else nGamma = oG + (k1*(1-Xt) - Xt*oG*k2);
+    switch (Type) {
+        case 0:
+            nGamma = oG + (k1*Xt-(1-Xt)*oG*k2);
+            break;
+        case 1:
+            nGamma = oG + (k1*Xt-k2*oG);
+            break;
+        default:
+            nGamma = oG;
+    }
     return nGamma;
 }
 
-double inn::Neuron::System::getFiFunctionValue(inn::Position S, inn::Position R, double Lambda, double Gamma) {
-    return Gamma * Lambda * exp(-Lambda*inn::Position::getDistance(S, R));
+std::pair<double, double> inn::Neuron::System::getFiFunctionValue(double Lambda, double Gamma, double dGamma, double D) {
+    double E = Lambda * exp(-Lambda*D);
+    return std::make_pair(Gamma*E, dGamma*E);
+}
+
+double  inn::Neuron::System::getReceptorInfluenceValue(bool Active, double dFi, inn::Position *RPos, inn::Position *RPr) {
+    double Yn = 0;
+    if (RPos->getDistanceFrom(RPr)) Yn = Active * dFi * (RPos->getPositionValue(1)-RPr->getPositionValue(1)) / RPos->getDistanceFrom(RPr);
+    return Yn;
 }
 
 double inn::Neuron::System::getRcValue(double k3, double Rs, double Fi, double dFi) {
@@ -47,10 +62,30 @@ double inn::Neuron::System::getRcValue(double k3, double Rs, double Fi, double d
     return Rs;
 }
 
-inn::Position inn::Neuron::System::getNewPosition(inn::Position R, inn::Position S, double FiL) {
-    return (R-S) / inn::Position::getDistance(S, R) * FiL;
+void inn::Neuron::System::getNewPosition(inn::Position *nRPos, inn::Position *R, inn::Position *S, double FiL, double D) {
+    nRPos -> setPosition(R);
+    nRPos -> doSubtract(S);
+    nRPos -> doDivide(D);
+    nRPos -> doMultiply(FiL);
+}
+
+double inn::Neuron::System::getLambdaValue(unsigned int Xm) {
+    return pow(10, -(log(Xm)/log(2)-6));
+}
+
+unsigned long long inn::Neuron::System::getOutputSignalQMaxSizeValue(unsigned int Xm) {
+    return pow(10, log(Xm)/log(2)-4);
+}
+
+unsigned long long inn::Neuron::System::getGammaQMaxSizeValue(double Lambda) {
+    return 1/Lambda*pow(10, 2);
 }
 
 double inn::Neuron::System::getFiVectorLength(double dFi) {
     return sqrt(dFi);
+}
+
+double inn::Neuron::System::getSynapticSensitivityValue(unsigned int W, unsigned int OW) {
+    double S = double(W) / OW;
+    return 39.682*S*S*S*S - 170.22*S*S*S + 267.81*S*S - 178.8*S + 43.072;
 }

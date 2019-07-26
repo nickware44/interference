@@ -14,6 +14,7 @@ inn::NeuralNet::Link::Link(inn::LinkType _LT, int _LinkFromEID) {
     LT = _LT;
     LinkFromEID = _LinkFromEID;
     LinkFromE = nullptr;
+    t = 0;
 }
 
 inn::NeuralNet::Link::Link(inn::LinkType _LT, inn::Neuron *_LinkFromE) {
@@ -21,6 +22,18 @@ inn::NeuralNet::Link::Link(inn::LinkType _LT, inn::Neuron *_LinkFromE) {
     LT = _LT;
     LinkFromEID = -1;
     LinkFromE = _LinkFromE;
+    t = 0;
+}
+
+bool inn::NeuralNet::Link::doCheckSignal() {
+    if (LinkFromE) {
+        return LinkFromE -> doCheckOutputSignalQ(t);
+    }
+    return false;
+}
+
+void inn::NeuralNet::Link::doResetSignalController() {
+    t = 0;
 }
 
 void inn::NeuralNet::Link::setLatency(unsigned int _Latency) {
@@ -41,4 +54,15 @@ int inn::NeuralNet::Link::getLinkFromEID() {
 
 inn::Neuron *inn::NeuralNet::Link::getLinkFromE() {
     return LinkFromE;
+}
+
+double inn::NeuralNet::Link::getSignal() {
+    if (LinkFromE) {
+        return LinkFromE -> doSignalReceive(t++);
+    }
+    return 0;
+}
+
+unsigned long long inn::NeuralNet::Link::getTime() {
+    return t;
 }

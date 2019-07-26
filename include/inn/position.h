@@ -25,13 +25,27 @@ namespace inn {
         Position(const inn::Position&);
         Position(unsigned int, unsigned int);
         Position(unsigned int, std::vector<double>);
+        void doAdd(const inn::Position*);
+        void doSubtract(const inn::Position*);
+        void doDivide(double);
+        void doMultiply(double);
+        void doZeroPosition();
         void setPosition(const inn::Position&);
+        void setPosition(const inn::Position*);
         void setPosition(std::vector<double>);
         unsigned int getDimensionsCount() const;
         unsigned int getXm() const;
         double getPositionValue(unsigned int) const;
+        double getDistanceFrom(const inn::Position*);
         inn::Position& operator= (const inn::Position&);
+
         static const double getDistance(const inn::Position&, const inn::Position&);
+        static const double getDistance(const inn::Position*, const inn::Position*);
+
+        static inn::Position* getSum(const inn::Position*, const inn::Position*);
+        static inn::Position* getDiff(const inn::Position*, const inn::Position*);
+        static inn::Position* getQuotient(const inn::Position*, double);
+        static inn::Position* getProduct(const inn::Position*, double);
         ~Position();
     };
 
