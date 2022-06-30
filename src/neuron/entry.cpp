@@ -16,32 +16,32 @@ inn::Neuron::Entry::Entry(const Entry &E) {
     }
 }
 
-void inn::Neuron::Entry::doAddSynaps(inn::Position *SPos, unsigned int Xm, unsigned int Tl, int Type) {
-	auto *S = new Synaps(SPos, 0.8, inn::Neuron::System::getLambdaValue(Xm), Tl, Type);
+void inn::Neuron::Entry::doAddSynaps(inn::Position *SPos, unsigned int Xm, unsigned int Tl) {
+	auto *S = new Synaps(SPos, 0.8, inn::Neuron::System::getLambdaValue(Xm), Tl);
     Synapses.push_back(S);
 }
 
-void inn::Neuron::Entry::doIn(double X, unsigned long long t) {
+void inn::Neuron::Entry::doIn(double X, unsigned long long t, double WVSum) {
     //Signal.push_back(X);
 
     unsigned long long STl = 0;
 
     for (auto S: Synapses) {
         STl = S -> getTl();
-        if (t >= STl) S -> doIn(X);
-        else S -> doIn(0);
+        if (t >= STl) S -> doIn(X, WVSum);
+        else S -> doIn(0, WVSum);
     }
 }
 
-void inn::Neuron::Entry::doSendToQueue(double X, unsigned long long t) {
+void inn::Neuron::Entry::doSendToQueue(double X, unsigned long long t, double WVSum) {
     //Signal.push_back(X);
 
     unsigned long long STl = 0;
 
     for (auto S: Synapses) {
         STl = S -> getTl();
-        if (t >= STl) S -> doSendToQueue(X);
-        else S -> doSendToQueue(0);
+        if (t >= STl) S -> doSendToQueue(X, WVSum);
+        else S -> doSendToQueue(0, WVSum);
     }
 }
 
@@ -73,8 +73,8 @@ void inn::Neuron::Entry::setk2(double _k2) {
     for (auto S: Synapses) S -> setk2(_k2);
 }
 
-void inn::Neuron::Entry::setNeurotransmitterType(int NTType) {
-    for (auto S: Synapses) S -> setNeurotransmitterType(NTType);
+void inn::Neuron::Entry::setWTs(inn::WaveType _WTs) {
+    for (auto S: Synapses) S -> setWTs(_WTs);
 }
 
 inn::Neuron::Synaps* inn::Neuron::Entry::getSynaps(unsigned long long SID) const {

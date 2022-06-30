@@ -16,6 +16,7 @@ inn::NeuralNet::NeuralNet() {
     LDRCounterN = 0;
     t = 0;
     DataDone = false;
+    Learned = false;
 }
 
 void inn::NeuralNet::doAddNeuron(Neuron *N, std::vector<inn::LinkDefinition> LinkFromTo) {
@@ -46,7 +47,6 @@ void inn::NeuralNet::doAddNeuron(Neuron *N, std::vector<inn::LinkDefinition> Lin
                 nL = new inn::NeuralNet::Link(std::get<0>(L), oN);
                 nL -> setLatency(ML+1);
                 NeuronLinks.insert(std::pair<inn::Neuron*, inn::NeuralNet::Link>(N, *nL));
-
                 break;
             default:
                 throw inn::Error(inn::EX_NEURALNET_LINKTYPE);
@@ -96,9 +96,29 @@ void inn::NeuralNet::doCreateNewOutput(unsigned long long NID) {
 }
 
 std::vector<double> inn::NeuralNet::doComparePatterns() {
-    std::vector<double> PDiff;
-    for (auto O: Outputs) PDiff.push_back(O->doComparePattern());
-    return PDiff;
+    std::vector<double> PDiffR, PDiffL, PDiff;
+    for (auto O: Outputs) {
+        auto P = O -> doComparePattern();
+        PDiffR.push_back(std::get<0>(P));
+        PDiffL.push_back(std::get<1>(P));
+    }
+    double PDRMin = PDiffR[std::distance(PDiffR.begin(), std::min_element(PDiffR.begin(), PDiffR.end()))];
+    double PDRMax = PDiffR[std::distance(PDiffR.begin(), std::max_element(PDiffR.begin(), PDiffR.end()))] - PDRMin;
+
+    double PDLMin = PDiffL[std::distance(PDiffL.begin(), std::min_element(PDiffL.begin(), PDiffL.end()))];
+    double PDLMax = PDiffL[std::distance(PDiffL.begin(), std::max_element(PDiffL.begin(), PDiffL.end()))] - PDLMin;
+
+//    for (auto &PDR: PDiffR) {
+//        PDR = 1 - (PDR-PDRMin) / PDRMax;
+//    }
+    for (auto &PDL: PDiffL) {
+        PDL = 1 - (PDL-PDLMin) / PDLMax;
+        std::cout << PDL << std::endl;
+    }
+    for (auto i = 0; i < Outputs.size(); i++) {
+        PDiff.push_back((PDiffR[i]+PDiffL[i])/2);
+    }
+    return PDiffR;
 }
 
 void inn::NeuralNet::doEnableMultithreading() {
@@ -127,7 +147,8 @@ void inn::NeuralNet::doFinalize() {
                 if (std::get<1>(N) == Tl) {
                     LinkMapRange R = NeuronLinks.equal_range(std::get<2>(N));
                     for (auto it = R.first; it != R.second; ++it) {
-                        if (it->second.getTime() != t) {
+                        //std::cout << it->second.getTime() << std::endl;
+                        if ((!Learned && it->second.getTime() != t) || (Learned && it->second.getTime() != t+it->second.getLinkFromE()->getTlo())) {
                             End = false;
                             break;
                         }
@@ -140,6 +161,7 @@ void inn::NeuralNet::doFinalize() {
         }
     }
     for (auto N: Neurons) std::get<2>(N) -> doFinalize();
+    Learned = true;
 }
 
 void inn::NeuralNet::doReinit() {
@@ -153,16 +175,18 @@ void inn::NeuralNet::doSignalSend(std::vector<double> X) {
     if (EntriesCount != X.size()) {
         throw inn::Error(inn::EX_NEURALNET_INPUT);
     }
+    std::vector<inn::WaveDefinition> Waves(Neurons.size());
     for (auto N: Neurons) {
         LinkMapRange R = NeuronLinks.equal_range(std::get<2>(N));
         unsigned long long i = 0;
         for (auto it = R.first; it != R.second; ++it, i++) {
             if (it->second.getLinkType() == inn::LINK_ENTRY2NEURON) {
                 if (DataDone) continue;
-                std::get<2>(N) -> doSignalSendEntry(i, X[it->second.getLinkFromEID()]);
+                std::get<2>(N) -> doSignalSendEntry(i, X[it->second.getLinkFromEID()], std::vector<inn::WaveDefinition>());
             } else {
                 if (!it->second.doCheckSignal()) continue;
-                std::get<2>(N) -> doSignalSendEntry(i, it->second.getSignal());
+                //if (Learned) for (int x = 0; x < Neurons.size(); x++) Waves[x] = std::get<2>(Neurons[x])->getWave();
+                std::get<2>(N) -> doSignalSendEntry(i, it->second.getSignal(), Waves);
             }
         }
         if (!std::get<2>(N)->isMultithreadingEnabled()) std::get<2>(N) -> doSignalsSend();

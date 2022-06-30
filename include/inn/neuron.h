@@ -19,6 +19,8 @@
 
 namespace inn {
     typedef unsigned int TopologyID;
+    enum class WaveType: int {NOWAVE = -1, WAVETYPE1, WAVETYPE2, WAVETYPE3};
+    typedef std::pair<inn::WaveType, double> WaveDefinition;
 
     class Neuron {
     private:
@@ -28,28 +30,34 @@ namespace inn {
         std::vector<inn::Neuron::Entry*> Entries;
         std::vector<inn::Neuron::Receptor*> Receptors;
         std::atomic<unsigned long long> t;
+        unsigned long long Tlo;
         unsigned int Xm, DimensionsCount;
         float P;
         double Y;
         bool Multithreading;
+        int NID;
+        bool Learned;
         std::vector<double> OutputSignalQ;
         inn::Position *dRPos, *nRPos;
+        inn::WaveType WTin, WTout;
         inn::Computer<inn::Neuron::Receptor*, inn::Neuron> *ReceptorPositionComputer;
         bool doPrepareEntriesData(unsigned long long);
         void doComputeNewPosition(inn::Neuron::Receptor*);
         std::vector<double> doCompareCheckpoints();
+        double LastWVSum;
     public:
+        typedef std::tuple<double, double> PatternDefinition;
         class System;
         Neuron();
         Neuron(const inn::Neuron&);
-        Neuron(unsigned int, unsigned int);
+        Neuron(unsigned int, unsigned int, unsigned long long _Tlo = 0, inn::WaveType _WTin = inn::WaveType::NOWAVE, inn::WaveType _WTout = inn::WaveType::NOWAVE);
         void doEnableMultithreading();
         void doCreateNewEntries(unsigned int);
-        void doCreateNewSynaps(unsigned int, std::vector<double>, unsigned int, unsigned int);
+        void doCreateNewSynaps(unsigned int, std::vector<double>, unsigned int);
         void doCreateNewReceptor(std::vector<double>);
         void doCreateNewReceptorCluster(double, double, double, inn::TopologyID);
         void doSignalsSend();
-        void doSignalSendEntry(unsigned long long, double);
+        void doSignalSendEntry(unsigned long long, double, const std::vector<inn::WaveDefinition>&);
         double doSignalReceive();
         double doSignalReceive(unsigned long long);
         bool doCheckOutputSignalQ(unsigned long long);
@@ -57,10 +65,11 @@ namespace inn {
         void doFinalize();
         void doReinit();
         void doCreateCheckpoint();
-        double doComparePattern();
+        inn::Neuron::PatternDefinition doComparePattern() const;
         void setk1(double);
         void setk2(double);
         void setk3(double);
+        void setNID(int);
         bool isMultithreadingEnabled() const;
         inn::Neuron::Entry* getEntry(unsigned long long) const;
         inn::Neuron::Receptor* getReceptor(unsigned long long) const;
@@ -70,6 +79,11 @@ namespace inn {
         unsigned long long getTime() const;
         unsigned int getXm() const;
         unsigned int getDimensionsCount() const;
+        inn::WaveType getWTin() const;
+        inn::WaveType getWTout() const;
+        inn::WaveDefinition getWave() const;
+        unsigned long long getTlo() const;
+        int getNID() const;
         ~Neuron();
     };
 
@@ -80,14 +94,14 @@ namespace inn {
     public:
         Entry() = default;
         Entry(const inn::Neuron::Entry&);
-        void doAddSynaps(inn::Position*, unsigned int, unsigned int, int);
-        void doIn(double, unsigned long long);
-        void doSendToQueue(double, unsigned long long);
+        void doAddSynaps(inn::Position*, unsigned int, unsigned int);
+        void doIn(double, unsigned long long, double);
+        void doSendToQueue(double, unsigned long long, double);
         bool doInFromQueue(unsigned long long);
         void doPrepare();
         void doFinalize();
         void doClearSignal();
-        void setNeurotransmitterType(int);
+        void setWTs(inn::WaveType);
         void setk1(double);
         void setk2(double);
         inn::Neuron::Synaps* getSynaps(unsigned long long) const;
@@ -101,7 +115,7 @@ namespace inn {
         double ok1, ok2, k1, k2;
         double Lambda;
         unsigned long long Tl;
-        int NeurotransmitterType;
+        inn::WaveType WTs;
         double Gamma, dGamma;
         long long QCounter;
         std::vector<double> GammaQ;
@@ -109,21 +123,21 @@ namespace inn {
     public:
         Synaps();
         Synaps(const inn::Neuron::Synaps&);
-        Synaps(inn::Position*, double, double, unsigned long long, int);
-        void doIn(double);
-        void doSendToQueue(double);
+        Synaps(inn::Position*, double, double, unsigned long long);
+        void doIn(double, double);
+        void doSendToQueue(double, double);
         bool doInFromQueue(unsigned long long);
         void doPrepare();
         void doReset();
         void setk1(double);
         void setk2(double);
-        void setNeurotransmitterType(int);
+        void setWTs(inn::WaveType);
         inn::Position* getPos() const;
         double getk1() const;
         double getk2() const;
         double getLambda() const;
         unsigned long long getTl() const;
-        int getNeurotransmitterType() const;
+        inn::WaveType getWTs() const;
         double getGamma() const;
         double getdGamma() const;
         unsigned long long getQSize();
@@ -173,7 +187,7 @@ namespace inn {
         static std::vector<double> doCompareCPFunction(std::vector<inn::Position*>, std::vector<inn::Position*>);
         static double doCompareCPFunctionD(std::vector<inn::Position*>, std::vector<inn::Position*>);
         static double doCompareFunction(inn::Position*, inn::Position*);
-        static double getGammaFunctionValue(double, double, double, double, int);
+        static double getGammaFunctionValue(double, double, double, double, double);
         static std::pair<double, double> getFiFunctionValue(double, double, double, double);
         static double getReceptorInfluenceValue(bool, double, inn::Position*, inn::Position*);
         static double getRcValue(double, double, double, double);

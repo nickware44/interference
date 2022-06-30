@@ -32,6 +32,7 @@ namespace inn {
         unsigned int LDRCounterE, LDRCounterN;
         unsigned long long t;
         bool DataDone;
+        bool Learned;
         std::vector<inn::NeuralNet::NeuronDefinition> Neurons;
         inn::NeuralNet::LinkMap NeuronLinks;
         std::vector<inn::Neuron*> Outputs;

@@ -255,27 +255,30 @@ int main() {
         auto *NN = new inn::NeuralNet();
         NN -> doCreateNewEntries(IC*4*3*2);
         for (unsigned int i = 0; i < IC; i++) {
-            auto *N1 = new inn::Neuron(500, 2);
+            auto *N1 = new inn::Neuron(500, 2, 0, inn::WaveType::NOWAVE, static_cast<inn::WaveType>(i));
             N1->doCreateNewEntries(6);
-            N1->doCreateNewSynaps(0, {200, 100}, 0, 0);
-            N1->doCreateNewSynaps(1, {342, 342}, 0, 0);
-            N1->doCreateNewSynaps(2, {58, 342}, 0, 0);
-            N1->doCreateNewSynaps(3, {200, 400}, 0, 0);
-            N1->doCreateNewSynaps(4, {58, 58}, 0, 0);
-            N1->doCreateNewSynaps(5, {342, 58}, 0, 0);
+            N1->doCreateNewSynaps(0, {200, 100}, 0);
+            N1->doCreateNewSynaps(1, {342, 342}, 0);
+            N1->doCreateNewSynaps(2, {58, 342}, 0);
+            N1->doCreateNewSynaps(3, {200, 400}, 0);
+            N1->doCreateNewSynaps(4, {58, 58}, 0);
+            N1->doCreateNewSynaps(5, {342, 58}, 0);
             N1->doCreateNewReceptorCluster(200, 200, 10, 0);
-            N1 -> setk1(1.8);
+            N1 -> setk1(2.8);
             N1 -> setk3(600.2);
             auto *N2 = new inn::Neuron(*N1);
             auto *N3 = new inn::Neuron(*N1);
             auto *N4 = new inn::Neuron(*N1);
-            auto *N5 = new inn::Neuron(200, 2);
+            auto *N5 = new inn::Neuron(200, 2, 0, static_cast<inn::WaveType>(i), inn::WaveType::NOWAVE);
             N5->doCreateNewEntries(4);
-            N5->doCreateNewSynaps(0, {50, 100}, 0, 0);
-            N5->doCreateNewSynaps(1, {100, 150}, 0, 0);
-            N5->doCreateNewSynaps(2, {100, 50}, 0, 0);
-            N5->doCreateNewSynaps(3, {150, 100}, 0, 0);
+            N5->doCreateNewSynaps(0, {50, 100}, 0);
+            N5->doCreateNewSynaps(1, {100, 150}, 0);
+            N5->doCreateNewSynaps(2, {100, 50}, 0);
+            N5->doCreateNewSynaps(3, {150, 100}, 0);
             N5->doCreateNewReceptorCluster(100, 100, 5, 0);
+            N5 -> setNID(i+1);
+            N5 -> setk1(2.8);
+            /*
             switch (i) {
                 case 0:
                     N5 -> setk1(3.8);
@@ -301,6 +304,7 @@ int main() {
                     N5 -> setk1(5.5);
                     N5 -> setk2(0.2);
             }
+             */
             NN -> doAddNeuron(N1, {inn::LinkDefinitionRangeNext(inn::LINK_ENTRY2NEURON, 6)});
             NN -> doAddNeuron(N2, {inn::LinkDefinitionRangeNext(inn::LINK_ENTRY2NEURON, 6)});
             NN -> doAddNeuron(N3, {inn::LinkDefinitionRangeNext(inn::LINK_ENTRY2NEURON, 6)});
@@ -309,10 +313,14 @@ int main() {
                                    inn::LinkDefinition(inn::LINK_NEURON2NEURON, 5*i+1),
                                    inn::LinkDefinition(inn::LINK_NEURON2NEURON, 5*i+2),
                                    inn::LinkDefinition(inn::LINK_NEURON2NEURON, 5*i+3)});
-            NN -> doCreateNewOutput(5*i+4);
+//            NN -> doCreateNewOutput(5*i); //5*i+4
+//            NN -> doCreateNewOutput(5*i+1); //5*i+4
+//            NN -> doCreateNewOutput(5*i+2); //5*i+4
+//            NN -> doCreateNewOutput(5*i+3); //5*i+4
+            NN -> doCreateNewOutput(5*i+4); //5*i+4
         }
         std::cout << "Preparing..." << std::endl;
-        NN -> doEnableMultithreading();
+        //NN -> doEnableMultithreading();
         NN -> doPrepare();
         Time = time_stop() / 1000.;
         std::cout << "Done:\t\t\t\t"<< Time << "s" << std::endl;
@@ -333,6 +341,8 @@ int main() {
         time_start();
         SendSignalVision(I1o, NN, IC, -1);
         Time = time_stop() / 1000.;
+        PDiff = NN -> doComparePatterns();
+        for (int p = 0; p < PDiff.size(); p++) std::cout << "Pattern difference #" << p+1 << ":\t\t" << PDiff[p] << std::endl;
         std::cout << "Done:\t\t\t\t" << Time  << "s" << std::endl;
         std::cout << "Total speed:\t\t\t" << I1o[0].size()*IC*24./1024/1024/Time << " mbit/s" << std::endl;
         std::cout << "=====================================================================================" << std::endl;

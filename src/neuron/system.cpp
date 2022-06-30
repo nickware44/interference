@@ -27,21 +27,13 @@ double inn::Neuron::System::doCompareCPFunctionD(std::vector<inn::Position*> CP,
 }
 
 double inn::Neuron::System::doCompareFunction(inn::Position *R, inn::Position *Rf) {
-    return inn::Position::getDistance(R, Rf);
+    return 1;//inn::Position::getDistance(R, Rf);
 }
 
-double inn::Neuron::System::getGammaFunctionValue(double oG, double k1, double k2, double Xt, int Type) {
+double inn::Neuron::System::getGammaFunctionValue(double oG, double k1, double k2, double Xt, double WVSum) {
     double nGamma;
-    switch (Type) {
-        case 0:
-            nGamma = oG + (k1*Xt-(1-Xt)*oG*k2);
-            break;
-        case 1:
-            nGamma = oG + (k1*Xt-k2*oG);
-            break;
-        default:
-            nGamma = oG;
-    }
+    if (WVSum < 13) WVSum = 1;
+    nGamma = oG + (k1*Xt-(1-Xt)*oG*k2)/WVSum;
     return nGamma;
 }
 
@@ -50,7 +42,7 @@ std::pair<double, double> inn::Neuron::System::getFiFunctionValue(double Lambda,
     return std::make_pair(Gamma*E, dGamma*E);
 }
 
-double  inn::Neuron::System::getReceptorInfluenceValue(bool Active, double dFi, inn::Position *RPos, inn::Position *RPr) {
+double inn::Neuron::System::getReceptorInfluenceValue(bool Active, double dFi, inn::Position *RPos, inn::Position *RPr) {
     double Yn = 0;
     if (RPos->getDistanceFrom(RPr)) Yn = Active * dFi * (RPos->getPositionValue(1)-RPr->getPositionValue(1)) / RPos->getDistanceFrom(RPr);
     return Yn;
