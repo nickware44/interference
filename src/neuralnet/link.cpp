@@ -63,6 +63,6 @@ double inn::NeuralNet::Link::getSignal() {
     return 0;
 }
 
-unsigned long long inn::NeuralNet::Link::getTime() {
+int64_t inn::NeuralNet::Link::getTime() {
     return t;
 }

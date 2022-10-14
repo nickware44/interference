@@ -9,7 +9,7 @@
 
 #include "../../include/inn/neuron.h"
 
-inn::Neuron::Synaps::Synaps() {
+inn::Neuron::Synapse::Synapse() {
     SPos = new inn::Position();
     ok1 = 0;
     ok2 = 0;
@@ -24,7 +24,7 @@ inn::Neuron::Synaps::Synaps() {
     QSize = 0;
 }
 
-inn::Neuron::Synaps::Synaps(const Synaps &S) {
+inn::Neuron::Synapse::Synapse(const Synapse &S) {
     SPos = S.getPos();
     ok1 = S.getk1();
     ok2 = S.getk2();
@@ -40,7 +40,7 @@ inn::Neuron::Synaps::Synaps(const Synaps &S) {
     GammaQ.reserve(inn::Neuron::System::getGammaQMaxSizeValue(Lambda));
 }
 
-inn::Neuron::Synaps::Synaps(inn::Position *_SPos, double _k1, double _Lambda, unsigned long long _Tl) {
+inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, int64_t _Tl) {
     SPos = _SPos;
     ok1 = _k1;
     ok2 = ok1 * 9e-1;
@@ -56,20 +56,20 @@ inn::Neuron::Synaps::Synaps(inn::Position *_SPos, double _k1, double _Lambda, un
     GammaQ.reserve(inn::Neuron::System::getGammaQMaxSizeValue(Lambda));
 }
 
-void inn::Neuron::Synaps::doIn(double X, double WVSum) {
+void inn::Neuron::Synapse::doIn(double X, double WVSum) {
     double nGamma = inn::Neuron::System::getGammaFunctionValue(Gamma, k1, k2, X, WVSum);
     dGamma = nGamma - Gamma;
     Gamma = nGamma;
 }
 
-void inn::Neuron::Synaps::doSendToQueue(double X, double WVSum) {
+void inn::Neuron::Synapse::doSendToQueue(double X, double WVSum) {
     double GammaLast = !QSize ? 0 : GammaQ[QSize-1];
     double nGamma = inn::Neuron::System::getGammaFunctionValue(GammaLast, k1, k2, X, WVSum);
     GammaQ[QSize] = nGamma;
     QSize++;
 }
 
-bool inn::Neuron::Synaps::doInFromQueue(unsigned long long tT) {
+bool inn::Neuron::Synapse::doInFromQueue(int64_t tT) {
     if (tT >= QSize) return false;
     if (tT == QCounter) return true;
     double nGamma = GammaQ[tT];
@@ -79,12 +79,12 @@ bool inn::Neuron::Synaps::doInFromQueue(unsigned long long tT) {
     return true;
 }
 
-void inn::Neuron::Synaps::doPrepare() {
+void inn::Neuron::Synapse::doPrepare() {
     ok1 = k1;
     ok2 = k2;
 }
 
-void inn::Neuron::Synaps::doReset() {
+void inn::Neuron::Synapse::doReset() {
     Gamma = 0;
     dGamma = 0;
     QCounter = 0;
@@ -94,50 +94,50 @@ void inn::Neuron::Synaps::doReset() {
     k2 = ok2;
 }
 
-void inn::Neuron::Synaps::setk1(double _k1) {
+void inn::Neuron::Synapse::setk1(double _k1) {
     k1 = _k1;
 }
 
-void inn::Neuron::Synaps::setk2(double _k2) {
+void inn::Neuron::Synapse::setk2(double _k2) {
     k2 = _k2;
 }
 
-void inn::Neuron::Synaps::setWTs(inn::WaveType _WTs) {
+void inn::Neuron::Synapse::setWTs(inn::WaveType _WTs) {
     WTs = _WTs;
 }
 
-inn::Position* inn::Neuron::Synaps::getPos() const {
+inn::Position* inn::Neuron::Synapse::getPos() const {
     return SPos;
 }
 
-double inn::Neuron::Synaps::getk1() const {
+double inn::Neuron::Synapse::getk1() const {
     return k1;
 }
 
-double inn::Neuron::Synaps::getk2() const {
+double inn::Neuron::Synapse::getk2() const {
     return k2;
 }
 
-double inn::Neuron::Synaps::getLambda() const {
+double inn::Neuron::Synapse::getLambda() const {
     return Lambda;
 }
 
-unsigned long long inn::Neuron::Synaps::getTl() const {
+int64_t inn::Neuron::Synapse::getTl() const {
     return Tl;
 }
 
-inn::WaveType inn::Neuron::Synaps::getWTs() const {
+inn::WaveType inn::Neuron::Synapse::getWTs() const {
     return WTs;
 }
 
-double inn::Neuron::Synaps::getGamma() const {
+double inn::Neuron::Synapse::getGamma() const {
     return Gamma;
 }
 
-double inn::Neuron::Synaps::getdGamma() const {
+double inn::Neuron::Synapse::getdGamma() const {
     return dGamma;
 }
 
-unsigned long long inn::Neuron::Synaps::getQSize() {
+int64_t inn::Neuron::Synapse::getQSize() {
     return QSize;
 }

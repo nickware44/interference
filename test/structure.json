@@ -1,0 +1,64 @@
+{
+  "entries": ["E1", "E2"],
+  "neurons": [
+    {
+      "name": "N1",
+      "size": 500,
+      "dimensions": 3,
+      "input_signals": ["E2", "E1", "N3"],
+
+      "synapses": [
+        {
+          "entry": 0,
+          "position": [100, 100, 100],
+          "neurotransmitter": "activation"
+        },
+        {
+          "entry": 1,
+          "position": [100, 100, 100],
+          "neurotransmitter": "activation"
+        },
+        {
+          "entry": 0,
+          "position": [100, 100, 100],
+          "neurotransmitter": "deactivation"
+        }
+      ],
+
+      "receptors": [
+        {
+          "type": "single",
+          "position": [100, 100, 100]
+        },
+        {
+          "type": "cluster",
+          "position": [100, 100, 100],
+          "count": 10,
+          "radius": 10
+        }
+      ]
+    },
+    {
+      "name": "N2",
+      "size": 500,
+      "dimensions": 3,
+      "input_signals": ["N1"],
+
+      "synapses": [],
+      "receptors": []
+    },
+    {
+      "name": "N3",
+      "size": 500,
+      "dimensions": 3,
+      "input_signals": ["E1", "N2"],
+
+      "synapses": [],
+      "receptors": []
+    }
+  ],
+  "output_signals": ["N1"],
+  "name": "self test net",
+  "desc": "neural net structure for self testing",
+  "version": "1.0"
+}

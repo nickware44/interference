@@ -7,8 +7,13 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
+#include <fstream>
+#include <queue>
 #include "../../include/inn/neuralnet.h"
 #include "../../include/inn/error.h"
+#include "../3rdparty/json.hpp"
+
+typedef nlohmann::json json;
 
 inn::NeuralNet::NeuralNet() {
     EntriesCount = 0;
@@ -20,6 +25,7 @@ inn::NeuralNet::NeuralNet() {
 }
 
 void inn::NeuralNet::doAddNeuron(Neuron *N, std::vector<inn::LinkDefinition> LinkFromTo) {
+    /*
     int i = 0;
     unsigned int ML, MLF = 0;
     inn::NeuralNet::LinkMapRange Range;
@@ -54,6 +60,7 @@ void inn::NeuralNet::doAddNeuron(Neuron *N, std::vector<inn::LinkDefinition> Lin
         i++;
     }
     Neurons.emplace_back(Neurons.size(), MLF, N);
+     */
 }
 
 void inn::NeuralNet::doAddNeuron(Neuron *N, std::vector<inn::LinkDefinitionRange> LinkFromToRange) {
@@ -88,19 +95,17 @@ void inn::NeuralNet::doCreateNewEntries(unsigned int _EC) {
     EntriesCount = _EC;
 }
 
-void inn::NeuralNet::doCreateNewOutput(unsigned long long NID) {
-    if (NID >= Neurons.size()) {
-        throw inn::Error(inn::EX_NEURALNET_NEURONS);
-    }
-    Outputs.push_back(std::get<2>(Neurons[NID]));
+void inn::NeuralNet::doCreateNewOutput(const std::string& NeuronName) {
+    auto N = Neurons.find(NeuronName);
+    //if (N != Neurons.end()) Outputs.push_back(N->second);
 }
 
 std::vector<double> inn::NeuralNet::doComparePatterns() {
     std::vector<double> PDiffR, PDiffL, PDiff;
     for (auto O: Outputs) {
-        auto P = O -> doComparePattern();
-        PDiffR.push_back(std::get<0>(P));
-        PDiffL.push_back(std::get<1>(P));
+//        auto P = O -> doComparePattern();
+//        PDiffR.push_back(std::get<0>(P));
+//        PDiffL.push_back(std::get<1>(P));
     }
     double PDRMin = PDiffR[std::distance(PDiffR.begin(), std::min_element(PDiffR.begin(), PDiffR.end()))];
     double PDRMax = PDiffR[std::distance(PDiffR.begin(), std::max_element(PDiffR.begin(), PDiffR.end()))] - PDRMin;
@@ -122,19 +127,20 @@ std::vector<double> inn::NeuralNet::doComparePatterns() {
 }
 
 void inn::NeuralNet::doEnableMultithreading() {
-    for (auto N: Neurons) std::get<2>(N) -> doEnableMultithreading();
+    //for (auto N: Neurons) std::get<2>(N) -> doEnableMultithreading();
 }
 
 void inn::NeuralNet::doPrepare() {
-    std::sort(Neurons.begin(), Neurons.end(), [](const inn::NeuralNet::NeuronDefinition &N1, const inn::NeuralNet::NeuronDefinition &N2) -> bool
-    {
-        return std::get<1>(N1) > std::get<1>(N2);
-    });
-    for (auto N: Neurons) std::get<2>(N) -> doPrepare();
+//    std::sort(Neurons.begin(), Neurons.end(), [](const inn::NeuralNet::NeuronDefinition &N1, const inn::NeuralNet::NeuronDefinition &N2) -> bool
+//    {
+//        return std::get<1>(N1) > std::get<1>(N2);
+//    });
+    for (const auto& N: Neurons) N.second -> doPrepare();
 }
 
 void inn::NeuralNet::doFinalize() {
     if (Neurons.empty()) return;
+    /*
     std::vector<double> nX;
     unsigned int Tl = std::get<1>(Neurons[0]);
     if (Tl) {
@@ -162,23 +168,73 @@ void inn::NeuralNet::doFinalize() {
     }
     for (auto N: Neurons) std::get<2>(N) -> doFinalize();
     Learned = true;
+     */
 }
 
-void inn::NeuralNet::doReinit() {
+void inn::NeuralNet::doReset() {
     t = 0;
     DataDone = false;
-    for (auto &NL: NeuronLinks) NL.second.doResetSignalController();
-    for (auto N: Neurons) std::get<2>(N) -> doReinit();
+    //for (auto &NL: NeuronLinks) NL.second.doResetSignalController();
+    for (const auto& N: Neurons) N.second -> doReinit();
 }
 
-void inn::NeuralNet::doSignalSend(std::vector<double> X) {
+void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
+    std::queue<std::tuple<std::string, std::string, double>> nqueue;
+    std::map<std::string, std::string> nwaiting;
+    std::vector<std::string> m;
+
+    int xi = 0;
+    for (auto &e: Entries) {
+        for (auto &en: e.second) {
+            nqueue.push(std::make_tuple(e.first, en, X[xi]));
+        }
+        xi++;
+    }
+
+    while (!nqueue.empty()) {
+        auto i = nqueue.front();
+        nqueue.pop();
+        std::cout << std::get<0>(i) << " -> " << std::get<1>(i) << " (" << std::get<2>(i) << ")" << std::endl;
+        auto n = Neurons.find(std::get<1>(i));
+        if (n != Neurons.end()) {
+            bool done =  n -> second -> doSignalSendEntry(std::get<0>(i), std::get<2>(i), {});
+            if (done) {
+                std::cout << std::get<1>(i) << " computed" << std::endl;
+                nwaiting.erase(std::get<1>(i));
+                auto nlinks = n -> second -> getLinkOutput();
+                for (auto &nl: nlinks) {
+                    nqueue.push(std::make_tuple(std::get<1>(i), nl, n->second->doSignalReceive()));
+                }
+            } else {
+                auto wnname = nwaiting.find(std::get<1>(i));
+                if (wnname == nwaiting.end()) nwaiting.insert(std::make_pair(std::get<1>(i), ""));
+            }
+        }
+
+        if (nqueue.empty() && !nwaiting.empty()) { // if not-computed neurons remains
+            for (auto &wnname: nwaiting) {
+                auto wn = Neurons.find(wnname.first);
+                if (wn != Neurons.end()) {
+                    auto waiting = wn->second->getWaitingEntries();
+                    for (auto &we: waiting) {
+                        auto nfrom = Neurons.find(we);
+                        if (nfrom != Neurons.end()) {
+                            nqueue.push(std::make_tuple(we, wnname.first, nfrom->second->doSignalReceive()));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /*
     if (EntriesCount != X.size()) {
         throw inn::Error(inn::EX_NEURALNET_INPUT);
     }
     std::vector<inn::WaveDefinition> Waves(Neurons.size());
     for (auto N: Neurons) {
         LinkMapRange R = NeuronLinks.equal_range(std::get<2>(N));
-        unsigned long long i = 0;
+        int64_t i = 0;
         for (auto it = R.first; it != R.second; ++it, i++) {
             if (it->second.getLinkType() == inn::LINK_ENTRY2NEURON) {
                 if (DataDone) continue;
@@ -192,31 +248,148 @@ void inn::NeuralNet::doSignalSend(std::vector<double> X) {
         if (!std::get<2>(N)->isMultithreadingEnabled()) std::get<2>(N) -> doSignalsSend();
     }
     if (!DataDone) t++;
+     */
 }
 
 std::vector<double> inn::NeuralNet::doSignalReceive() {
     std::vector<double> nY;
-    for (auto N: Outputs) nY.push_back(N->doSignalReceive());
+    //for (auto N: Outputs) nY.push_back(N->doSignalReceive());
     return nY;
 }
 
 bool inn::NeuralNet::isMultithreadingEnabled() {
-    for (auto N: Neurons) if (!std::get<2>(N)->isMultithreadingEnabled()) return false;
+    //for (auto N: Neurons) if (!std::get<2>(N)->isMultithreadingEnabled()) return false;
     return true;
 }
 
-inn::Neuron* inn::NeuralNet::getNeuron(unsigned long long NID) {
-    if (NID >= Neurons.size()) {
-        throw inn::Error(inn::EX_NEURALNET_NEURONS);
-    }
-    for (auto N: Neurons) if (std::get<0>(N) == NID) return std::get<2>(N);
+inn::Neuron* inn::NeuralNet::getNeuron(const std::string& NName) {
+    auto N = Neurons.find(NName);
+    if (N != Neurons.end()) return N->second;
     return nullptr;
 }
 
-unsigned long long inn::NeuralNet::getNeuronCount() {
+uint64_t inn::NeuralNet::getNeuronCount() {
     return Neurons.size();
 }
 
+void inn::NeuralNet::setStructure(std::ifstream &Stream) {
+    if (!Stream.is_open()) {
+        std::cout << "Error opening file" << std::endl;
+        return;
+    }
+    std::string jstr;
+    while (!Stream.eof()) {
+        std::string rstr;
+        getline(Stream, rstr);
+        jstr.append(rstr);
+    }
+    setStructure(jstr);
+}
+
+void inn::NeuralNet::setStructure(const std::string &Str) {
+    try {
+        auto j = json::parse(Str);
+        //std::cout << j.dump(4) << std::endl;
+        Name = j["name"].get<std::string>();
+        Description = j["desc"].get<std::string>();
+        Version = j["version"].get<std::string>();
+
+        std::multimap<std::string, std::string> links;
+        for (auto &jneuron: j["neurons"].items()) {
+            auto nname = jneuron.value()["name"].get<std::string>();
+            for (auto &jinputs: jneuron.value()["input_signals"].items()) {
+                auto iname = jinputs.value().get<std::string>();
+                links.insert(std::make_pair(iname, nname));
+            }
+        }
+
+        for (auto &jentry: j["entries"].items()) {
+            auto ename = jentry.value().get<std::string>();
+            std::vector<std::string> elinks;
+            auto l = links.equal_range(ename);
+            for (auto it = l.first; it != l.second; it++) {
+                elinks.push_back(it->second);
+                std::cout << ename << " -> " << it->second << std::endl;
+            }
+            Entries.insert(std::make_pair(ename, elinks));
+        }
+
+//        for (auto &l: links) {
+//            std::cout << l.first << " - " << l.second << std::endl;
+//        }
+
+        for (auto &jneuron: j["neurons"].items()) {
+            auto nname = jneuron.value()["name"].get<std::string>();
+            auto nsize = jneuron.value()["size"].get<unsigned int>();
+            auto ndimensions = jneuron.value()["dimensions"].get<unsigned int>();
+            std::vector<std::string> nentries;
+            for (auto &jent: jneuron.value()["input_signals"].items()) {
+                nentries.push_back(jent.value().get<std::string>());
+            }
+            auto *N = new inn::Neuron(nsize, ndimensions, 0, nentries);
+
+            for (auto &jsynapse: jneuron.value()["synapses"].items()) {
+                std::vector<double> pos;
+                if (ndimensions != jsynapse.value()["position"].size()) {
+                    std::cout << "Error: position vector size not equal dimension count" << std::endl;
+                    return;
+                }
+                for (auto &jposition: jsynapse.value()["position"].items()) {
+                    pos.push_back(jposition.value().get<double>());
+                }
+                unsigned int tl = 0;
+                if (jneuron.value()["tl"] != nullptr) tl = jsynapse.value()["tl"].get<unsigned int>();
+                auto sentryid = jsynapse.value()["entry"].get<unsigned int>();
+                auto sentry = jneuron.value()["input_signals"][sentryid];
+                N -> doCreateNewSynapse(sentry, pos, tl);
+            }
+            for (auto &jreceptor: jneuron.value()["receptors"].items()) {
+                std::vector<double> pos;
+                if (ndimensions != jreceptor.value()["position"].size()) {
+                    std::cout << "Error: position vector size not equal dimension count" << std::endl;
+                    return;
+                }
+                for (auto &jposition: jreceptor.value()["position"].items()) {
+                    pos.push_back(jposition.value().get<double>());
+                }
+                if (jreceptor.value()["type"] != nullptr && jreceptor.value()["type"].get<std::string>() == "cluster") {
+                    auto rcount = jreceptor.value()["count"].get<unsigned int>();
+                    auto rradius = jreceptor.value()["count"].get<unsigned int>();
+                    //N -> doCreateNewReceptorCluster(0, 0, rradius, 0);
+                } else {
+                    N -> doCreateNewReceptor(pos);
+                }
+            }
+
+            auto l = links.equal_range(nname);
+            for (auto it = l.first; it != l.second; it++) {
+                N -> doLinkOutput(it->second);
+                std::cout << nname << " -> " << it->second << std::endl;
+            }
+
+            Neurons.insert(std::make_pair(nname, N));
+        }
+    } catch (std::exception &e) {
+        std::cout << "Error parsing structure: " << e.what() << std::endl;
+    }
+}
+
+std::string inn::NeuralNet::getStructure() {
+    return {};
+}
+
+std::string inn::NeuralNet::getName() {
+    return Name;
+}
+
+std::string inn::NeuralNet::getDescription() {
+    return Description;
+}
+
+std::string inn::NeuralNet::getVersion() {
+    return Version;
+}
+
 inn::NeuralNet::~NeuralNet() {
-    for (auto N: Neurons) delete std::get<2>(N);
+    //for (auto N: Neurons) delete std::get<2>(N);
 }

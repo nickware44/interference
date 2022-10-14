@@ -3,7 +3,8 @@ project(interference)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_library(interference src/neuron/neuron.cpp include/inn/neuron.h src/neuron/entry.cpp src/neuron/system.cpp src/neuron/synaps.cpp src/neuron/receptor.cpp src/position.cpp include/inn/position.h src/error.cpp include/inn/error.h src/neuralnet/neuralnet.cpp include/inn/neuralnet.h src/neuralnet/link.cpp include/inn/computer.hpp)
+add_library(interference src/neuron/neuron.cpp include/inn/neuron.h src/neuron/entry.cpp src/neuron/system.cpp src/neuron/synapse.cpp src/neuron/receptor.cpp src/position.cpp include/inn/position.h src/error.cpp include/inn/error.h src/neuralnet/neuralnet.cpp include/inn/neuralnet.h src/neuralnet/link.cpp include/inn/computer.hpp)
+
 if(WIN32)
     include_directories(interference "C:/boost/compute/include/")
     include_directories(interference "C:/Program Files (x86)/AMD APP SDK/3.0/include")
@@ -28,3 +29,5 @@ else()
     target_link_libraries(inn_vision_sample interference Threads::Threads -latomic)
     install(TARGETS inn_vision_sample RUNTIME DESTINATION ${PROJECT_SOURCE_DIR}/samples/inn_vision/bin)
 endif()
+
+add_subdirectory(test)

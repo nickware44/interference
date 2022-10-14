@@ -9,34 +9,44 @@
 
 #include "../../include/inn/neuron.h"
 
-inn::Neuron::Entry::Entry(const Entry &E) {
-    for (unsigned long long i = 0; i < E.getSynapsesCount(); i++) {
-        auto *S = new Synaps(*E.getSynaps(i));
-        Synapses.push_back(S);
-    }
+inn::Neuron::Entry::Entry() {
+    t = -1;
 }
 
-void inn::Neuron::Entry::doAddSynaps(inn::Position *SPos, unsigned int Xm, unsigned int Tl) {
-	auto *S = new Synaps(SPos, 0.8, inn::Neuron::System::getLambdaValue(Xm), Tl);
+inn::Neuron::Entry::Entry(const Entry &E) {
+    for (int64_t i = 0; i < E.getSynapsesCount(); i++) {
+        auto *S = new Synapse(*E.getSynapse(i));
+        Synapses.push_back(S);
+    }
+    t = -1;
+}
+
+bool inn::Neuron::Entry::doCheckState(int64_t tn) const {
+    return tn == t;
+}
+
+void inn::Neuron::Entry::doAddSynapse(inn::Position *SPos, unsigned int Xm, unsigned int Tl) {
+	auto *S = new Synapse(SPos, 0.8, inn::Neuron::System::getLambdaValue(Xm), Tl);
     Synapses.push_back(S);
 }
 
-void inn::Neuron::Entry::doIn(double X, unsigned long long t, double WVSum) {
+void inn::Neuron::Entry::doIn(double X, int64_t tn, double WVSum) {
     //Signal.push_back(X);
 
-    unsigned long long STl = 0;
+    int64_t STl;
+    t = tn;
 
     for (auto S: Synapses) {
         STl = S -> getTl();
-        if (t >= STl) S -> doIn(X, WVSum);
+        if (tn >= STl) S -> doIn(X, WVSum);
         else S -> doIn(0, WVSum);
     }
 }
 
-void inn::Neuron::Entry::doSendToQueue(double X, unsigned long long t, double WVSum) {
+void inn::Neuron::Entry::doSendToQueue(double X, int64_t t, double WVSum) {
     //Signal.push_back(X);
 
-    unsigned long long STl = 0;
+    int64_t STl = 0;
 
     for (auto S: Synapses) {
         STl = S -> getTl();
@@ -45,7 +55,7 @@ void inn::Neuron::Entry::doSendToQueue(double X, unsigned long long t, double WV
     }
 }
 
-bool inn::Neuron::Entry::doInFromQueue(unsigned long long tT) {
+bool inn::Neuron::Entry::doInFromQueue(int64_t tT) {
     for (auto S: Synapses) if (!S->doInFromQueue(tT)) return false;
     return true;
 }
@@ -77,11 +87,11 @@ void inn::Neuron::Entry::setWTs(inn::WaveType _WTs) {
     for (auto S: Synapses) S -> setWTs(_WTs);
 }
 
-inn::Neuron::Synaps* inn::Neuron::Entry::getSynaps(unsigned long long SID) const {
+inn::Neuron::Synapse* inn::Neuron::Entry::getSynapse(int64_t SID) const {
     return Synapses[SID];
 }
 
-unsigned long long inn::Neuron::Entry::getSynapsesCount() const {
+int64_t inn::Neuron::Entry::getSynapsesCount() const {
     return Synapses.size();
 }
 

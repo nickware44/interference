@@ -13,6 +13,7 @@
 #include <cmath>
 #include <vector>
 #include <atomic>
+#include <map>
 #include <iostream>
 #include "position.h"
 #include "computer.hpp"
@@ -25,12 +26,13 @@ namespace inn {
     class Neuron {
     private:
         class Entry;
-        class Synaps;
+        class Synapse;
         class Receptor;
-        std::vector<inn::Neuron::Entry*> Entries;
+        std::map<std::string, inn::Neuron::Entry*> Entries;
+        std::vector<std::string> Links;
         std::vector<inn::Neuron::Receptor*> Receptors;
-        std::atomic<unsigned long long> t;
-        unsigned long long Tlo;
+        std::atomic<int64_t> t;
+        int64_t Tlo;
         unsigned int Xm, DimensionsCount;
         float P;
         double Y;
@@ -41,7 +43,7 @@ namespace inn {
         inn::Position *dRPos, *nRPos;
         inn::WaveType WTin, WTout;
         inn::Computer<inn::Neuron::Receptor*, inn::Neuron> *ReceptorPositionComputer;
-        bool doPrepareEntriesData(unsigned long long);
+        bool doPrepareEntriesData(int64_t);
         void doComputeNewPosition(inn::Neuron::Receptor*);
         std::vector<double> doCompareCheckpoints();
         double LastWVSum;
@@ -50,83 +52,87 @@ namespace inn {
         class System;
         Neuron();
         Neuron(const inn::Neuron&);
-        Neuron(unsigned int, unsigned int, unsigned long long _Tlo = 0, inn::WaveType _WTin = inn::WaveType::NOWAVE, inn::WaveType _WTout = inn::WaveType::NOWAVE);
+        Neuron(unsigned int, unsigned int, int64_t _Tlo = 0, const std::vector<std::string>& InputSignals = {}, inn::WaveType _WTin = inn::WaveType::NOWAVE, inn::WaveType _WTout = inn::WaveType::NOWAVE);
         void doEnableMultithreading();
-        void doCreateNewEntries(unsigned int);
-        void doCreateNewSynaps(unsigned int, std::vector<double>, unsigned int);
+        void doCreateNewSynapse(const std::string&, std::vector<double>, unsigned int);
         void doCreateNewReceptor(std::vector<double>);
         void doCreateNewReceptorCluster(double, double, double, inn::TopologyID);
         void doSignalsSend();
-        void doSignalSendEntry(unsigned long long, double, const std::vector<inn::WaveDefinition>&);
+        bool doSignalSendEntry(const std::string&, double, const std::vector<inn::WaveDefinition>&);
         double doSignalReceive();
-        double doSignalReceive(unsigned long long);
-        bool doCheckOutputSignalQ(unsigned long long);
+        double doSignalReceive(int64_t);
+        bool doCheckOutputSignalQ(int64_t);
         void doPrepare();
         void doFinalize();
         void doReinit();
         void doCreateCheckpoint();
         inn::Neuron::PatternDefinition doComparePattern() const;
+        void doLinkOutput(const std::string&);
         void setk1(double);
         void setk2(double);
         void setk3(double);
         void setNID(int);
         bool isMultithreadingEnabled() const;
-        inn::Neuron::Entry* getEntry(unsigned long long) const;
-        inn::Neuron::Receptor* getReceptor(unsigned long long) const;
-        unsigned long long getEntriesCount() const;
+        std::vector<std::string>& getLinkOutput();
+        //inn::Neuron::Entry* getEntry(const std::string&) const;
+        inn::Neuron::Receptor* getReceptor(int64_t) const;
+        std::vector<std::string> getWaitingEntries();
+        int64_t getEntriesCount() const;
         unsigned int getSynapsesCount() const;
-        unsigned long long getReceptorsCount() const;
-        unsigned long long getTime() const;
+        int64_t getReceptorsCount() const;
+        int64_t getTime() const;
         unsigned int getXm() const;
         unsigned int getDimensionsCount() const;
         inn::WaveType getWTin() const;
         inn::WaveType getWTout() const;
         inn::WaveDefinition getWave() const;
-        unsigned long long getTlo() const;
+        int64_t getTlo() const;
         int getNID() const;
         ~Neuron();
     };
 
     class Neuron::Entry {
     private:
-        std::vector<inn::Neuron::Synaps*> Synapses;
+        std::vector<inn::Neuron::Synapse*> Synapses;
+        int64_t t;
         std::vector<double> Signal;
     public:
-        Entry() = default;
+        Entry();
         Entry(const inn::Neuron::Entry&);
-        void doAddSynaps(inn::Position*, unsigned int, unsigned int);
-        void doIn(double, unsigned long long, double);
-        void doSendToQueue(double, unsigned long long, double);
-        bool doInFromQueue(unsigned long long);
+        bool doCheckState(int64_t) const;
+        void doAddSynapse(inn::Position*, unsigned int, unsigned int);
+        void doIn(double, int64_t, double);
+        void doSendToQueue(double, int64_t, double);
+        bool doInFromQueue(int64_t);
         void doPrepare();
         void doFinalize();
         void doClearSignal();
         void setWTs(inn::WaveType);
         void setk1(double);
         void setk2(double);
-        inn::Neuron::Synaps* getSynaps(unsigned long long) const;
-        unsigned long long getSynapsesCount() const;
+        inn::Neuron::Synapse* getSynapse(int64_t) const;
+        int64_t getSynapsesCount() const;
         ~Entry();
     };
 
-    class Neuron::Synaps {
+    class Neuron::Synapse {
     private:
         inn::Position* SPos;
         double ok1, ok2, k1, k2;
         double Lambda;
-        unsigned long long Tl;
+        int64_t Tl;
         inn::WaveType WTs;
         double Gamma, dGamma;
         long long QCounter;
         std::vector<double> GammaQ;
-        std::atomic<unsigned long long> QSize;
+        std::atomic<int64_t> QSize;
     public:
-        Synaps();
-        Synaps(const inn::Neuron::Synaps&);
-        Synaps(inn::Position*, double, double, unsigned long long);
+        Synapse();
+        Synapse(const inn::Neuron::Synapse&);
+        Synapse(inn::Position*, double, double, int64_t);
         void doIn(double, double);
         void doSendToQueue(double, double);
-        bool doInFromQueue(unsigned long long);
+        bool doInFromQueue(int64_t);
         void doPrepare();
         void doReset();
         void setk1(double);
@@ -136,12 +142,12 @@ namespace inn {
         double getk1() const;
         double getk2() const;
         double getLambda() const;
-        unsigned long long getTl() const;
+        int64_t getTl() const;
         inn::WaveType getWTs() const;
         double getGamma() const;
         double getdGamma() const;
-        unsigned long long getQSize();
-        ~Synaps() = default;
+        int64_t getQSize();
+        ~Synapse() = default;
     };
 
     class Neuron::Receptor {
@@ -192,8 +198,8 @@ namespace inn {
         static double getReceptorInfluenceValue(bool, double, inn::Position*, inn::Position*);
         static double getRcValue(double, double, double, double);
         static void getNewPosition(inn::Position*, inn::Position*, inn::Position*, double, double);
-        static unsigned long long getOutputSignalQMaxSizeValue(unsigned int);
-        static unsigned long long getGammaQMaxSizeValue(double);
+        static int64_t getOutputSignalQMaxSizeValue(unsigned int);
+        static int64_t getGammaQMaxSizeValue(double);
         static double getLambdaValue(unsigned int);
         static double getFiVectorLength(double);
         static double getSynapticSensitivityValue(unsigned int, unsigned int);

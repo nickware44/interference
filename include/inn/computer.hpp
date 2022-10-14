@@ -24,14 +24,14 @@ namespace inn {
     private:
         std::atomic<bool> KeepWorkerAlive;
         T2 *Instance;
-        bool (T2::*doBeforeWork)(unsigned long long);
+        bool (T2::*doBeforeWork)(int64_t);
         void (T2::*doWork)();
         std::thread Worker;
-        std::atomic<unsigned long long> tTM;
+        std::atomic<int64_t> tTM;
         void tComputerWorker();
     public:
         Computer();
-        Computer(T2*, bool (T2::*)(unsigned long long), void (T2::*)());
+        Computer(T2*, bool (T2::*)(int64_t), void (T2::*)());
         void doWait();
         ~Computer() = default;
     };
@@ -43,7 +43,7 @@ namespace inn {
     }
 
     template <class T1, class T2>
-    inn::Computer<T1, T2>::Computer(T2 *_Instance, bool (T2::*_BeforeWorkFunction)(unsigned long long),
+    inn::Computer<T1, T2>::Computer(T2 *_Instance, bool (T2::*_BeforeWorkFunction)(int64_t),
             void (T2::*_WorkFunction)()) {
         KeepWorkerAlive = true;
         Instance = _Instance;

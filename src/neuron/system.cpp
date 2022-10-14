@@ -11,7 +11,7 @@
 
 std::vector<double> inn::Neuron::System::doCompareCPFunction(std::vector<inn::Position*> CP, std::vector<inn::Position*> CPf) {
     std::vector<double> R;
-    unsigned long long L = CP.size();
+    int64_t L = CP.size();
     if (CPf.size() < L) L = CPf.size();
     R.reserve(L);
     for (long long i = 0; i < L; i++) R.push_back(inn::Position::getDistance(CP[i], CPf[i]));
@@ -20,7 +20,7 @@ std::vector<double> inn::Neuron::System::doCompareCPFunction(std::vector<inn::Po
 
 double inn::Neuron::System::doCompareCPFunctionD(std::vector<inn::Position*> CP, std::vector<inn::Position*> CPf) {
     double R = 0;
-    unsigned long long L = CP.size();
+    int64_t L = CP.size();
     if (CPf.size() < L) L = CPf.size();
     for (int i = 0; i < L; i++) R += inn::Position::getDistance(CP[i], CPf[i]);
     return R;
@@ -65,11 +65,11 @@ double inn::Neuron::System::getLambdaValue(unsigned int Xm) {
     return pow(10, -(log(Xm)/log(2)-6));
 }
 
-unsigned long long inn::Neuron::System::getOutputSignalQMaxSizeValue(unsigned int Xm) {
+int64_t inn::Neuron::System::getOutputSignalQMaxSizeValue(unsigned int Xm) {
     return pow(10, log(Xm)/log(2)-4);
 }
 
-unsigned long long inn::Neuron::System::getGammaQMaxSizeValue(double Lambda) {
+int64_t inn::Neuron::System::getGammaQMaxSizeValue(double Lambda) {
     return 1/Lambda*pow(10, 2);
 }
 
