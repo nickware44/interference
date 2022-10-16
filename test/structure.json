@@ -52,6 +52,7 @@
       "size": 500,
       "dimensions": 3,
       "input_signals": ["E1", "N2"],
+      "latency": 1,
 
       "synapses": [],
       "receptors": []

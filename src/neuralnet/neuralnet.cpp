@@ -197,36 +197,31 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
         std::cout << std::get<0>(i) << " -> " << std::get<1>(i) << " (" << std::get<2>(i) << ")" << std::endl;
         auto n = Neurons.find(std::get<1>(i));
         if (n != Neurons.end()) {
-            bool done =  n -> second -> doSignalSendEntry(std::get<0>(i), std::get<2>(i), {});
+            if (!t) {
+                auto waiting = n -> second -> getWaitingEntries();
+                auto l = Latencies.find(std::get<1>(i));
+                auto latency = l == Latencies.end() ? 0 : l->second;
+                for (auto &we: waiting) {
+                    auto nfrom = Latencies.find(we);
+                    if (nfrom != Latencies.end() && nfrom->second > latency) {
+                        std::cout << we << " (latency " << nfrom->second << ") -> " << std::get<1>(i) << " (0)" << std::endl;
+                        n -> second -> doSignalSendEntry(we, 0, {});
+                    }
+                }
+            }
+
+            bool done = n -> second -> doSignalSendEntry(std::get<0>(i), std::get<2>(i), {});
+
             if (done) {
                 std::cout << std::get<1>(i) << " computed" << std::endl;
-                nwaiting.erase(std::get<1>(i));
                 auto nlinks = n -> second -> getLinkOutput();
                 for (auto &nl: nlinks) {
                     nqueue.push(std::make_tuple(std::get<1>(i), nl, n->second->doSignalReceive()));
                 }
-            } else {
-                auto wnname = nwaiting.find(std::get<1>(i));
-                if (wnname == nwaiting.end()) nwaiting.insert(std::make_pair(std::get<1>(i), ""));
-            }
-        }
-
-        if (nqueue.empty() && !nwaiting.empty()) { // if not-computed neurons remains
-            for (auto &wnname: nwaiting) {
-                auto wn = Neurons.find(wnname.first);
-                if (wn != Neurons.end()) {
-                    auto waiting = wn->second->getWaitingEntries();
-                    for (auto &we: waiting) {
-                        auto nfrom = Neurons.find(we);
-                        if (nfrom != Neurons.end()) {
-                            nqueue.push(std::make_tuple(we, wnname.first, nfrom->second->doSignalReceive()));
-                        }
-                    }
-                }
             }
         }
     }
-
+    t++;
     /*
     if (EntriesCount != X.size()) {
         throw inn::Error(inn::EX_NEURALNET_INPUT);
@@ -322,6 +317,11 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
             auto nname = jneuron.value()["name"].get<std::string>();
             auto nsize = jneuron.value()["size"].get<unsigned int>();
             auto ndimensions = jneuron.value()["dimensions"].get<unsigned int>();
+            if (jneuron.value()["latency"] != nullptr) {
+                auto nlatency = jneuron.value()["latency"].get<int>();
+                std::cout << nname << " with latency " << nlatency << std::endl;
+                Latencies.insert(std::make_pair(nname, nlatency));
+            }
             std::vector<std::string> nentries;
             for (auto &jent: jneuron.value()["input_signals"].items()) {
                 nentries.push_back(jent.value().get<std::string>());

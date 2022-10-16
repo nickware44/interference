@@ -173,9 +173,9 @@ void inn::Neuron::doSignalsSend() {
         //P += inn::Neuron::System::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), RPos, RPr);
         //R -> doUpdateSensitivityValue();
     }
-    P /= Receptors.size();
-    if (Multithreading || Tlo) OutputSignalQ[t] = P;
-    Y = P;
+//    P /= Receptors.size();
+//    if (Multithreading || Tlo) OutputSignalQ[t] = P;
+//    Y = P;
     t++;
 }
 
@@ -202,7 +202,7 @@ bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, const std
 
     //if (!Multithreading) Entries[EID] -> doIn(X, t, WVSum);
     //else Entries[EID] -> doSendToQueue(X, t, WVSum);
-    //doSignalsSend();
+    doSignalsSend();
     return true;
 }
 
@@ -309,6 +309,10 @@ bool inn::Neuron::isMultithreadingEnabled() const {
     return Multithreading;
 }
 
+void inn::Neuron::setTime(int64_t ts) {
+    t = ts;
+}
+
 void inn::Neuron::setk1(double _k1) {
     for (auto E: Entries) E.second -> setk1(_k1);
 }
@@ -338,10 +342,13 @@ std::vector<std::string>& inn::Neuron::getLinkOutput() {
     return Links;
 }
 
-//inn::Neuron::Entry* inn::Neuron::getEntry(const std::string& EName) const {
-//    auto eneuron = Entries.find(EName);
-//    return eneuron!=Entries.end() ? eneuron->second : nullptr;
-//}
+std::vector<std::string> inn::Neuron::getEntries() {
+    std::vector<std::string> elist;
+    for (auto &e: Entries) {
+        elist.push_back(e.first);
+    }
+    return elist;
+}
 
 inn::Neuron::Receptor* inn::Neuron::getReceptor(int64_t RID) const {
     if (RID >= Receptors.size()) {

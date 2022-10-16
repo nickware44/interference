@@ -68,13 +68,14 @@ namespace inn {
         void doCreateCheckpoint();
         inn::Neuron::PatternDefinition doComparePattern() const;
         void doLinkOutput(const std::string&);
+        void setTime(int64_t);
         void setk1(double);
         void setk2(double);
         void setk3(double);
         void setNID(int);
         bool isMultithreadingEnabled() const;
         std::vector<std::string>& getLinkOutput();
-        //inn::Neuron::Entry* getEntry(const std::string&) const;
+        std::vector<std::string> getEntries();
         inn::Neuron::Receptor* getReceptor(int64_t) const;
         std::vector<std::string> getWaitingEntries();
         int64_t getEntriesCount() const;
