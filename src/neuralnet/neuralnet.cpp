@@ -22,82 +22,7 @@ inn::NeuralNet::NeuralNet() {
     t = 0;
     DataDone = false;
     Learned = false;
-}
-
-void inn::NeuralNet::doAddNeuron(Neuron *N, std::vector<inn::LinkDefinition> LinkFromTo) {
-    /*
-    int i = 0;
-    unsigned int ML, MLF = 0;
-    inn::NeuralNet::LinkMapRange Range;
-    inn::NeuralNet::Link *nL;
-    inn::Neuron *oN;
-    for (auto L: LinkFromTo) {
-        if (i >= N->getEntriesCount()) {
-            throw inn::Error(inn::EX_NEURALNET_NEURON_ENTRIES);
-        }
-        if (std::get<0>(L) == LINK_ENTRY2NEURON && std::get<1>(L) >= EntriesCount) {
-            throw inn::Error(inn::EX_NEURALNET_ENTRIES);
-        }
-        switch (std::get<0>(L)) {
-            case LINK_ENTRY2NEURON:
-                NeuronLinks.insert(std::pair<inn::Neuron*, inn::NeuralNet::Link>(N, inn::NeuralNet::Link(std::get<0>(L), std::get<1>(L))));
-                break;
-            case LINK_NEURON2NEURON:
-                ML = 0;
-                if (std::get<1>(L) == Neurons.size()) oN = N;
-                else oN = std::get<2>(Neurons[std::get<1>(L)]);
-                Range = NeuronLinks.equal_range(oN);
-                for (auto it = Range.first; it != Range.second; ++it)
-                    if (it->second.getLatency() > ML) ML = it -> second.getLatency();
-                if (ML+1 > MLF) MLF = ML + 1;
-                nL = new inn::NeuralNet::Link(std::get<0>(L), oN);
-                nL -> setLatency(ML+1);
-                NeuronLinks.insert(std::pair<inn::Neuron*, inn::NeuralNet::Link>(N, *nL));
-                break;
-            default:
-                throw inn::Error(inn::EX_NEURALNET_LINKTYPE);
-        }
-        i++;
-    }
-    Neurons.emplace_back(Neurons.size(), MLF, N);
-     */
-}
-
-void inn::NeuralNet::doAddNeuron(Neuron *N, std::vector<inn::LinkDefinitionRange> LinkFromToRange) {
-    std::vector<inn::LinkDefinition> LinkFromTo;
-    for (auto &LinkRange: LinkFromToRange) {
-        for (auto i = std::get<1>(LinkRange); i <= std::get<2>(LinkRange); i++)
-            LinkFromTo.emplace_back(std::get<0>(LinkRange), i);
-    }
-    doAddNeuron(N, LinkFromTo);
-}
-
-void inn::NeuralNet::doAddNeuron(Neuron *N, inn::LinkDefinitionRangeNext LinkFromToRangeNext) {
-    std::vector<inn::LinkDefinition> LinkFromTo;
-    switch (std::get<0>(LinkFromToRangeNext)) {
-        case LINK_ENTRY2NEURON:
-            for (auto i = LDRCounterE; i < LDRCounterE+std::get<1>(LinkFromToRangeNext); i++)
-                LinkFromTo.emplace_back(std::get<0>(LinkFromToRangeNext), i);
-            LDRCounterE += std::get<1>(LinkFromToRangeNext);
-            break;
-        case LINK_NEURON2NEURON:
-            for (auto i = LDRCounterN; i < LDRCounterN+std::get<1>(LinkFromToRangeNext); i++)
-                LinkFromTo.emplace_back(std::get<0>(LinkFromToRangeNext), i);
-            LDRCounterN += std::get<1>(LinkFromToRangeNext);
-            break;
-        default:
-            throw inn::Error(inn::EX_NEURALNET_LINKTYPE);
-    }
-    doAddNeuron(N, LinkFromTo);
-}
-
-void inn::NeuralNet::doCreateNewEntries(unsigned int _EC) {
-    EntriesCount = _EC;
-}
-
-void inn::NeuralNet::doCreateNewOutput(const std::string& NeuronName) {
-    auto N = Neurons.find(NeuronName);
-    //if (N != Neurons.end()) Outputs.push_back(N->second);
+    CurrentBackend = ComputerBackendDefault;
 }
 
 std::vector<double> inn::NeuralNet::doComparePatterns() {
@@ -124,10 +49,6 @@ std::vector<double> inn::NeuralNet::doComparePatterns() {
         PDiff.push_back((PDiffR[i]+PDiffL[i])/2);
     }
     return PDiffR;
-}
-
-void inn::NeuralNet::doEnableMultithreading() {
-    //for (auto N: Neurons) std::get<2>(N) -> doEnableMultithreading();
 }
 
 void inn::NeuralNet::doPrepare() {
@@ -361,8 +282,16 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
     }
 }
 
+void inn::NeuralNet::setComputerBackend(int Backend) {
+    CurrentBackend = Backend;
+}
+
 std::string inn::NeuralNet::getStructure() {
     return {};
+}
+
+int inn::NeuralNet::getComputerBackend() const {
+    return CurrentBackend;
 }
 
 std::string inn::NeuralNet::getName() {
