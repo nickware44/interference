@@ -35,9 +35,9 @@ namespace inn {
         bool DataDone;
         bool Learned;
         std::map<std::string, std::vector<std::string>> Entries;
-        std::map<std::string, std::string> Outputs;
         std::map<std::string, inn::Neuron*> Neurons;
         std::map<std::string, int> Latencies;
+        std::vector<std::string> Outputs;
         //std::vector<inn::NeuralNet::NeuronDefinition> Neurons;
         //inn::NeuralNet::LinkMap NeuronLinks;
         void doAddNeuron(Neuron*, std::vector<inn::LinkDefinition>);

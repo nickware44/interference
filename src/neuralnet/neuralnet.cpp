@@ -222,34 +222,15 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
         }
     }
     t++;
-    /*
-    if (EntriesCount != X.size()) {
-        throw inn::Error(inn::EX_NEURALNET_INPUT);
-    }
-    std::vector<inn::WaveDefinition> Waves(Neurons.size());
-    for (auto N: Neurons) {
-        LinkMapRange R = NeuronLinks.equal_range(std::get<2>(N));
-        int64_t i = 0;
-        for (auto it = R.first; it != R.second; ++it, i++) {
-            if (it->second.getLinkType() == inn::LINK_ENTRY2NEURON) {
-                if (DataDone) continue;
-                std::get<2>(N) -> doSignalSendEntry(i, X[it->second.getLinkFromEID()], std::vector<inn::WaveDefinition>());
-            } else {
-                if (!it->second.doCheckSignal()) continue;
-                //if (Learned) for (int x = 0; x < Neurons.size(); x++) Waves[x] = std::get<2>(Neurons[x])->getWave();
-                std::get<2>(N) -> doSignalSendEntry(i, it->second.getSignal(), Waves);
-            }
-        }
-        if (!std::get<2>(N)->isMultithreadingEnabled()) std::get<2>(N) -> doSignalsSend();
-    }
-    if (!DataDone) t++;
-     */
 }
 
 std::vector<double> inn::NeuralNet::doSignalReceive() {
-    std::vector<double> nY;
-    //for (auto N: Outputs) nY.push_back(N->doSignalReceive());
-    return nY;
+    std::vector<double> ny;
+    for (const auto& oname: Outputs) {
+        auto n = Neurons.find(oname);
+        if (n != Neurons.end()) ny.push_back(n->second->doSignalReceive());
+    }
+    return ny;
 }
 
 bool inn::NeuralNet::isMultithreadingEnabled() {
@@ -307,6 +288,12 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                 std::cout << ename << " -> " << it->second << std::endl;
             }
             Entries.insert(std::make_pair(ename, elinks));
+        }
+
+        for (auto &joutput: j["output_signals"].items()) {
+            auto oname = joutput.value().get<std::string>();
+            std::cout <<  "Output " << oname << std::endl;
+            Outputs.push_back(oname);
         }
 
 //        for (auto &l: links) {

@@ -34,8 +34,7 @@ namespace inn {
         std::atomic<int64_t> t;
         int64_t Tlo;
         unsigned int Xm, DimensionsCount;
-        float P;
-        double Y;
+        double P, Y;
         bool Multithreading;
         int NID;
         bool Learned;
@@ -57,7 +56,7 @@ namespace inn {
         void doCreateNewSynapse(const std::string&, std::vector<double>, unsigned int);
         void doCreateNewReceptor(std::vector<double>);
         void doCreateNewReceptorCluster(double, double, double, inn::TopologyID);
-        void doSignalsSend();
+        void doSignalsProcess();
         bool doSignalSendEntry(const std::string&, double, const std::vector<inn::WaveDefinition>&);
         double doSignalReceive();
         double doSignalReceive(int64_t);

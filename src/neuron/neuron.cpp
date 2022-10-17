@@ -149,6 +149,7 @@ void inn::Neuron::doComputeNewPosition(inn::Neuron::Receptor *R) {
             FiSum += FiValues.first;
         }
     }
+//    std::cout << "doComputeNewPosition " << FiSum << std::endl;
 	R -> setFi(FiSum);
     R -> setPos(dRPos);
 }
@@ -161,21 +162,22 @@ void inn::Neuron::doComputeNewPosition(inn::Neuron::Receptor *R) {
 //    }
 //}
 
-void inn::Neuron::doSignalsSend() {
+void inn::Neuron::doSignalsProcess() {
     P = 0;
-    //auto RPr = new inn::Position(Xm, {0, 0, 0});
+    auto RPr = new inn::Position(Xm, {0, 0, 0});
     inn::Position *RPos;
     for (auto R: Receptors) {
         if (!R->isLocked()) RPos = R -> getPos();
         else RPos = R -> getPosf();
-        //RPr -> setPosition(RPos);
-        //doComputeNewPosition(R);
-        //P += inn::Neuron::System::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), RPos, RPr);
-        //R -> doUpdateSensitivityValue();
+        RPr -> setPosition(RPos);
+        doComputeNewPosition(R);
+        P += inn::Neuron::System::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), RPos, RPr);
+        R -> doUpdateSensitivityValue();
     }
-//    P /= Receptors.size();
+    P /= Receptors.size();
+//    std::cout << "Process signal " << Receptors.size() << " " << P << std::endl;
 //    if (Multithreading || Tlo) OutputSignalQ[t] = P;
-//    Y = P;
+    Y = P;
     t++;
 }
 
@@ -202,7 +204,7 @@ bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, const std
 
     //if (!Multithreading) Entries[EID] -> doIn(X, t, WVSum);
     //else Entries[EID] -> doSendToQueue(X, t, WVSum);
-    doSignalsSend();
+    doSignalsProcess();
     return true;
 }
 
@@ -234,7 +236,7 @@ void inn::Neuron::doCreateCheckpoint() {
 void inn::Neuron::doPrepare() {
     for (auto E: Entries) E.second -> doPrepare();
     if (Multithreading)
-        ReceptorPositionComputer = new inn::Computer<inn::Neuron::Receptor*, inn::Neuron>(this, &inn::Neuron::doPrepareEntriesData, &inn::Neuron::doSignalsSend);
+        ReceptorPositionComputer = new inn::Computer<inn::Neuron::Receptor*, inn::Neuron>(this, &inn::Neuron::doPrepareEntriesData, &inn::Neuron::doSignalsProcess);
 }
 
 void inn::Neuron::doFinalize() {

@@ -26,7 +26,7 @@ bool inn::Neuron::Entry::doCheckState(int64_t tn) const {
 }
 
 void inn::Neuron::Entry::doAddSynapse(inn::Position *SPos, unsigned int Xm, unsigned int Tl) {
-	auto *S = new Synapse(SPos, 0.8, inn::Neuron::System::getLambdaValue(Xm), Tl);
+	auto *S = new Synapse(SPos, 10.8, inn::Neuron::System::getLambdaValue(Xm), Tl);
     Synapses.push_back(S);
 }
 
