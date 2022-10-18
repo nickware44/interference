@@ -4,10 +4,12 @@ project(interference)
 set(CMAKE_CXX_STANDARD 14)
 
 add_library(interference src/neuron/neuron.cpp include/inn/neuron.h
-        src/neuron/entry.cpp src/neuron/system.cpp src/neuron/synapse.cpp 
-        src/neuron/receptor.cpp src/position.cpp include/inn/position.h
-        src/error.cpp include/inn/error.h src/neuralnet/neuralnet.cpp
-        include/inn/neuralnet.h include/inn/computer.hpp src/neuron/computer.cpp include/inn/computer.h)
+        src/neuron/entry.cpp src/neuron/synapse.cpp src/neuron/receptor.cpp src/position.cpp include/inn/position.h
+        src/error.cpp include/inn/error.h src/neuralnet/neuralnet.cpp include/inn/neuralnet.h
+        include/inn/system.h src/system.cpp
+        src/computer.cpp include/inn/computer.h
+        src/backends/default.cpp include/inn/backends/default.h
+        src/backends/multithread.cpp include/inn/backends/multithread.h )
 
 if(WIN32)
     #include_directories(interference "C:/boost/compute/include/")

@@ -9,9 +9,9 @@
 
 #include <fstream>
 #include <queue>
+#include "../3rdparty/json.hpp"
 #include "../../include/inn/neuralnet.h"
 #include "../../include/inn/error.h"
-#include "../3rdparty/json.hpp"
 
 typedef nlohmann::json json;
 
@@ -22,7 +22,6 @@ inn::NeuralNet::NeuralNet() {
     t = 0;
     DataDone = false;
     Learned = false;
-    CurrentBackend = ComputerBackendDefault;
 }
 
 std::vector<double> inn::NeuralNet::doComparePatterns() {
@@ -282,16 +281,8 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
     }
 }
 
-void inn::NeuralNet::setComputerBackend(int Backend) {
-    CurrentBackend = Backend;
-}
-
 std::string inn::NeuralNet::getStructure() {
     return {};
-}
-
-int inn::NeuralNet::getComputerBackend() const {
-    return CurrentBackend;
 }
 
 std::string inn::NeuralNet::getName() {

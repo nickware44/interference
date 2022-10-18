@@ -8,6 +8,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "../../include/inn/neuron.h"
+#include "../../include/inn/system.h"
 
 inn::Neuron::Receptor::Receptor() {
 	RPos = new inn::Position();
@@ -80,7 +81,7 @@ void inn::Neuron::Receptor::doSavePos() {
 }
 
 void inn::Neuron::Receptor::doUpdateSensitivityValue() {
-    Rs = inn::Neuron::System::getRcValue(k3, Rs, Fi, dFi);
+    Rs = ComputeBackend->getRcValue(k3, Rs, Fi, dFi);
 }
 
 void inn::Neuron::Receptor::setPos(inn::Position *_RPos) {

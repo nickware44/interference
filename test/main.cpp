@@ -5,9 +5,10 @@
 #define NN_OUTPUT_OK 231.363
 
 int main() {
+    inn::setComputeBackend(inn::ComputeBackends::Multithread);
+
     std::ifstream structure("../../test/structure.json");
     auto NN = new inn::NeuralNet();
-    NN -> setComputerBackend(inn::ComputerBackendMultithread);
     NN -> setStructure(structure);
     std::cout << "Model name: " << NN->getName() << std::endl;
     std::cout << "Model desc: " << NN->getDescription() << std::endl;

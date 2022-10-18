@@ -16,7 +16,6 @@
 #include <map>
 #include <iostream>
 #include "position.h"
-#include "computer.hpp"
 
 namespace inn {
     typedef unsigned int TopologyID;
@@ -41,7 +40,7 @@ namespace inn {
         std::vector<double> OutputSignalQ;
         inn::Position *dRPos, *nRPos;
         inn::WaveType WTin, WTout;
-        inn::Computer<inn::Neuron::Receptor*, inn::Neuron> *ReceptorPositionComputer;
+        //inn::Computer<inn::Neuron::Receptor*, inn::Neuron> *ReceptorPositionComputer;
         bool doPrepareEntriesData(int64_t);
         void doComputeNewPosition(inn::Neuron::Receptor*);
         std::vector<double> doCompareCheckpoints();
@@ -51,7 +50,7 @@ namespace inn {
         class System;
         Neuron();
         Neuron(const inn::Neuron&);
-        Neuron(unsigned int, unsigned int, int64_t _Tlo = 0, const std::vector<std::string>& InputSignals = {}, inn::WaveType _WTin = inn::WaveType::NOWAVE, inn::WaveType _WTout = inn::WaveType::NOWAVE);
+        Neuron(unsigned int, unsigned int, int64_t, const std::vector<std::string>& InputSignals);
         void doEnableMultithreading();
         void doCreateNewSynapse(const std::string&, std::vector<double>, unsigned int);
         void doCreateNewReceptor(std::vector<double>);
@@ -185,25 +184,6 @@ namespace inn {
         double getL() const;
         double getLf() const;
         ~Receptor() = default;
-    };
-
-    class Neuron::System {
-    public:
-        System() = default;
-        static std::vector<double> doCompareCPFunction(std::vector<inn::Position*>, std::vector<inn::Position*>);
-        static double doCompareCPFunctionD(std::vector<inn::Position*>, std::vector<inn::Position*>);
-        static double doCompareFunction(inn::Position*, inn::Position*);
-        static double getGammaFunctionValue(double, double, double, double, double);
-        static std::pair<double, double> getFiFunctionValue(double, double, double, double);
-        static double getReceptorInfluenceValue(bool, double, inn::Position*, inn::Position*);
-        static double getRcValue(double, double, double, double);
-        static void getNewPosition(inn::Position*, inn::Position*, inn::Position*, double, double);
-        static int64_t getOutputSignalQMaxSizeValue(unsigned int);
-        static int64_t getGammaQMaxSizeValue(double);
-        static double getLambdaValue(unsigned int);
-        static double getFiVectorLength(double);
-        static double getSynapticSensitivityValue(unsigned int, unsigned int);
-        ~System() = default;
     };
 }
 

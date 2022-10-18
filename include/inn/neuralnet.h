@@ -14,13 +14,11 @@
 #include <algorithm>
 #include <tuple>
 #include "neuron.h"
+#include "../../include/inn/system.h"
 
 namespace inn {
-    enum {ComputerBackendDefault, ComputerBackendMultithread};
-
     class NeuralNet {
     private:
-        int CurrentBackend;
         std::string Name, Description, Version;
         unsigned int EntriesCount;
         unsigned int LDRCounterE, LDRCounterN;
@@ -42,9 +40,7 @@ namespace inn {
         bool isMultithreadingEnabled();
         void setStructure(std::ifstream&);
         void setStructure(const std::string &Str);
-        void setComputerBackend(int);
         std::string getStructure();
-        int getComputerBackend() const;
         std::string getName();
         std::string getDescription();
         std::string getVersion();

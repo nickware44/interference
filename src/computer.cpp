@@ -7,7 +7,7 @@
 // Licence: MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/inn/computer.h"
+#include "../include/inn/computer.h"
 
 inn::Computer::Computer() {
 
