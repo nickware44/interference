@@ -33,33 +33,26 @@ namespace inn {
         std::atomic<int64_t> t;
         int64_t Tlo;
         unsigned int Xm, DimensionsCount;
-        double P, Y;
-        bool Multithreading;
+        double Y;
         int NID;
         bool Learned;
         std::vector<double> OutputSignalQ;
-        inn::Position *dRPos, *nRPos;
         inn::WaveType WTin, WTout;
-        //inn::Computer<inn::Neuron::Receptor*, inn::Neuron> *ReceptorPositionComputer;
-        bool doPrepareEntriesData(int64_t);
-        void doComputeNewPosition(inn::Neuron::Receptor*);
         std::vector<double> doCompareCheckpoints();
         double LastWVSum;
     public:
         typedef std::tuple<double, double> PatternDefinition;
-        class System;
         Neuron();
         Neuron(const inn::Neuron&);
         Neuron(unsigned int, unsigned int, int64_t, const std::vector<std::string>& InputSignals);
-        void doEnableMultithreading();
         void doCreateNewSynapse(const std::string&, std::vector<double>, unsigned int);
         void doCreateNewReceptor(std::vector<double>);
         void doCreateNewReceptorCluster(double, double, double, inn::TopologyID);
-        void doSignalsProcess();
         bool doSignalSendEntry(const std::string&, double, const std::vector<inn::WaveDefinition>&);
-        double doSignalReceive();
+        std::pair<int64_t, double> doSignalReceive();
         double doSignalReceive(int64_t);
         bool doCheckOutputSignalQ(int64_t);
+        void doFinalizeInput(double);
         void doPrepare();
         void doFinalize();
         void doReinit();
@@ -71,9 +64,9 @@ namespace inn {
         void setk2(double);
         void setk3(double);
         void setNID(int);
-        bool isMultithreadingEnabled() const;
         std::vector<std::string>& getLinkOutput();
         std::vector<std::string> getEntries();
+        inn::Neuron::Entry*  getEntry(int64_t);
         inn::Neuron::Receptor* getReceptor(int64_t) const;
         std::vector<std::string> getWaitingEntries();
         int64_t getEntriesCount() const;
@@ -93,14 +86,16 @@ namespace inn {
     class Neuron::Entry {
     private:
         std::vector<inn::Neuron::Synapse*> Synapses;
+        double X;
         int64_t t;
-        std::vector<double> Signal;
+        //std::vector<double> Signal;
     public:
         Entry();
         Entry(const inn::Neuron::Entry&);
         bool doCheckState(int64_t) const;
         void doAddSynapse(inn::Position*, unsigned int, unsigned int);
-        void doIn(double, int64_t, double);
+        void doIn(double, int64_t);
+        void doProcess();
         void doSendToQueue(double, int64_t, double);
         bool doInFromQueue(int64_t);
         void doPrepare();
@@ -129,7 +124,7 @@ namespace inn {
         Synapse();
         Synapse(const inn::Neuron::Synapse&);
         Synapse(inn::Position*, double, double, int64_t);
-        void doIn(double, double);
+        void doIn(double);
         void doSendToQueue(double, double);
         bool doInFromQueue(int64_t);
         void doPrepare();

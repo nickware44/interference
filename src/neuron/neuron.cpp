@@ -16,13 +16,9 @@ inn::Neuron::Neuron() {
     Tlo = 0;
     Xm = 0;
     DimensionsCount = 0;
-    P = 0;
     Y = 0;
-    Multithreading = false;
     NID = 0;
     Learned = false;
-    dRPos = new inn::Position(Xm, DimensionsCount);
-    nRPos = new inn::Position(Xm, DimensionsCount);
 //    ReceptorPositionComputer = nullptr;
 }
 
@@ -31,19 +27,14 @@ inn::Neuron::Neuron(const Neuron &N) {
     Tlo = N.getTlo();
     Xm = N.getXm();
     DimensionsCount = N.getDimensionsCount();
-    P = 0;
     Y = 0;
-    Multithreading = N.isMultithreadingEnabled();
     NID = 0;
     Learned = false;
     //for (int64_t i = 0; i < N.getEntriesCount(); i++) Entries.push_back(new Entry(*N.getEntry(i)));
     for (int64_t i = 0; i < N.getReceptorsCount(); i++) Receptors.push_back(new Receptor(*N.getReceptor(i)));
-    dRPos = new inn::Position(Xm, DimensionsCount);
-    nRPos = new inn::Position(Xm, DimensionsCount);
     //ReceptorPositionComputer = nullptr;
     WTin = N.getWTin();
     WTout = N.getWTout();
-    if (Tlo) OutputSignalQ.reserve(ComputeBackend->getOutputSignalQMaxSizeValue(Xm));
 }
 
 inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::vector<std::string>& InputNames) {
@@ -51,22 +42,13 @@ inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::
     Tlo = Tl;
     Xm = XSize;
     DimensionsCount = DC;
-    P = 0;
     Y = 0;
-    Multithreading = false;
     NID = 0;
     Learned = false;
-    dRPos = new inn::Position(Xm, DimensionsCount);
-    nRPos = new inn::Position(Xm, DimensionsCount);
     for (auto &i: InputNames) {
         auto *E = new Entry();
         Entries.insert(std::make_pair(i, E));
     }
-}
-
-void inn::Neuron::doEnableMultithreading() {
-    if (!Tlo) OutputSignalQ.reserve(ComputeBackend->getOutputSignalQMaxSizeValue(Xm));
-    Multithreading = true;
 }
 
 void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<double> PosVector, unsigned int Tl) {
@@ -120,101 +102,23 @@ void inn::Neuron::doCreateNewReceptorCluster(double x, double y, double D, Topol
     }
 }
 
-bool inn::Neuron::doPrepareEntriesData(int64_t tT) {
-    //for (auto E: Entries) if (!E->doInFromQueue(tT)) return false;
-    return true;
-}
-
-void inn::Neuron::doComputeNewPosition(inn::Neuron::Receptor *R) {
-	double FiSum = 0, D = 0;
-	inn::Position *RPos, *SPos;
-    std::pair<double, double> FiValues;
-    FiSum = 0;
-    if (R->isLocked()) RPos = R -> getPosf();
-    else RPos = R -> getPos();
-    dRPos -> doZeroPosition();
-    for (const auto& E: Entries) {
-        for (unsigned int k = 0; k < E.second->getSynapsesCount(); k++) {
-            Synapse *S = E.second -> getSynapse(k);
-            SPos = S -> getPos();
-            D = SPos -> getDistanceFrom(RPos);
-            FiValues = ComputeBackend->getFiFunctionValue(S->getLambda(), S->getGamma(), S->getdGamma(), D);
-            if (FiValues.second > 0) {
-				ComputeBackend->getNewPosition(nRPos, RPos, SPos, ComputeBackend->getFiVectorLength(FiValues.second), D);
-				dRPos -> doAdd(nRPos);
-            }
-            FiSum += FiValues.first;
-        }
-    }
-//    std::cout << "doComputeNewPosition " << FiSum << std::endl;
-	R -> setFi(FiSum);
-    R -> setPos(dRPos);
-}
-
-//void inn::Neuron::doSignalTransfer(const std::string& NameFrom, double X, int64_t tX) {
-//    auto eneuron = Entries.find(NameFrom);
-//    if (eneuron != Entries.end()) {
-//        eneuron -> second -> doIn(X, t, 0);
-//
-//    }
-//}
-
-void inn::Neuron::doSignalsProcess() {
-    P = 0;
-    auto RPr = new inn::Position(Xm, {0, 0, 0});
-    inn::Position *RPos;
-    for (auto R: Receptors) {
-        if (!R->isLocked()) RPos = R -> getPos();
-        else RPos = R -> getPosf();
-        RPr -> setPosition(RPos);
-        doComputeNewPosition(R);
-        P += ComputeBackend->getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), RPos, RPr);
-        R -> doUpdateSensitivityValue();
-    }
-    P /= Receptors.size();
-//    std::cout << "Process signal " << Receptors.size() << " " << P << std::endl;
-//    if (Multithreading || Tlo) OutputSignalQ[t] = P;
-    Y = P;
-    t++;
-}
-
 bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, const std::vector<inn::WaveDefinition>& Wv) {
-//    if (EID >= Entries.size()) {
-//        throw inn::Error(inn::EX_NEURON_INPUT);
-//    }
-//    double WVSum = 0;
-//    for (auto Wvi: Wv) {
-//        if (Wvi.first != WTin) WVSum += Wvi.second;
-//        else WVSum -= Wvi.second;
-//    }
-    //if (WVSum != 0) WVSum = exp(WVSum*3) / 3;
-//    LastWVSum = WVSum;
-    //if (static_cast<int>(WTin) == 7 && WVSum != 0) std::cout << t << " ~ " << WVSum << std::endl;
-
     auto entry = Entries.find(From);
-    entry -> second -> doIn(X, t, {});
-//    std::cout << "From " << entry->first << std::endl;
+    entry -> second -> doIn(X, t);
     for (auto &e: Entries) {
-//        std::cout << e.first << " " << e.second->doCheckState(t) << std::endl;
         if (!e.second->doCheckState(t)) return false;
     }
-
-    //if (!Multithreading) Entries[EID] -> doIn(X, t, WVSum);
-    //else Entries[EID] -> doSendToQueue(X, t, WVSum);
-    doSignalsProcess();
+    ComputeBackend -> doProcessNeuron((void*)this);
     return true;
 }
 
-double inn::Neuron::doSignalReceive() {
-    if (Learned && Tlo) {
-        if (t < Tlo) return 0;
-        return OutputSignalQ[t-Tlo];
-    }
-    return Y;
+std::pair<int64_t, double> inn::Neuron::doSignalReceive() {
+    int64_t tr = t;
+    return std::make_pair(tr, Y);
 }
 
 double inn::Neuron::doSignalReceive(int64_t tT) {
-    if (Multithreading) return OutputSignalQ[tT];
+//    if (Multithreading) return OutputSignalQ[tT];
     if (Learned && Tlo) {
         if (tT < Tlo) return 0;
         return OutputSignalQ[tT-Tlo];
@@ -223,11 +127,16 @@ double inn::Neuron::doSignalReceive(int64_t tT) {
 }
 
 bool inn::Neuron::doCheckOutputSignalQ(int64_t tT) {
-    return !Multithreading || tT < t;
+    return false;
 }
 
 void inn::Neuron::doCreateCheckpoint() {
     for (auto R: Receptors) R -> doSavePos();
+}
+
+void inn::Neuron::doFinalizeInput(double P) {
+    Y = P;
+    t++;
 }
 
 void inn::Neuron::doPrepare() {
@@ -243,7 +152,6 @@ void inn::Neuron::doFinalize() {
 
 void inn::Neuron::doReinit() {
     t = 0;
-    P = 0;
     for (auto R: Receptors) {
         R -> doReset();
         R -> doPrepare();
@@ -300,10 +208,6 @@ void inn::Neuron::doLinkOutput(const std::string& NName) {
     Links.push_back(NName);
 }
 
-bool inn::Neuron::isMultithreadingEnabled() const {
-    return Multithreading;
-}
-
 void inn::Neuron::setTime(int64_t ts) {
     t = ts;
 }
@@ -343,6 +247,15 @@ std::vector<std::string> inn::Neuron::getEntries() {
         elist.push_back(e.first);
     }
     return elist;
+}
+
+inn::Neuron::Entry* inn::Neuron::getEntry(int64_t EID) {
+    if (EID >= Entries.size()) {
+        throw inn::Error(inn::EX_NEURON_ENTRIES);
+    }
+    auto it = Entries.begin();
+    std::advance(it, EID);
+    return it->second;
 }
 
 inn::Neuron::Receptor* inn::Neuron::getReceptor(int64_t RID) const {

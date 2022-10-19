@@ -14,25 +14,20 @@
 
 namespace inn {
     class Computer {
-    private:
-        std::queue<std::vector<double>> DataQueue;
     public:
         Computer();
-        virtual std::vector<double> doCompareCPFunction(std::vector<inn::Position*>, std::vector<inn::Position*>) = 0;
-        virtual double doCompareCPFunctionD(std::vector<inn::Position*>, std::vector<inn::Position*>) = 0;
-        virtual double doCompareFunction(inn::Position*, inn::Position*) = 0;
-        virtual double getGammaFunctionValue(double, double, double, double, double) = 0;
-        virtual std::pair<double, double> getFiFunctionValue(double, double, double, double) = 0;
-        virtual double getReceptorInfluenceValue(bool, double, inn::Position*, inn::Position*) = 0;
-        virtual double getRcValue(double, double, double, double) = 0;
-        virtual void getNewPosition(inn::Position*, inn::Position*, inn::Position*, double, double) = 0;
-        virtual int64_t getOutputSignalQMaxSizeValue(unsigned int) = 0;
-        virtual int64_t getGammaQMaxSizeValue(double) = 0;
-        virtual double getLambdaValue(unsigned int) = 0;
-        virtual double getFiVectorLength(double) = 0;
-        virtual double getSynapticSensitivityValue(unsigned int, unsigned int) = 0;
-        void doAddData();
-        void doProcess();
+        virtual void doProcessNeuron(void*) = 0;
+        static std::vector<double> doCompareCPFunction(std::vector<inn::Position*>, std::vector<inn::Position*>);
+        static double doCompareCPFunctionD(std::vector<inn::Position*>, std::vector<inn::Position*>);
+        static double doCompareFunction(inn::Position*, inn::Position*);
+        static double getGammaFunctionValue(double, double, double, double);
+        static std::pair<double, double> getFiFunctionValue(double, double, double, double);
+        static double getReceptorInfluenceValue(bool, double, inn::Position*, inn::Position*);
+        static double getRcValue(double, double, double, double);
+        static void getNewPosition(inn::Position*, inn::Position*, inn::Position*, double, double);
+        static double getLambdaValue(unsigned int);
+        static double getFiVectorLength(double);
+        static double getSynapticSensitivityValue(unsigned int, unsigned int);
     };
 }
 

@@ -12,6 +12,7 @@
 
 inn::Neuron::Entry::Entry() {
     t = -1;
+    X = 0;
 }
 
 inn::Neuron::Entry::Entry(const Entry &E) {
@@ -20,6 +21,7 @@ inn::Neuron::Entry::Entry(const Entry &E) {
         Synapses.push_back(S);
     }
     t = -1;
+    X = 0;
 }
 
 bool inn::Neuron::Entry::doCheckState(int64_t tn) const {
@@ -31,16 +33,15 @@ void inn::Neuron::Entry::doAddSynapse(inn::Position *SPos, unsigned int Xm, unsi
     Synapses.push_back(S);
 }
 
-void inn::Neuron::Entry::doIn(double X, int64_t tn, double WVSum) {
-    //Signal.push_back(X);
-
-    int64_t STl;
+void inn::Neuron::Entry::doIn(double Xt, int64_t tn) {
     t = tn;
+    X = Xt;
+}
 
+void inn::Neuron::Entry::doProcess() {
     for (auto S: Synapses) {
-        STl = S -> getTl();
-        if (tn >= STl) S -> doIn(X, WVSum);
-        else S -> doIn(0, WVSum);
+        if (t >= S->getTl()) S -> doIn(X);
+        else S -> doIn(0);
     }
 }
 
@@ -69,11 +70,11 @@ void inn::Neuron::Entry::doFinalize() {
     //for (auto Sig: Signal)
         //for (auto S: Synapses) S -> doIn(Sig);
     for (auto S: Synapses) S -> doReset();
-    Signal.clear();
+    //Signal.clear();
 }
 
 void inn::Neuron::Entry::doClearSignal() {
-    Signal.clear();
+    //Signal.clear();
 }
 
 void inn::Neuron::Entry::setk1(double _k1) {

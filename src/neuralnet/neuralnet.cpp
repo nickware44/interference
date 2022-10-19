@@ -99,6 +99,8 @@ void inn::NeuralNet::doReset() {
 }
 
 void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
+    t++;
+
     std::queue<std::tuple<std::string, std::string, double>> nqueue;
     std::map<std::string, std::string> nwaiting;
     std::vector<std::string> m;
@@ -117,7 +119,7 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
         std::cout << std::get<0>(i) << " -> " << std::get<1>(i) << " (" << std::get<2>(i) << ")" << std::endl;
         auto n = Neurons.find(std::get<1>(i));
         if (n != Neurons.end()) {
-            if (!t) {
+            if (t == 1) {
                 auto waiting = n -> second -> getWaitingEntries();
                 auto l = Latencies.find(std::get<1>(i));
                 auto latency = l == Latencies.end() ? 0 : l->second;
@@ -136,19 +138,18 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
                 std::cout << std::get<1>(i) << " computed" << std::endl;
                 auto nlinks = n -> second -> getLinkOutput();
                 for (auto &nl: nlinks) {
-                    nqueue.push(std::make_tuple(std::get<1>(i), nl, n->second->doSignalReceive()));
+                    nqueue.push(std::make_tuple(std::get<1>(i), nl, n->second->doSignalReceive().second));
                 }
             }
         }
     }
-    t++;
 }
 
 std::vector<double> inn::NeuralNet::doSignalReceive() {
     std::vector<double> ny;
     for (const auto& oname: Outputs) {
         auto n = Neurons.find(oname);
-        if (n != Neurons.end()) ny.push_back(n->second->doSignalReceive());
+        if (n != Neurons.end()) ny.push_back(n->second->doSignalReceive().second);
     }
     return ny;
 }

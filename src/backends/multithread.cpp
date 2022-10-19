@@ -7,8 +7,10 @@
 // Licence: MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include <functional>
 #include "../../include/inn/backends/multithread.h"
+#include "../../include/inn/neuron.h"
+
+std::queue<void*> DataQueue;
 
 inn::ComputeBackendMultithread::ComputeBackendMultithread(int WorkersCount) {
     for (int i = 0; i < WorkersCount; i++) {
@@ -16,79 +18,64 @@ inn::ComputeBackendMultithread::ComputeBackendMultithread(int WorkersCount) {
     }
 }
 
-std::vector<double> inn::ComputeBackendMultithread::doCompareCPFunction(std::vector<inn::Position*> CP, std::vector<inn::Position*> CPf) {
-    std::vector<double> R;
-    int64_t L = CP.size();
-    if (CPf.size() < L) L = CPf.size();
-    R.reserve(L);
-    for (long long i = 0; i < L; i++) R.push_back(inn::Position::getDistance(CP[i], CPf[i]));
-    return R;
+void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
+    DataQueue.push(Object);
 }
 
-double inn::ComputeBackendMultithread::doCompareCPFunctionD(std::vector<inn::Position*> CP, std::vector<inn::Position*> CPf) {
-    double R = 0;
-    int64_t L = CP.size();
-    if (CPf.size() < L) L = CPf.size();
-    for (int i = 0; i < L; i++) R += inn::Position::getDistance(CP[i], CPf[i]);
-    return R;
-}
+[[noreturn]] void inn::ComputeBackendMultithread::tWorker(int n) {
+    while (true) {
+        if (DataQueue.empty()) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            continue;
+        }
+        auto N = (inn::Neuron*)DataQueue.front();
+        DataQueue.pop();
 
-double inn::ComputeBackendMultithread::doCompareFunction(inn::Position *R, inn::Position *Rf) {
-    return 1;//inn::Position::getDistance(R, Rf);
-}
+        double FiSum, D, P = 0;
+        auto Xm = N -> getXm();
+        auto DimensionsCount = N -> getDimensionsCount();
+        auto RPr = new inn::Position(Xm, {0, 0, 0});
 
-double inn::ComputeBackendMultithread::getGammaFunctionValue(double oG, double k1, double k2, double Xt, double WVSum) {
-    double nGamma;
-    if (WVSum < 13) WVSum = 1;
-    nGamma = oG + (k1*Xt-(1-Xt)*oG*k2)/WVSum;
-    return nGamma;
-}
+        auto dRPos = new inn::Position(Xm, DimensionsCount);
+        auto nRPos = new inn::Position(Xm, DimensionsCount);
 
-std::pair<double, double> inn::ComputeBackendMultithread::getFiFunctionValue(double Lambda, double Gamma, double dGamma, double D) {
-    double E = Lambda * exp(-Lambda*D);
-    return std::make_pair(Gamma*E, dGamma*E);
-}
+        inn::Position *RPos;
 
-double inn::ComputeBackendMultithread::getReceptorInfluenceValue(bool Active, double dFi, inn::Position *RPos, inn::Position *RPr) {
-    double Yn = 0;
-    if (RPos->getDistanceFrom(RPr)) Yn = Active * dFi * (RPos->getPositionValue(1)-RPr->getPositionValue(1)) / RPos->getDistanceFrom(RPr);
-    return Yn;
-}
+        for (int i = 0; i < N->getReceptorsCount(); i++) {
+            auto R = N->getReceptor(i);
+            if (!R->isLocked()) RPos = R -> getPos();
+            else RPos = R -> getPosf();
+            RPr -> setPosition(RPos);
+            inn::Position *SPos;
+            std::pair<double, double> FiValues;
+            FiSum = 0;
+            dRPos -> doZeroPosition();
 
-double inn::ComputeBackendMultithread::getRcValue(double k3, double Rs, double Fi, double dFi) {
-    if (Fi >= Rs && dFi > 0) Rs += dFi;
-    else Rs = Rs / (k3*Rs+1);
-    return Rs;
-}
+            for (int j = 0; j < N->getEntriesCount(); j++) {
+                auto E = N -> getEntry(j);
 
-void inn::ComputeBackendMultithread::getNewPosition(inn::Position *nRPos, inn::Position *R, inn::Position *S, double FiL, double D) {
-    nRPos -> setPosition(R);
-    nRPos -> doSubtract(S);
-    nRPos -> doDivide(D);
-    nRPos -> doMultiply(FiL);
-}
+                E -> doProcess();
+                for (unsigned int k = 0; k < E->getSynapsesCount(); k++) {
+                    auto *S = E -> getSynapse(k);
+                    SPos = S -> getPos();
+                    D = SPos -> getDistanceFrom(RPos);
+                    FiValues = inn::Computer::getFiFunctionValue(S->getLambda(), S->getGamma(), S->getdGamma(), D);
+                    if (FiValues.second > 0) {
+                        inn::Computer::getNewPosition(nRPos, RPos, SPos, inn::Computer::getFiVectorLength(FiValues.second), D);
+                        dRPos -> doAdd(nRPos);
+                    }
+                    FiSum += FiValues.first;
+                }
+            }
 
-double inn::ComputeBackendMultithread::getLambdaValue(unsigned int Xm) {
-    return pow(10, -(log(Xm)/log(2)-6));
-}
+            R -> setFi(FiSum);
+            R -> setPos(dRPos);
+            P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), RPos, RPr);
+            R -> doUpdateSensitivityValue();
+        }
+        P /= (double)N->getReceptorsCount();
 
-int64_t inn::ComputeBackendMultithread::getOutputSignalQMaxSizeValue(unsigned int Xm) {
-    return pow(10, log(Xm)/log(2)-4);
-}
-
-int64_t inn::ComputeBackendMultithread::getGammaQMaxSizeValue(double Lambda) {
-    return 1/Lambda*pow(10, 2);
-}
-
-double inn::ComputeBackendMultithread::getFiVectorLength(double dFi) {
-    return sqrt(dFi);
-}
-
-double inn::ComputeBackendMultithread::getSynapticSensitivityValue(unsigned int W, unsigned int OW) {
-    double S = double(W) / OW;
-    return 39.682*S*S*S*S - 170.22*S*S*S + 267.81*S*S - 178.8*S + 43.072;
-}
-
-void inn::ComputeBackendMultithread::tWorker(int n) {
-    std::cout << "From Thread ID : "<<std::this_thread::get_id() << " num: " << n << std::endl;
+        N -> doFinalizeInput(P);
+        std::cout << "From Thread ID : " << std::this_thread::get_id() << " num: " << n << std::endl;
+    }
 }

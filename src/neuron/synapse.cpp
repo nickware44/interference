@@ -38,7 +38,6 @@ inn::Neuron::Synapse::Synapse(const Synapse &S) {
     dGamma = S.getdGamma();
     QCounter = -1;
     QSize = 0;
-    GammaQ.reserve(ComputeBackend->getGammaQMaxSizeValue(Lambda));
 }
 
 inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, int64_t _Tl) {
@@ -54,20 +53,19 @@ inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, 
     dGamma = 0;
     QCounter = -1;
     QSize = 0;
-    GammaQ.reserve(ComputeBackend->getGammaQMaxSizeValue(Lambda));
 }
 
-void inn::Neuron::Synapse::doIn(double X, double WVSum) {
-    double nGamma = ComputeBackend->getGammaFunctionValue(Gamma, k1, k2, X, WVSum);
+void inn::Neuron::Synapse::doIn(double X) {
+    double nGamma = ComputeBackend->getGammaFunctionValue(Gamma, k1, k2, X);
     dGamma = nGamma - Gamma;
     Gamma = nGamma;
 }
 
 void inn::Neuron::Synapse::doSendToQueue(double X, double WVSum) {
-    double GammaLast = !QSize ? 0 : GammaQ[QSize-1];
-    double nGamma = ComputeBackend->getGammaFunctionValue(GammaLast, k1, k2, X, WVSum);
-    GammaQ[QSize] = nGamma;
-    QSize++;
+//    double GammaLast = !QSize ? 0 : GammaQ[QSize-1];
+//    double nGamma = ComputeBackend->getGammaFunctionValue(GammaLast, k1, k2, X);
+//    GammaQ[QSize] = nGamma;
+//    QSize++;
 }
 
 bool inn::Neuron::Synapse::doInFromQueue(int64_t tT) {

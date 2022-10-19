@@ -81,7 +81,7 @@ void inn::Neuron::Receptor::doSavePos() {
 }
 
 void inn::Neuron::Receptor::doUpdateSensitivityValue() {
-    Rs = ComputeBackend->getRcValue(k3, Rs, Fi, dFi);
+    Rs = inn::Computer::getRcValue(k3, Rs, Fi, dFi);
 }
 
 void inn::Neuron::Receptor::setPos(inn::Position *_RPos) {
