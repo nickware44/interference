@@ -30,6 +30,7 @@ namespace inn {
         std::map<std::string, int> Latencies;
         std::vector<std::string> Outputs;
         void doPrepare();
+        void doSignalProcessStart();
     public:
         NeuralNet();
         std::vector<double> doComparePatterns();

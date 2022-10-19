@@ -9,11 +9,13 @@
 
 #include <fstream>
 #include <queue>
+#include <thread>
 #include "../3rdparty/json.hpp"
 #include "../../include/inn/neuralnet.h"
 #include "../../include/inn/error.h"
 
 typedef nlohmann::json json;
+std::queue<std::tuple<std::string, std::string, double>> nqueue;
 
 inn::NeuralNet::NeuralNet() {
     EntriesCount = 0;
@@ -22,6 +24,8 @@ inn::NeuralNet::NeuralNet() {
     t = 0;
     DataDone = false;
     Learned = false;
+
+    if (inn::isSynchronizationNeeded()) doSignalProcessStart();
 }
 
 std::vector<double> inn::NeuralNet::doComparePatterns() {
@@ -98,12 +102,53 @@ void inn::NeuralNet::doReset() {
     for (const auto& N: Neurons) N.second -> doReinit();
 }
 
+void inn::NeuralNet::doSignalProcessStart() {
+    std::function<void(std::map<std::string, inn::Neuron*>, std::map<std::string, int>, int64_t)>
+            tWatcher([] (const std::map<std::string, inn::Neuron*>& tNeurons,
+                           const std::map<std::string, int>& tLatencies,
+                           int64_t tt) {
+
+        while (!nqueue.empty() || inn::isSynchronizationNeeded()) {
+            auto i = nqueue.front();
+            nqueue.pop();
+            std::cout << std::get<0>(i) << " -> " << std::get<1>(i) << " (" << std::get<2>(i) << ")" << std::endl;
+            auto n = tNeurons.find(std::get<1>(i));
+            if (n != tNeurons.end()) {
+                if (tt == 1) {
+                    auto waiting = n -> second -> getWaitingEntries();
+                    auto l = tLatencies.find(std::get<1>(i));
+                    auto latency = l == tLatencies.end() ? 0 : l->second;
+                    for (auto &we: waiting) {
+                        auto nfrom = tLatencies.find(we);
+                        if (nfrom != tLatencies.end() && nfrom->second > latency) {
+                            std::cout << we << " (latency " << nfrom->second << ") -> " << std::get<1>(i) << " (0)" << std::endl;
+                            n -> second -> doSignalSendEntry(we, 0, {});
+                        }
+                    }
+                }
+
+                bool done = n -> second -> doSignalSendEntry(std::get<0>(i), std::get<2>(i), {});
+
+                if (done) {
+                    std::cout << std::get<1>(i) << " computed" << std::endl;
+                    auto nlinks = n -> second -> getLinkOutput();
+                    for (auto &nl: nlinks) {
+                        nqueue.push(std::make_tuple(std::get<1>(i), nl, n->second->doSignalReceive().second));
+                    }
+                }
+            }
+        }
+    });
+
+    if (inn::isSynchronizationNeeded()) {
+        std::thread Worker(tWatcher, Neurons, Latencies, t);
+    } else {
+        tWatcher(Neurons, Latencies, t);
+    }
+}
+
 void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
     t++;
-
-    std::queue<std::tuple<std::string, std::string, double>> nqueue;
-    std::map<std::string, std::string> nwaiting;
-    std::vector<std::string> m;
 
     int xi = 0;
     for (auto &e: Entries) {
@@ -113,36 +158,7 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
         xi++;
     }
 
-    while (!nqueue.empty()) {
-        auto i = nqueue.front();
-        nqueue.pop();
-        std::cout << std::get<0>(i) << " -> " << std::get<1>(i) << " (" << std::get<2>(i) << ")" << std::endl;
-        auto n = Neurons.find(std::get<1>(i));
-        if (n != Neurons.end()) {
-            if (t == 1) {
-                auto waiting = n -> second -> getWaitingEntries();
-                auto l = Latencies.find(std::get<1>(i));
-                auto latency = l == Latencies.end() ? 0 : l->second;
-                for (auto &we: waiting) {
-                    auto nfrom = Latencies.find(we);
-                    if (nfrom != Latencies.end() && nfrom->second > latency) {
-                        std::cout << we << " (latency " << nfrom->second << ") -> " << std::get<1>(i) << " (0)" << std::endl;
-                        n -> second -> doSignalSendEntry(we, 0, {});
-                    }
-                }
-            }
-
-            bool done = n -> second -> doSignalSendEntry(std::get<0>(i), std::get<2>(i), {});
-
-            if (done) {
-                std::cout << std::get<1>(i) << " computed" << std::endl;
-                auto nlinks = n -> second -> getLinkOutput();
-                for (auto &nl: nlinks) {
-                    nqueue.push(std::make_tuple(std::get<1>(i), nl, n->second->doSignalReceive().second));
-                }
-            }
-        }
-    }
+    doSignalProcessStart(); // doing some work only if synchronization is not needed
 }
 
 std::vector<double> inn::NeuralNet::doSignalReceive() {

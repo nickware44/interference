@@ -16,11 +16,11 @@ namespace inn {
                   Multithread,
                   OpenCLGPU} ComputeBackends;
 
-    extern int CurrentComputeBackend;
     extern inn::Computer *ComputeBackend;
 
     void setComputeBackend(int Backend, int Parameter = 0);
     int getComputeBackend();
+    bool isSynchronizationNeeded();
 }
 
 #endif //INTERFERENCE_SYSTEM_H
