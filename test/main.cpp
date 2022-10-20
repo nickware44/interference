@@ -1,13 +1,14 @@
 
 #include <fstream>
 #include <inn/neuralnet.h>
+#include <unistd.h>
 
 #define NN_OUTPUT_OK 231.363
 
 int main() {
-    inn::setComputeBackend(inn::ComputeBackends::Default, 1);
+    inn::setComputeBackend(inn::ComputeBackends::Multithread, 1);
 
-    std::ifstream structure("../../test/structure.json");
+    std::ifstream structure("../../test/structure2.json");
     auto NN = new inn::NeuralNet();
     NN -> setStructure(structure);
     std::cout << "Model name: " << NN->getName() << std::endl;
@@ -18,7 +19,7 @@ int main() {
     NN -> doSignalSend({500, 500});
     std::cout << "Running second step" << std::endl;
     NN -> doSignalSend({200, 200});
-
+    sleep(100);
     auto Y = NN -> doSignalReceive();
     std::cout << "Neural net output: " << Y[0] << std::endl;
     if (fabs(Y[0]-NN_OUTPUT_OK) < 1e-4) {

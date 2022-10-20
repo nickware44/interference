@@ -40,6 +40,7 @@ namespace inn {
         inn::WaveType WTin, WTout;
         std::vector<double> doCompareCheckpoints();
         double LastWVSum;
+        bool Pending;
     public:
         typedef std::tuple<double, double> PatternDefinition;
         Neuron();
@@ -80,6 +81,7 @@ namespace inn {
         inn::WaveDefinition getWave() const;
         int64_t getTlo() const;
         int getNID() const;
+        bool isPending() const;
         ~Neuron();
     };
 

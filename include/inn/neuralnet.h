@@ -20,14 +20,12 @@ namespace inn {
     class NeuralNet {
     private:
         std::string Name, Description, Version;
+        int64_t t;
         unsigned int EntriesCount;
         unsigned int LDRCounterE, LDRCounterN;
-        int64_t t;
         bool DataDone;
         bool Learned;
         std::map<std::string, std::vector<std::string>> Entries;
-        std::map<std::string, inn::Neuron*> Neurons;
-        std::map<std::string, int> Latencies;
         std::vector<std::string> Outputs;
         void doPrepare();
         void doSignalProcessStart();

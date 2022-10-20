@@ -9,6 +9,7 @@
 
 #include "../../include/inn/backends/multithread.h"
 #include "../../include/inn/neuron.h"
+#include "../../include/inn/system.h"
 
 std::queue<void*> DataQueue;
 
@@ -20,6 +21,7 @@ inn::ComputeBackendMultithread::ComputeBackendMultithread(int WorkersCount) {
 
 void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
     DataQueue.push(Object);
+    std::cout << "Pushed object to data queue" << std::endl;
 }
 
 [[noreturn]] void inn::ComputeBackendMultithread::tWorker(int n) {
@@ -77,5 +79,6 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
 
         N -> doFinalizeInput(P);
         std::cout << "From Thread ID : " << std::this_thread::get_id() << " num: " << n << std::endl;
+        inn::doNeuralNetSync();
     }
 }

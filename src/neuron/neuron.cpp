@@ -108,6 +108,7 @@ bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, const std
     for (auto &e: Entries) {
         if (!e.second->doCheckState(t)) return false;
     }
+    Pending = true;
     ComputeBackend -> doProcessNeuron((void*)this);
     return true;
 }
@@ -137,6 +138,8 @@ void inn::Neuron::doCreateCheckpoint() {
 void inn::Neuron::doFinalizeInput(double P) {
     Y = P;
     t++;
+    Pending = false;
+    std::cout << "Object processed" << std::endl;
 }
 
 void inn::Neuron::doPrepare() {
@@ -314,6 +317,10 @@ int64_t inn::Neuron::getTlo() const {
 
 int inn::Neuron::getNID() const {
     return NID;
+}
+
+bool inn::Neuron::isPending() const {
+    return Pending;
 }
 
 inn::Neuron::~Neuron() {
