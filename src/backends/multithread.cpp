@@ -27,7 +27,7 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
 [[noreturn]] void inn::ComputeBackendMultithread::tWorker(int n) {
     while (true) {
         if (DataQueue.empty()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
             continue;
         }
         auto N = (inn::Neuron*)DataQueue.front();
@@ -77,8 +77,8 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
         }
         P /= (double)N->getReceptorsCount();
 
+        std::cout << "From Thread ID : " << std::this_thread::get_id() << " num: " << n << ", t: " << N->getTime() << std::endl;
         N -> doFinalizeInput(P);
-        std::cout << "From Thread ID : " << std::this_thread::get_id() << " num: " << n << std::endl;
         inn::doNeuralNetSync();
     }
 }

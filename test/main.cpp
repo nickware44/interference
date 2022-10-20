@@ -8,18 +8,18 @@
 int main() {
     inn::setComputeBackend(inn::ComputeBackends::Multithread, 1);
 
-    std::ifstream structure("../../test/structure2.json");
+    std::ifstream structure("../../test/structure.json");
     auto NN = new inn::NeuralNet();
     NN -> setStructure(structure);
     std::cout << "Model name: " << NN->getName() << std::endl;
     std::cout << "Model desc: " << NN->getDescription() << std::endl;
     std::cout << "Model ver : " << NN->getVersion() << std::endl;
-
+    sleep(1);
     std::cout << "Running first step" << std::endl;
     NN -> doSignalSend({500, 500});
     std::cout << "Running second step" << std::endl;
     NN -> doSignalSend({200, 200});
-    sleep(100);
+    sleep(5);
     auto Y = NN -> doSignalReceive();
     std::cout << "Neural net output: " << Y[0] << std::endl;
     if (fabs(Y[0]-NN_OUTPUT_OK) < 1e-4) {

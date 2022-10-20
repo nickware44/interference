@@ -109,26 +109,45 @@ void inn::NeuralNet::doSignalProcessStart() {
         std::vector<std::string> pending;
 
         while (!nqueue.empty() || inn::isSynchronizationNeeded()) {
-            if (inn::isSynchronizationNeeded() && nqueue.empty()) {
+            if (inn::isSynchronizationNeeded() && nqueue.empty() && pending.empty()) {
                 inn::doNeuralNetSyncWait();
             }
+
+            if (inn::isSynchronizationNeeded()) {
+                std::vector<std::string> pending_n;
+                while (!pending.empty()) {
+                    auto p = pending.back();
+                    pending.pop_back();
+                    auto ne = Neurons.find(p);
+                    if (!ne->second->isPending()) {
+                        auto nlinks = ne -> second -> getLinkOutput();
+                        for (auto &nl: nlinks) {
+                            nqueue.push(std::make_tuple(p, nl, ne->second->doSignalReceive().second, ne->second->getTime()));
+                            std::cout  << "(" << ne->second->getTime() << ") " << "Added "
+                                << p << " -> " << nl << " (" << ne->second->doSignalReceive().second << ")" << std::endl;
+                        }
+                        //inn::doNeuralNetSyncWait();
+                    } else pending_n.push_back(p);
+                }
+                pending = std::move(pending_n);
+            }
+
+            if (nqueue.empty()) continue;
 
             auto i = nqueue.front();
             nqueue.pop();
             auto n = Neurons.find(std::get<1>(i));
-            auto tt = std::get<3>(i);
 
-            if (inn::isSynchronizationNeeded()) {
-                auto ne = Neurons.find(std::get<1>(i));
-                if (n->second->isPending()) {
-                    nqueue.push(i);
-                    continue;
-                    //inn::doNeuralNetSyncWait();
-                }
+            auto pn = std::find(pending.begin(), pending.end(), std::get<1>(i));
+            if (n != Neurons.end() && (n->second->isPending() || pn != pending.end())) {
+                nqueue.push(i);
+                continue;
             }
 
+            auto tt = std::get<3>(i);
+
             if (n != Neurons.end()) {
-                bool done = true;
+                bool done = false;
 
                 std::cout << "(" << tt << ") " << std::get<0>(i) << " -> "
                           << std::get<1>(i) << " (" << std::get<2>(i) << ")" << std::endl;
@@ -146,10 +165,10 @@ void inn::NeuralNet::doSignalProcessStart() {
                     }
                 }
 
-                if (n->second->getTime() != tt) {
+                //if (n->second->getTime() != tt) {
                     std::cout << "(" << tt << ") " << "Sending signal to " << std::get<1>(i) << std::endl;
                     done = n -> second -> doSignalSendEntry(std::get<0>(i), std::get<2>(i), {});
-                }
+                //}
 
                 if (done) {
                     if (n->second->isPending()) {
@@ -162,6 +181,7 @@ void inn::NeuralNet::doSignalProcessStart() {
                         nqueue.push(std::make_tuple(std::get<1>(i), nl, n->second->doSignalReceive().second, std::get<3>(i)));
                     }
                 }
+                std::cout << "queue " << nqueue.size() << std::endl;
             }
         }
     });
