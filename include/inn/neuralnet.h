@@ -35,6 +35,7 @@ namespace inn {
         void doFinalize();
         void doReset();
         void doSignalSend(const std::vector<double>&);
+        void doSignalSend(const std::vector<std::vector<double>>&, const std::function<void()>& Callback = nullptr);
         std::vector<double> doSignalReceive();
         bool isMultithreadingEnabled();
         void setStructure(std::ifstream&);

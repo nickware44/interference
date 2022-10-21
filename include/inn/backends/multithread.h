@@ -18,6 +18,7 @@ namespace inn {
     class ComputeBackendMultithread : public Computer {
     private:
         std::vector<std::thread> Workers;
+        unsigned int LastWorker;
 
         [[noreturn]] static void tWorker(int);
     public:

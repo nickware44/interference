@@ -136,21 +136,29 @@ void inn::NeuralNet::doSignalProcessStart() {
 
             auto i = nqueue.front();
             nqueue.pop();
+            auto tt = std::get<3>(i);
             auto n = Neurons.find(std::get<1>(i));
-
+            auto nf = Neurons.find(std::get<0>(i));
             auto pn = std::find(pending.begin(), pending.end(), std::get<1>(i));
-            if (n != Neurons.end() && (n->second->isPending() || pn != pending.end())) {
+            if (n != Neurons.end() && (n->second->isPending() || pn != pending.end() ||
+//                    (nf != Neurons.end() && !(nf->second->getTime() == n->second->getTime()+1 || nf->second->getTime() == n->second->getTime())))) {
+                    (nf != Neurons.end() && !(tt == n->second->getTime()+1 || tt == n->second->getTime())))) {
+#if 0
+                std::cout << "Queue size " << nqueue.size() << std::endl;
+                std::cout << "Resending to queue " << std::get<0>(i) << " " << std::get<1>(i) <<
+                    " " << (nf != Neurons.end()?nf->second->getTime():0) << " " << n->second->getTime() << " " << n->second->isPending() << std::endl;
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+#endif
                 nqueue.push(i);
                 continue;
             }
-
-            auto tt = std::get<3>(i);
 
             if (n != Neurons.end()) {
                 bool done = false;
 
                 std::cout << "(" << tt << ") " << std::get<0>(i) << " -> "
-                          << std::get<1>(i) << " (" << std::get<2>(i) << ")" << std::endl;
+                          << std::get<1>(i) << " (" << (nf!=Neurons.end()?nf->second->getTime():0) << "-" <<  n->second->getTime()
+                          << " " << std::get<2>(i) << ")" << std::endl;
 
                 if (tt == 1) {
                     auto waiting = n -> second -> getWaitingEntries();
@@ -158,7 +166,7 @@ void inn::NeuralNet::doSignalProcessStart() {
                     auto latency = l == Latencies.end() ? 0 : l->second;
                     for (auto &we: waiting) {
                         auto nfrom = Latencies.find(we);
-                        if (nfrom != Latencies.end() && nfrom->second > latency) {
+                        if (nfrom != Latencies.end() && nfrom->second > latency && std::get<0>(i) != we) {
                             std::cout << we << " (latency " << nfrom->second << ") -> " << std::get<1>(i) << " (0)" << std::endl;
                             n -> second -> doSignalSendEntry(we, 0, {});
                         }
@@ -200,6 +208,8 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
     int xi = 0;
     for (auto &e: Entries) {
         for (auto &en: e.second) {
+//            auto n = Neurons.find(en);
+//            if (n != Neurons.end())
             nqueue.push(std::make_tuple(e.first, en, X[xi], t));
         }
         xi++;
@@ -209,6 +219,17 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
         doSignalProcessStart();
     else
         doNeuralNetSync();
+}
+
+void inn::NeuralNet::doSignalSend(const std::vector<std::vector<double>>& Xx, const std::function<void()>& Callback) {
+    t = 0;
+    for (auto &X: Xx) {
+        doSignalSend(X);
+    }
+    if (inn::isSynchronizationNeeded()) {
+        // sync
+    }
+    if (Callback) Callback();
 }
 
 std::vector<double> inn::NeuralNet::doSignalReceive() {
@@ -341,6 +362,7 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                 std::cout << nname << " -> " << it->second << std::endl;
             }
 
+            N -> setName(nname);
             Neurons.insert(std::make_pair(nname, N));
         }
     } catch (std::exception &e) {

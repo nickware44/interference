@@ -41,6 +41,7 @@ namespace inn {
         std::vector<double> doCompareCheckpoints();
         double LastWVSum;
         bool Pending;
+        std::string Name;
     public:
         typedef std::tuple<double, double> PatternDefinition;
         Neuron();
@@ -65,6 +66,7 @@ namespace inn {
         void setk2(double);
         void setk3(double);
         void setNID(int);
+        void setName(const std::string&);
         std::vector<std::string>& getLinkOutput();
         std::vector<std::string> getEntries();
         inn::Neuron::Entry*  getEntry(int64_t);
@@ -81,6 +83,7 @@ namespace inn {
         inn::WaveDefinition getWave() const;
         int64_t getTlo() const;
         int getNID() const;
+        std::string getName();
         bool isPending() const;
         ~Neuron();
     };

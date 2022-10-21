@@ -106,8 +106,12 @@ bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, const std
     auto entry = Entries.find(From);
     entry -> second -> doIn(X, t);
     for (auto &e: Entries) {
-        if (!e.second->doCheckState(t)) return false;
+        if (!e.second->doCheckState(t)) {
+            std::cout << "In to entry of " << Name << " from " << From << " (" << t << ") - not ready" << std::endl;
+            return false;
+        }
     }
+    std::cout << "In to entry of " << Name << " from " << From << " (" << t << ") - ready" << std::endl;
     Pending = true;
     ComputeBackend -> doProcessNeuron((void*)this);
     return true;
@@ -139,7 +143,7 @@ void inn::Neuron::doFinalizeInput(double P) {
     Y = P;
     t++;
     Pending = false;
-    std::cout << "Object processed" << std::endl;
+    std::cout << "Object processed " << Name << std::endl;
 }
 
 void inn::Neuron::doPrepare() {
@@ -231,6 +235,10 @@ void inn::Neuron::setNID(int _NID) {
     NID = _NID;
 }
 
+void inn::Neuron::setName(const std::string& NName) {
+    Name = NName;
+}
+
 std::vector<std::string> inn::Neuron::getWaitingEntries() {
     std::vector<std::string> waiting;
     for (auto &e: Entries) {
@@ -317,6 +325,10 @@ int64_t inn::Neuron::getTlo() const {
 
 int inn::Neuron::getNID() const {
     return NID;
+}
+
+std::string inn::Neuron::getName() {
+    return Name;
 }
 
 bool inn::Neuron::isPending() const {

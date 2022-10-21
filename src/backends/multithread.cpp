@@ -11,27 +11,34 @@
 #include "../../include/inn/neuron.h"
 #include "../../include/inn/system.h"
 
-std::queue<void*> DataQueue;
+std::vector<std::queue<void*>> DataQueues;
+std::vector<inn::Event*> Events;
 
 inn::ComputeBackendMultithread::ComputeBackendMultithread(int WorkersCount) {
+    LastWorker = 0;
     for (int i = 0; i < WorkersCount; i++) {
+        Events.emplace_back(new inn::Event());
         Workers.emplace_back(tWorker, i);
+        DataQueues.emplace_back();
     }
 }
 
 void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
-    DataQueue.push(Object);
-    std::cout << "Pushed object to data queue" << std::endl;
+    if (LastWorker >= Workers.size()) LastWorker = 0;
+    DataQueues[LastWorker].push(Object);
+    Events[LastWorker] -> doNotifyOne();
+    LastWorker++;
+//    std::cout << "Pushed object to data queue " << ((inn::Neuron*)Object)->getName()
+//        << " " << ((inn::Neuron*)Object)->getTime() << std::endl;
 }
 
 [[noreturn]] void inn::ComputeBackendMultithread::tWorker(int n) {
     while (true) {
-        if (DataQueue.empty()) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(100));
-            continue;
+        if (DataQueues[n].empty()) {
+            Events[n] -> doWait();
         }
-        auto N = (inn::Neuron*)DataQueue.front();
-        DataQueue.pop();
+        auto N = (inn::Neuron*)DataQueues[n].front();
+        DataQueues[n].pop();
 
         double FiSum, D, P = 0;
         auto Xm = N -> getXm();
@@ -77,7 +84,7 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
         }
         P /= (double)N->getReceptorsCount();
 
-        std::cout << "From Thread ID : " << std::this_thread::get_id() << " num: " << n << ", t: " << N->getTime() << std::endl;
+        //std::cout << "From Thread ID : " << std::this_thread::get_id() << " num: " << n << ", t: " << N->getTime() << std::endl;
         N -> doFinalizeInput(P);
         inn::doNeuralNetSync();
     }
