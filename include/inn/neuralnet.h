@@ -27,6 +27,7 @@ namespace inn {
         bool DataDone;
         bool Learned;
         std::map<std::string, std::vector<std::string>> Entries;
+        std::map<std::string, std::vector<std::string>> Ensembles;
         std::vector<std::string> Outputs;
         void doPrepare();
         void doSignalProcessStart();
@@ -39,7 +40,7 @@ namespace inn {
         std::vector<double> doSignalTransfer(const std::vector<std::vector<double>>&);
         void doSignalTransferAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)> Callback = nullptr);
         std::vector<double> doSignalReceive();
-        bool isMultithreadingEnabled();
+        void doReplicateEnsemble(const std::string& From, const std::string& To);
         void setStructure(std::ifstream&);
         void setStructure(const std::string &Str);
         std::string getStructure();

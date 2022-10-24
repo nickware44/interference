@@ -6,6 +6,7 @@
       "size": 500,
       "dimensions": 3,
       "input_signals": ["E1", "E2"],
+      "ensemble": "A1",
 
       "synapses": [
         {
@@ -48,6 +49,7 @@
       "size": 500,
       "dimensions": 3,
       "input_signals": ["E1", "E2"],
+      "ensemble": "A1",
 
       "synapses": [
         {
@@ -90,6 +92,7 @@
       "size": 500,
       "dimensions": 3,
       "input_signals": ["E1", "E2"],
+      "ensemble": "A1",
 
       "synapses": [
         {
@@ -132,6 +135,7 @@
       "size": 500,
       "dimensions": 3,
       "input_signals": ["E1", "E2"],
+      "ensemble": "A1",
 
       "synapses": [
         {
@@ -174,6 +178,7 @@
       "size": 500,
       "dimensions": 3,
       "input_signals": ["E1", "E2"],
+      "ensemble": "A1",
 
       "synapses": [
         {
@@ -216,6 +221,7 @@
       "size": 500,
       "dimensions": 3,
       "input_signals": ["N1", "N2", "N3", "N4", "N5"],
+      "ensemble": "A1",
 
       "synapses": [
         {

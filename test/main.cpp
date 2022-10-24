@@ -11,11 +11,12 @@ uint64_t getTimestampMS() {
 }
 
 int main() {
-    inn::setComputeBackend(inn::ComputeBackends::Multithread, 6);
+    inn::setComputeBackend(inn::ComputeBackends::Default, 6);
 
     std::ifstream structure("../../test/structure2.json");
     auto NN = new inn::NeuralNet();
     NN -> setStructure(structure);
+    NN -> doReplicateEnsemble("A1", "A2");
     std::cout << "Model name: " << NN->getName() << std::endl;
     std::cout << "Model desc: " << NN->getDescription() << std::endl;
     std::cout << "Model ver : " << NN->getVersion() << std::endl;

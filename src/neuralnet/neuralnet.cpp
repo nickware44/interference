@@ -277,9 +277,53 @@ std::vector<double> inn::NeuralNet::doSignalReceive() {
     return ny;
 }
 
-bool inn::NeuralNet::isMultithreadingEnabled() {
-    //for (auto N: Neurons) if (!std::get<2>(N)->isMultithreadingEnabled()) return false;
-    return true;
+void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::string& To) {
+    std::vector<std::string> enew;
+    auto efrom = Ensembles.find(From);
+
+    if (efrom != Ensembles.end()) {
+        auto eto = Ensembles.find(To);
+        auto lastname = efrom->second.back();
+
+        std::string numstr, namestr;
+        int p = 1;
+        while (lastname.size() >= p) {
+            auto c = lastname.c_str()[lastname.size()-p];
+            if (c >= 48 && c <= 57) numstr = c + numstr;
+            else break;
+            p++;
+        }
+        namestr = lastname.substr(0, lastname.size()-p+1);
+        int num = std::stoi(numstr);
+
+        std::cout << namestr << " " << num << std::endl;
+
+        for (auto &en: efrom->second) {
+            auto n = Neurons.find(en);
+            if (n != Neurons.end()) {
+                num++;
+                auto nnew = new inn::Neuron(*n->second);
+                auto nname = namestr+std::to_string(num);
+
+                nnew -> setName(nname);
+
+                if (eto == Ensembles.end()) {
+                    enew.push_back(nname);
+                } else {
+                    eto->second.push_back(nname);
+                }
+            }
+        }
+
+        if (eto == Ensembles.end()) Ensembles.insert(std::make_pair(To, enew));
+    }
+    for (const auto& e: Ensembles) {
+        std::cout << e.first << " -";
+        for (const auto& en: e.second) {
+            std::cout << " " << en;
+        }
+        std::cout << std::endl;
+    }
 }
 
 inn::Neuron* inn::NeuralNet::getNeuron(const std::string& NName) {
@@ -359,6 +403,18 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
             }
             auto *N = new inn::Neuron(nsize, ndimensions, 0, nentries);
 
+            if (jneuron.value()["ensemble"] != nullptr) {
+                auto ename = jneuron.value()["ensemble"].get<std::string>();
+                auto e = Ensembles.find(ename);
+                if (e == Ensembles.end()) {
+                    std::vector<std::string> en;
+                    en.push_back(nname);
+                    Ensembles.insert(std::make_pair(ename, en));
+                } else {
+                    e->second.push_back(nname);
+                }
+            }
+
             for (auto &jsynapse: jneuron.value()["synapses"].items()) {
                 std::vector<double> pos;
                 if (ndimensions != jsynapse.value()["position"].size()) {
@@ -403,6 +459,14 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
 
             N -> setName(nname);
             Neurons.insert(std::make_pair(nname, N));
+        }
+
+        for (const auto& e: Ensembles) {
+            std::cout << e.first << " -";
+            for (const auto& en: e.second) {
+                std::cout << " " << en;
+            }
+            std::cout << std::endl;
         }
     } catch (std::exception &e) {
         std::cout << "Error parsing structure: " << e.what() << std::endl;
