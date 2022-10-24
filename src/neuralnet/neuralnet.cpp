@@ -119,7 +119,7 @@ void inn::NeuralNet::doSignalProcessStart() {
                 inn::doNeuralNetSyncWait();
             }
 
-            m.lock();
+            if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> guard(m);
 
             if (inn::isSynchronizationNeeded()) {
                 std::vector<std::string> pending_n;
@@ -130,7 +130,9 @@ void inn::NeuralNet::doSignalProcessStart() {
                     if (!ne->second->isPending()) {
                         auto nlinks = ne -> second -> getLinkOutput();
                         for (auto &nl: nlinks) {
-                            nqueue.push(std::make_tuple(p, nl, ne->second->doSignalReceive().second, ne->second->getTime()));
+                            auto nr = ne->second->doSignalReceive().second;
+                            auto nt = ne->second->getTime();
+                            nqueue.push(std::make_tuple(p, nl, nr, nt));
 //                            std::cout  << "(" << ne->second->getTime() << ") " << "Added "
 //                                << p << " -> " << nl << " (" << ne->second->doSignalReceive().second << ")" << std::endl;
                         }
@@ -199,8 +201,6 @@ void inn::NeuralNet::doSignalProcessStart() {
                 }
 //                std::cout << "queue " << nqueue.size() << std::endl;
             }
-
-            m.unlock();
         }
     });
 
@@ -214,21 +214,19 @@ void inn::NeuralNet::doSignalProcessStart() {
 
 void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
     t++;
-
+    if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> guard(m);
     int xi = 0;
     for (auto &e: Entries) {
         for (auto &en: e.second) {
-            m.lock();
             nqueue.push(std::make_tuple(e.first, en, X[xi], t));
-            m.unlock();
         }
         xi++;
     }
 
     if (!inn::isSynchronizationNeeded()) {
-        doSignalProcessStart();
+//        doSignalProcessStart();
     } else {
-        doNeuralNetSync();
+//        doNeuralNetSync();
     }
 }
 
@@ -239,7 +237,10 @@ std::vector<double> inn::NeuralNet::doSignalTransfer(const std::vector<std::vect
     }
 
     if (inn::isSynchronizationNeeded()) {
+        doNeuralNetSync();
         DataDoneEvent -> doWait();
+    } else {
+        doSignalProcessStart();
     }
 
     return doSignalReceive();

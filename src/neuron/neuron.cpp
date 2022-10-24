@@ -19,6 +19,7 @@ inn::Neuron::Neuron() {
     Y = 0;
     NID = 0;
     Learned = false;
+    Pending = false;
 //    ReceptorPositionComputer = nullptr;
 }
 
@@ -35,6 +36,7 @@ inn::Neuron::Neuron(const Neuron &N) {
     //ReceptorPositionComputer = nullptr;
     WTin = N.getWTin();
     WTout = N.getWTout();
+    Pending = false;
 }
 
 inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::vector<std::string>& InputNames) {
@@ -49,6 +51,7 @@ inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::
         auto *E = new Entry();
         Entries.insert(std::make_pair(i, E));
     }
+    Pending = false;
 }
 
 void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<double> PosVector, double k1, unsigned int Tl) {
