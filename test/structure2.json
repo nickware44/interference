@@ -11,28 +11,33 @@
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 9
         },
         {
           "entry": 1,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 9
         },
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "deactivation"
+          "neurotransmitter": "deactivation",
+          "k1": 9
+        },
+        {
+          "entry": 1,
+          "position": [100, 100, 100],
+          "neurotransmitter": "deactivation",
+          "k1": 9
         }
       ],
 
       "receptors": [
         {
-          "type": "single",
-          "position": [100, 110, 110]
-        },
-        {
           "type": "cluster",
-          "position": [100, 100, 100],
+          "position": [100, 110, 100],
           "count": 10,
           "radius": 10
         }
@@ -42,19 +47,41 @@
       "name": "N2",
       "size": 500,
       "dimensions": 3,
-      "input_signals": ["N1"],
+      "input_signals": ["E1", "E2"],
 
       "synapses": [
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 9
+        },
+        {
+          "entry": 1,
+          "position": [100, 100, 100],
+          "neurotransmitter": "activation",
+          "k1": 9
+        },
+        {
+          "entry": 0,
+          "position": [100, 100, 100],
+          "neurotransmitter": "deactivation",
+          "k1": 9
+        },
+        {
+          "entry": 1,
+          "position": [100, 100, 100],
+          "neurotransmitter": "deactivation",
+          "k1": 9
         }
       ],
+
       "receptors": [
         {
-        "type": "single",
-        "position": [100, 110, 110]
+          "type": "cluster",
+          "position": [100, 110, 100],
+          "count": 10,
+          "radius": 10
         }
       ]
     },
@@ -62,24 +89,153 @@
       "name": "N3",
       "size": 500,
       "dimensions": 3,
-      "input_signals": ["N2"],
+      "input_signals": ["E1", "E2"],
 
       "synapses": [
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 9
+        },
+        {
+          "entry": 1,
+          "position": [100, 100, 100],
+          "neurotransmitter": "activation",
+          "k1": 9
+        },
+        {
+          "entry": 0,
+          "position": [100, 100, 100],
+          "neurotransmitter": "deactivation",
+          "k1": 9
+        },
+        {
+          "entry": 1,
+          "position": [100, 100, 100],
+          "neurotransmitter": "deactivation",
+          "k1": 9
+        }
+      ],
+
+      "receptors": [
+        {
+          "type": "cluster",
+          "position": [100, 110, 100],
+          "count": 10,
+          "radius": 10
+        }
+      ]
+    },
+    {
+      "name": "N4",
+      "size": 500,
+      "dimensions": 3,
+      "input_signals": ["E1", "E2"],
+
+      "synapses": [
+        {
+          "entry": 0,
+          "position": [100, 100, 100],
+          "neurotransmitter": "activation",
+          "k1": 9
+        },
+        {
+          "entry": 1,
+          "position": [100, 100, 100],
+          "neurotransmitter": "activation",
+          "k1": 9
+        },
+        {
+          "entry": 0,
+          "position": [100, 100, 100],
+          "neurotransmitter": "deactivation",
+          "k1": 9
+        },
+        {
+          "entry": 1,
+          "position": [100, 100, 100],
+          "neurotransmitter": "deactivation",
+          "k1": 9
+        }
+      ],
+
+      "receptors": [
+        {
+          "type": "cluster",
+          "position": [100, 110, 100],
+          "count": 10,
+          "radius": 10
+        }
+      ]
+    },
+    {
+      "name": "N5",
+      "size": 500,
+      "dimensions": 3,
+      "input_signals": ["E1", "E2"],
+
+      "synapses": [
+        {
+          "entry": 0,
+          "position": [100, 100, 100],
+          "neurotransmitter": "activation",
+          "k1": 9
+        },
+        {
+          "entry": 1,
+          "position": [100, 100, 100],
+          "neurotransmitter": "activation",
+          "k1": 9
+        },
+        {
+          "entry": 0,
+          "position": [100, 100, 100],
+          "neurotransmitter": "deactivation",
+          "k1": 9
+        },
+        {
+          "entry": 1,
+          "position": [100, 100, 100],
+          "neurotransmitter": "deactivation",
+          "k1": 9
+        }
+      ],
+
+      "receptors": [
+        {
+          "type": "cluster",
+          "position": [100, 110, 100],
+          "count": 10,
+          "radius": 10
+        }
+      ]
+    },
+    {
+      "name": "N6",
+      "size": 500,
+      "dimensions": 3,
+      "input_signals": ["N1", "N2", "N3", "N4", "N5"],
+
+      "synapses": [
+        {
+          "entry": 0,
+          "position": [100, 100, 100],
+          "neurotransmitter": "activation",
+          "k1": 2.23
         }
       ],
       "receptors": [
         {
-          "type": "single",
-          "position": [100, 110, 110]
+          "type": "cluster",
+          "position": [100, 102, 100],
+          "count": 10,
+          "radius": 2
         }
       ]
     }
   ],
-  "output_signals": ["N3"],
+  "output_signals": ["N6"],
   "name": "self test net",
   "desc": "neural net structure for self testing",
   "version": "1.0"

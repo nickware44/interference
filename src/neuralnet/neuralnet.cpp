@@ -18,6 +18,8 @@ typedef nlohmann::json json;
 std::queue<std::tuple<std::string, std::string, double, int64_t>> nqueue;
 std::map<std::string, inn::Neuron*> Neurons;
 std::map<std::string, int> Latencies;
+inn::Event *DataDoneEvent;
+std::mutex m;
 
 inn::NeuralNet::NeuralNet() {
     EntriesCount = 0;
@@ -27,7 +29,10 @@ inn::NeuralNet::NeuralNet() {
     DataDone = false;
     Learned = false;
 
-    if (inn::isSynchronizationNeeded()) doSignalProcessStart();
+    if (inn::isSynchronizationNeeded()) {
+        DataDoneEvent = new inn::Event();
+        doSignalProcessStart();
+    }
 }
 
 std::vector<double> inn::NeuralNet::doComparePatterns() {
@@ -110,8 +115,11 @@ void inn::NeuralNet::doSignalProcessStart() {
 
         while (!nqueue.empty() || inn::isSynchronizationNeeded()) {
             if (inn::isSynchronizationNeeded() && nqueue.empty() && pending.empty()) {
+                DataDoneEvent -> doNotifyOne();
                 inn::doNeuralNetSyncWait();
             }
+
+            m.lock();
 
             if (inn::isSynchronizationNeeded()) {
                 std::vector<std::string> pending_n;
@@ -123,8 +131,8 @@ void inn::NeuralNet::doSignalProcessStart() {
                         auto nlinks = ne -> second -> getLinkOutput();
                         for (auto &nl: nlinks) {
                             nqueue.push(std::make_tuple(p, nl, ne->second->doSignalReceive().second, ne->second->getTime()));
-                            std::cout  << "(" << ne->second->getTime() << ") " << "Added "
-                                << p << " -> " << nl << " (" << ne->second->doSignalReceive().second << ")" << std::endl;
+//                            std::cout  << "(" << ne->second->getTime() << ") " << "Added "
+//                                << p << " -> " << nl << " (" << ne->second->doSignalReceive().second << ")" << std::endl;
                         }
                         //inn::doNeuralNetSyncWait();
                     } else pending_n.push_back(p);
@@ -156,9 +164,9 @@ void inn::NeuralNet::doSignalProcessStart() {
             if (n != Neurons.end()) {
                 bool done = false;
 
-                std::cout << "(" << tt << ") " << std::get<0>(i) << " -> "
-                          << std::get<1>(i) << " (" << (nf!=Neurons.end()?nf->second->getTime():0) << "-" <<  n->second->getTime()
-                          << " " << std::get<2>(i) << ")" << std::endl;
+//                std::cout << "(" << tt << ") " << std::get<0>(i) << " -> "
+//                          << std::get<1>(i) << " (" << (nf!=Neurons.end()?nf->second->getTime():0) << "-" <<  n->second->getTime()
+//                          << " " << std::get<2>(i) << ")" << std::endl;
 
                 if (tt == 1) {
                     auto waiting = n -> second -> getWaitingEntries();
@@ -167,15 +175,15 @@ void inn::NeuralNet::doSignalProcessStart() {
                     for (auto &we: waiting) {
                         auto nfrom = Latencies.find(we);
                         if (nfrom != Latencies.end() && nfrom->second > latency && std::get<0>(i) != we) {
-                            std::cout << we << " (latency " << nfrom->second << ") -> " << std::get<1>(i) << " (0)" << std::endl;
+//                            std::cout << we << " (latency " << nfrom->second << ") -> " << std::get<1>(i) << " (0)" << std::endl;
                             n -> second -> doSignalSendEntry(we, 0, {});
                         }
                     }
                 }
 
                 //if (n->second->getTime() != tt) {
-                    std::cout << "(" << tt << ") " << "Sending signal to " << std::get<1>(i) << std::endl;
-                    done = n -> second -> doSignalSendEntry(std::get<0>(i), std::get<2>(i), {});
+//                    std::cout << "(" << tt << ") " << "Sending signal to " << std::get<1>(i) << std::endl;
+                done = n -> second -> doSignalSendEntry(std::get<0>(i), std::get<2>(i), {});
                 //}
 
                 if (done) {
@@ -183,14 +191,16 @@ void inn::NeuralNet::doSignalProcessStart() {
                         pending.push_back(std::get<1>(i));
                         continue;
                     }
-                    std::cout << "(" << tt << ") " << std::get<1>(i) << " computed" << std::endl;
+//                    std::cout << "(" << tt << ") " << std::get<1>(i) << " computed" << std::endl;
                     auto nlinks = n -> second -> getLinkOutput();
                     for (auto &nl: nlinks) {
                         nqueue.push(std::make_tuple(std::get<1>(i), nl, n->second->doSignalReceive().second, std::get<3>(i)));
                     }
                 }
-                std::cout << "queue " << nqueue.size() << std::endl;
+//                std::cout << "queue " << nqueue.size() << std::endl;
             }
+
+            m.unlock();
         }
     });
 
@@ -208,28 +218,53 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
     int xi = 0;
     for (auto &e: Entries) {
         for (auto &en: e.second) {
-//            auto n = Neurons.find(en);
-//            if (n != Neurons.end())
+            m.lock();
             nqueue.push(std::make_tuple(e.first, en, X[xi], t));
+            m.unlock();
         }
         xi++;
     }
 
-    if (!inn::isSynchronizationNeeded())
+    if (!inn::isSynchronizationNeeded()) {
         doSignalProcessStart();
-    else
+    } else {
         doNeuralNetSync();
+    }
 }
 
-void inn::NeuralNet::doSignalSend(const std::vector<std::vector<double>>& Xx, const std::function<void()>& Callback) {
+std::vector<double> inn::NeuralNet::doSignalTransfer(const std::vector<std::vector<double>>& Xx) {
     t = 0;
     for (auto &X: Xx) {
         doSignalSend(X);
     }
+
     if (inn::isSynchronizationNeeded()) {
-        // sync
+        DataDoneEvent -> doWait();
     }
-    if (Callback) Callback();
+
+    return doSignalReceive();
+}
+
+void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<double>>& Xx, const std::function<void(std::vector<double>)> Callback) {
+    t = 0;
+
+    std::function<void()> tCallback([this, Xx, Callback] () {
+        for (auto &X: Xx) {
+            doSignalSend(X);
+        }
+
+        if (inn::isSynchronizationNeeded()) {
+            doNeuralNetSync();
+        }
+
+        DataDoneEvent -> doWait();
+        if (Callback) {
+            auto Y = doSignalReceive();
+            Callback(Y);
+        }
+    });
+    std::thread CallbackThread(tCallback);
+    CallbackThread.detach();
 }
 
 std::vector<double> inn::NeuralNet::doSignalReceive() {
@@ -332,11 +367,14 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                 for (auto &jposition: jsynapse.value()["position"].items()) {
                     pos.push_back(jposition.value().get<double>());
                 }
+                double k1 = 1.2;
+                if (jsynapse.value()["k1"] != nullptr) k1 = jsynapse.value()["k1"].get<double>();
                 unsigned int tl = 0;
-                if (jneuron.value()["tl"] != nullptr) tl = jsynapse.value()["tl"].get<unsigned int>();
+                if (jsynapse.value()["tl"] != nullptr) tl = jsynapse.value()["tl"].get<unsigned int>();
                 auto sentryid = jsynapse.value()["entry"].get<unsigned int>();
                 auto sentry = jneuron.value()["input_signals"][sentryid];
-                N -> doCreateNewSynapse(sentry, pos, tl);
+
+                N -> doCreateNewSynapse(sentry, pos, k1, tl);
             }
             for (auto &jreceptor: jneuron.value()["receptors"].items()) {
                 std::vector<double> pos;
@@ -350,7 +388,7 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                 if (jreceptor.value()["type"] != nullptr && jreceptor.value()["type"].get<std::string>() == "cluster") {
                     auto rcount = jreceptor.value()["count"].get<unsigned int>();
                     auto rradius = jreceptor.value()["count"].get<unsigned int>();
-                    //N -> doCreateNewReceptorCluster(0, 0, rradius, 0);
+                    N -> doCreateNewReceptorCluster(pos, rradius, rcount);
                 } else {
                     N -> doCreateNewReceptor(pos);
                 }

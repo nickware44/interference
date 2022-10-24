@@ -47,9 +47,9 @@ namespace inn {
         Neuron();
         Neuron(const inn::Neuron&);
         Neuron(unsigned int, unsigned int, int64_t, const std::vector<std::string>& InputSignals);
-        void doCreateNewSynapse(const std::string&, std::vector<double>, unsigned int);
+        void doCreateNewSynapse(const std::string&, std::vector<double>, double, unsigned int);
         void doCreateNewReceptor(std::vector<double>);
-        void doCreateNewReceptorCluster(double, double, double, inn::TopologyID);
+        void doCreateNewReceptorCluster(const std::vector<double>& PosVector, unsigned R, unsigned C);
         bool doSignalSendEntry(const std::string&, double, const std::vector<inn::WaveDefinition>&);
         std::pair<int64_t, double> doSignalReceive();
         double doSignalReceive(int64_t);
@@ -98,7 +98,7 @@ namespace inn {
         Entry();
         Entry(const inn::Neuron::Entry&);
         bool doCheckState(int64_t) const;
-        void doAddSynapse(inn::Position*, unsigned int, unsigned int);
+        void doAddSynapse(inn::Position*, unsigned int, double, unsigned int);
         void doIn(double, int64_t);
         void doProcess();
         void doSendToQueue(double, int64_t, double);
@@ -136,6 +136,7 @@ namespace inn {
         void doReset();
         void setk1(double);
         void setk2(double);
+        void setLambda(double);
         void setWTs(inn::WaveType);
         inn::Position* getPos() const;
         double getk1() const;

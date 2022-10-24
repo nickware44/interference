@@ -13,6 +13,7 @@
 #include <map>
 #include <algorithm>
 #include <tuple>
+#include <functional>
 #include "neuron.h"
 #include "../../include/inn/system.h"
 
@@ -35,7 +36,8 @@ namespace inn {
         void doFinalize();
         void doReset();
         void doSignalSend(const std::vector<double>&);
-        void doSignalSend(const std::vector<std::vector<double>>&, const std::function<void()>& Callback = nullptr);
+        std::vector<double> doSignalTransfer(const std::vector<std::vector<double>>&);
+        void doSignalTransferAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)> Callback = nullptr);
         std::vector<double> doSignalReceive();
         bool isMultithreadingEnabled();
         void setStructure(std::ifstream&);

@@ -101,6 +101,10 @@ void inn::Neuron::Synapse::setk2(double _k2) {
     k2 = _k2;
 }
 
+void inn::Neuron::Synapse::setLambda(double L) {
+    Lambda = L;
+}
+
 void inn::Neuron::Synapse::setWTs(inn::WaveType _WTs) {
     WTs = _WTs;
 }

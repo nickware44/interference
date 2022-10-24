@@ -18,8 +18,8 @@ inn::ComputeBackendMultithread::ComputeBackendMultithread(int WorkersCount) {
     LastWorker = 0;
     for (int i = 0; i < WorkersCount; i++) {
         Events.emplace_back(new inn::Event());
-        Workers.emplace_back(tWorker, i);
         DataQueues.emplace_back();
+        Workers.emplace_back(tWorker, i);
     }
 }
 

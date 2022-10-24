@@ -52,6 +52,7 @@ inn::Neuron::Receptor::Receptor(inn::Position *_RPos, double _k3) {
 }
 
 bool inn::Neuron::Receptor::doCheckActive() {
+//    std::cout << Fi << std::endl;
     return Fi >= Rs;
 }
 

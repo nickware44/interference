@@ -3,7 +3,7 @@
   "neurons": [
     {
       "name": "N1",
-      "size": 500,
+      "size": 10000,
       "dimensions": 3,
       "input_signals": ["E1", "E2"],
 
@@ -22,25 +22,26 @@
           "entry": 0,
           "position": [100, 100, 100],
           "neurotransmitter": "deactivation"
+        },
+        {
+          "entry": 1,
+          "position": [100, 102, 100],
+          "neurotransmitter": "activation"
         }
       ],
 
       "receptors": [
         {
-          "type": "single",
-          "position": [100, 110, 110]
-        },
-        {
           "type": "cluster",
-          "position": [100, 100, 100],
-          "count": 10,
+          "position": [100, 210, 100],
+          "count": 15,
           "radius": 10
         }
       ]
     },
     {
       "name": "N2",
-      "size": 500,
+      "size": 10000,
       "dimensions": 3,
       "input_signals": ["N1", "N6"],
 
@@ -49,18 +50,35 @@
           "entry": 0,
           "position": [100, 100, 100],
           "neurotransmitter": "activation"
+        },
+        {
+          "entry": 0,
+          "position": [100, 101, 100],
+          "neurotransmitter": "activation"
+        },
+        {
+          "entry": 0,
+          "position": [100, 102, 100],
+          "neurotransmitter": "activation"
+        },
+        {
+          "entry": 0,
+          "position": [100, 103, 100],
+          "neurotransmitter": "activation"
         }
       ],
       "receptors": [
         {
-        "type": "single",
-        "position": [100, 110, 110]
+          "type": "cluster",
+          "position": [100, 210, 100],
+          "count": 15,
+          "radius": 10
         }
       ]
     },
     {
       "name": "N3",
-      "size": 500,
+      "size": 10000,
       "dimensions": 3,
       "input_signals": ["N1", "N6"],
 
@@ -73,14 +91,16 @@
       ],
       "receptors": [
         {
-          "type": "single",
-          "position": [100, 110, 110]
+          "type": "cluster",
+          "position": [100, 210, 100],
+          "count": 15,
+          "radius": 10
         }
       ]
     },
     {
       "name": "N4",
-      "size": 500,
+      "size": 10000,
       "dimensions": 3,
       "input_signals": ["N3", "N5", "N6"],
       "latency": 1,
@@ -94,14 +114,22 @@
       ],
       "receptors": [
         {
-          "type": "single",
-          "position": [100, 110, 110]
+          "type": "cluster",
+          "position": [100, 210, 100],
+          "count": 15,
+          "radius": 10
+        },
+        {
+          "type": "cluster",
+          "position": [100, 211, 100],
+          "count": 15,
+          "radius": 10
         }
       ]
     },
     {
       "name": "N5",
-      "size": 500,
+      "size": 10000,
       "dimensions": 3,
       "input_signals": ["N2", "N4"],
 
@@ -114,14 +142,22 @@
       ],
       "receptors": [
         {
-          "type": "single",
-          "position": [100, 110, 110]
+          "type": "cluster",
+          "position": [100, 210, 100],
+          "count": 15,
+          "radius": 10
+        },
+        {
+          "type": "cluster",
+          "position": [100, 211, 100],
+          "count": 15,
+          "radius": 10
         }
       ]
     },
     {
       "name": "N6",
-      "size": 500,
+      "size": 10000,
       "dimensions": 3,
       "input_signals": ["N2", "N3", "N4"],
       "latency": 2,
@@ -131,12 +167,35 @@
           "entry": 0,
           "position": [100, 100, 100],
           "neurotransmitter": "activation"
+        },
+        {
+          "entry": 0,
+          "position": [100, 101, 100],
+          "neurotransmitter": "activation"
+        },
+        {
+          "entry": 0,
+          "position": [100, 102, 100],
+          "neurotransmitter": "activation"
+        },
+        {
+          "entry": 0,
+          "position": [100, 103, 100],
+          "neurotransmitter": "activation"
         }
       ],
       "receptors": [
         {
-          "type": "single",
-          "position": [100, 105, 110]
+          "type": "cluster",
+          "position": [100, 210, 100],
+          "count": 15,
+          "radius": 10
+        },
+        {
+          "type": "cluster",
+          "position": [100, 211, 100],
+          "count": 15,
+          "radius": 10
         }
       ]
     }

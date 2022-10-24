@@ -51,15 +51,13 @@ inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::
     }
 }
 
-void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<double> PosVector, unsigned int Tl) {
-//    PosVector.push_back(0);
-//    std::cout << PosVector.size() << " " << DimensionsCount << std::endl;
+void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<double> PosVector, double k1, unsigned int Tl) {
 	if (PosVector.size() != DimensionsCount) {
         throw inn::Error(inn::EX_POSITION_DIMENSIONS);
 	}
     auto nentry = Entries.find(EName);
     if (nentry != Entries.end()) {
-        nentry -> second -> doAddSynapse(new inn::Position(Xm, std::move(PosVector)), Xm, Tl);
+        nentry -> second -> doAddSynapse(new inn::Position(Xm, std::move(PosVector)), Xm, k1, Tl);
     }
 }
 
@@ -72,33 +70,18 @@ void inn::Neuron::doCreateNewReceptor(std::vector<double> PosVector) {
     Receptors.push_back(R);
 }
 
-void inn::Neuron::doCreateNewReceptorCluster(double x, double y, double D, TopologyID TID) {
-    double R = D/2, xr = x - R, yr;
+void inn::Neuron::doCreateNewReceptorCluster(const std::vector<double>& PosVector, unsigned R, unsigned C) {
+    double x = PosVector[0];
+    double y = PosVector[1];
+    double xr = x - R, yr;
     int s = 1;
-    switch (TID) {
-        case 0:
-            for (int i = 0; i < 9; i++) {
-                yr = s*sqrt(fabs(R*R-(xr-x)*(xr-x))) + y;
-                doCreateNewReceptor({xr, yr, 5});
-                if (xr == x + R) {
-                    s = -1;
-                }
-                xr += s*(R/2);
-            }
-            break;
-        case 1:
-            yr = y - R;
-            for (int i = 0; i < 36; i++) {
-                doCreateNewReceptor({xr, yr, 10});
-                xr += D / 5;
-                if (xr > x + R) {
-                    yr += D / 5;
-                    xr = x - R;
-                }
-            }
-            break;
-        default:
-            doCreateNewReceptorCluster(x, y, D, 0);
+    for (int i = 0; i < C; i++) {
+        yr = s*sqrt(fabs(R*R-(xr-x)*(xr-x))) + y;
+        doCreateNewReceptor({xr, yr, 0});
+        if (xr == x + R) {
+            s = -1;
+        }
+        xr += s*((double)R/2);
     }
 }
 
@@ -107,11 +90,11 @@ bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, const std
     entry -> second -> doIn(X, t);
     for (auto &e: Entries) {
         if (!e.second->doCheckState(t)) {
-            std::cout << "In to entry of " << Name << " from " << From << " (" << t << ") - not ready" << std::endl;
+//            std::cout << "In to entry of " << Name << " from " << From << " (" << t << ") - not ready" << std::endl;
             return false;
         }
     }
-    std::cout << "In to entry of " << Name << " from " << From << " (" << t << ") - ready" << std::endl;
+//    std::cout << "In to entry of " << Name << " from " << From << " (" << t << ") - ready" << std::endl;
     Pending = true;
     ComputeBackend -> doProcessNeuron((void*)this);
     return true;
@@ -143,7 +126,7 @@ void inn::Neuron::doFinalizeInput(double P) {
     Y = P;
     t++;
     Pending = false;
-    std::cout << "Object processed " << Name << std::endl;
+//    std::cout << "Object processed " << Name << std::endl;
 }
 
 void inn::Neuron::doPrepare() {
