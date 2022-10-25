@@ -156,7 +156,7 @@ void inn::NeuralNet::doSignalProcessStart() {
 #if 0
                 std::cout << "Queue size " << nqueue.size() << std::endl;
                 std::cout << "Resending to queue " << std::get<0>(i) << " " << std::get<1>(i) <<
-                    " " << (nf != Neurons.end()?nf->second->getTime():0) << " " << n->second->getTime() << " " << n->second->isPending() << std::endl;
+                    " " << (nf != Neurons.end()?nf->second->getTime():0) << " " << n->second->getTime() << " " << tt << n->second->isPending() << std::endl;
                 std::this_thread::sleep_for(std::chrono::milliseconds(10));
 #endif
                 nqueue.push(i);
@@ -224,7 +224,7 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
     }
 
     if (!inn::isSynchronizationNeeded()) {
-//        doSignalProcessStart();
+        doSignalProcessStart();
     } else {
 //        doNeuralNetSync();
     }
@@ -240,7 +240,7 @@ std::vector<double> inn::NeuralNet::doSignalTransfer(const std::vector<std::vect
         doNeuralNetSync();
         DataDoneEvent -> doWait();
     } else {
-        doSignalProcessStart();
+//        doSignalProcessStart();
     }
 
     return doSignalReceive();
@@ -285,27 +285,61 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
         auto eto = Ensembles.find(To);
         auto lastname = efrom->second.back();
 
-        std::string numstr, namestr;
-        int p = 1;
-        while (lastname.size() >= p) {
-            auto c = lastname.c_str()[lastname.size()-p];
-            if (c >= 48 && c <= 57) numstr = c + numstr;
-            else break;
-            p++;
+        std::map<std::string, std::string> newnames;
+        for (auto &nn: efrom->second) {
+            std::string nname;
+            if (nn.substr(0, From.size()) == From) {
+                nname = nn;
+                nname.replace(0, From.size(), To);
+            } else nname = To + nn;
+            newnames.insert(std::make_pair(nn, nname));
         }
-        namestr = lastname.substr(0, lastname.size()-p+1);
-        int num = std::stoi(numstr);
-
-        std::cout << namestr << " " << num << std::endl;
 
         for (auto &en: efrom->second) {
             auto n = Neurons.find(en);
             if (n != Neurons.end()) {
-                num++;
                 auto nnew = new inn::Neuron(*n->second);
-                auto nname = namestr+std::to_string(num);
-
+                std::string nname = newnames.find(en)->second;
                 nnew -> setName(nname);
+
+                auto entries = nnew -> getEntries();
+                for (auto &e: entries) {
+                    auto r = newnames.find(e);
+                    if (r != newnames.end()) {
+                        nnew -> doReplaceEntryName(e, r->second);
+                    }
+                    auto ne = Entries.find(e);
+                    if (ne != Entries.end()) {
+                        ne->second.push_back(nname);
+                    }
+                }
+
+                auto outputlinks = nnew -> getLinkOutput();
+                nnew -> doClearOutputLinks();
+                for (auto &o: outputlinks) {
+                    auto r = newnames.find(o);
+                    if (r != newnames.end()) {
+                        nnew -> doLinkOutput(r->second);
+                    } else {
+                        nnew -> doLinkOutput(o);
+                    }
+                }
+
+                auto no = std::find(Outputs.begin(), Outputs.end(), en);
+                if (no != Outputs.end()) Outputs.push_back(nname);
+
+                auto nl = Latencies.find(en);
+                if (nl != Latencies.end()) Latencies.insert(std::make_pair(nname, nl->second));
+
+//                for (auto &e: nnew->getEntries()) {
+//                    std::cout << e << std::endl;
+//                }
+//
+//                for (auto &o: nnew->getLinkOutput()) {
+//                    std::cout << o << std::endl;
+//                }
+
+                Neurons.insert(std::make_pair(nname, nnew));
 
                 if (eto == Ensembles.end()) {
                     enew.push_back(nname);
@@ -317,13 +351,17 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
 
         if (eto == Ensembles.end()) Ensembles.insert(std::make_pair(To, enew));
     }
-    for (const auto& e: Ensembles) {
-        std::cout << e.first << " -";
-        for (const auto& en: e.second) {
-            std::cout << " " << en;
-        }
-        std::cout << std::endl;
-    }
+//    for (const auto& e: Ensembles) {
+//        std::cout << e.first << " -";
+//        for (const auto& en: e.second) {
+//            std::cout << " " << en;
+//        }
+//        std::cout << std::endl;
+//    }
+//    for (const auto& o: Outputs) {
+//        std::cout << o << " ";
+//    }
+//    std::cout << std::endl;
 }
 
 inn::Neuron* inn::NeuralNet::getNeuron(const std::string& NName) {

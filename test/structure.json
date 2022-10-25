@@ -6,27 +6,32 @@
       "size": 10000,
       "dimensions": 3,
       "input_signals": ["E1", "E2"],
+      "ensemble": "A1",
 
       "synapses": [
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         },
         {
           "entry": 1,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         },
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "deactivation"
+          "neurotransmitter": "deactivation",
+          "k1": 1
         },
         {
           "entry": 1,
           "position": [100, 102, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         }
       ],
 
@@ -44,27 +49,32 @@
       "size": 10000,
       "dimensions": 3,
       "input_signals": ["N1", "N6"],
+      "ensemble": "A1",
 
       "synapses": [
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         },
         {
           "entry": 0,
           "position": [100, 101, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         },
         {
           "entry": 0,
           "position": [100, 102, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         },
         {
           "entry": 0,
           "position": [100, 103, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         }
       ],
       "receptors": [
@@ -81,12 +91,14 @@
       "size": 10000,
       "dimensions": 3,
       "input_signals": ["N1", "N6"],
+      "ensemble": "A1",
 
       "synapses": [
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         }
       ],
       "receptors": [
@@ -104,12 +116,14 @@
       "dimensions": 3,
       "input_signals": ["N3", "N5", "N6"],
       "latency": 1,
+      "ensemble": "A1",
 
       "synapses": [
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         }
       ],
       "receptors": [
@@ -132,12 +146,14 @@
       "size": 10000,
       "dimensions": 3,
       "input_signals": ["N2", "N4"],
+      "ensemble": "A1",
 
       "synapses": [
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 2
         }
       ],
       "receptors": [
@@ -161,27 +177,32 @@
       "dimensions": 3,
       "input_signals": ["N2", "N3", "N4"],
       "latency": 2,
+      "ensemble": "A1",
 
       "synapses": [
         {
           "entry": 0,
           "position": [100, 100, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         },
         {
           "entry": 0,
           "position": [100, 101, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         },
         {
           "entry": 0,
           "position": [100, 102, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         },
         {
           "entry": 0,
           "position": [100, 103, 100],
-          "neurotransmitter": "activation"
+          "neurotransmitter": "activation",
+          "k1": 1
         }
       ],
       "receptors": [

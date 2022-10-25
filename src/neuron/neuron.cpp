@@ -23,7 +23,7 @@ inn::Neuron::Neuron() {
 //    ReceptorPositionComputer = nullptr;
 }
 
-inn::Neuron::Neuron(const Neuron &N) {
+inn::Neuron::Neuron(const inn::Neuron &N) {
     t = 0;
     Tlo = N.getTlo();
     Xm = N.getXm();
@@ -31,8 +31,10 @@ inn::Neuron::Neuron(const Neuron &N) {
     Y = 0;
     NID = 0;
     Learned = false;
-    //for (int64_t i = 0; i < N.getEntriesCount(); i++) Entries.push_back(new Entry(*N.getEntry(i)));
+    auto elabels = N.getEntries();
+    for (int64_t i = 0; i < N.getEntriesCount(); i++) Entries.insert(std::make_pair(elabels[i], new Entry(*N.getEntry(i))));
     for (int64_t i = 0; i < N.getReceptorsCount(); i++) Receptors.push_back(new Receptor(*N.getReceptor(i)));
+    Links = N.getLinkOutput();
     //ReceptorPositionComputer = nullptr;
     WTin = N.getWTin();
     WTout = N.getWTout();
@@ -201,6 +203,19 @@ void inn::Neuron::doLinkOutput(const std::string& NName) {
     Links.push_back(NName);
 }
 
+void inn::Neuron::doClearOutputLinks() {
+    Links.clear();
+}
+
+void inn::Neuron::doReplaceEntryName(const std::string& Original, const std::string& New) {
+    auto e = Entries.find(Original);
+    if (e != Entries.end()) {
+        auto entry = e -> second;
+        Entries.erase(e);
+        Entries.insert(std::make_pair(New, entry));
+    }
+}
+
 void inn::Neuron::setTime(int64_t ts) {
     t = ts;
 }
@@ -234,11 +249,11 @@ std::vector<std::string> inn::Neuron::getWaitingEntries() {
     return waiting;
 }
 
-std::vector<std::string>& inn::Neuron::getLinkOutput() {
+std::vector<std::string> inn::Neuron::getLinkOutput() const {
     return Links;
 }
 
-std::vector<std::string> inn::Neuron::getEntries() {
+std::vector<std::string> inn::Neuron::getEntries() const {
     std::vector<std::string> elist;
     for (auto &e: Entries) {
         elist.push_back(e.first);
@@ -246,7 +261,7 @@ std::vector<std::string> inn::Neuron::getEntries() {
     return elist;
 }
 
-inn::Neuron::Entry* inn::Neuron::getEntry(int64_t EID) {
+inn::Neuron::Entry* inn::Neuron::getEntry(int64_t EID) const {
     if (EID >= Entries.size()) {
         throw inn::Error(inn::EX_NEURON_ENTRIES);
     }
