@@ -11,7 +11,7 @@ uint64_t getTimestampMS() {
 }
 
 int main() {
-    inn::setComputeBackend(inn::ComputeBackends::Default, 6);
+    inn::setComputeBackend(inn::ComputeBackends::Multithread, 6);
 
     std::ifstream structure("../../test/structure2.json");
     auto NN = new inn::NeuralNet();

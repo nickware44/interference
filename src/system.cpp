@@ -58,6 +58,7 @@ bool inn::Event::TimedWait(DurationType const& rTimeout) {
     return bRet;
 }
 
+
 bool inn::Event::doWait() {
     bool bRet;
     std::unique_lock<std::mutex> oNotifierLock(m_oMutex);
@@ -80,3 +81,4 @@ bool inn::doNeuralNetSyncWait() {
 void inn::doNeuralNetSync() {
     NNSyncEvent -> doNotifyOne();
 }
+
