@@ -19,7 +19,7 @@ inn::Neuron::Neuron() {
     Y = 0;
     NID = 0;
     Learned = false;
-    Pending = false;
+    State = NotProcessed;
 //    ReceptorPositionComputer = nullptr;
 }
 
@@ -38,7 +38,7 @@ inn::Neuron::Neuron(const inn::Neuron &N) {
     //ReceptorPositionComputer = nullptr;
     WTin = N.getWTin();
     WTout = N.getWTout();
-    Pending = false;
+    State = NotProcessed;
 }
 
 inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::vector<std::string>& InputNames) {
@@ -53,7 +53,7 @@ inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::
         auto *E = new Entry();
         Entries.insert(std::make_pair(i, E));
     }
-    Pending = false;
+    State = NotProcessed;
 }
 
 void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<double> PosVector, double k1, unsigned int Tl) {
@@ -93,6 +93,7 @@ void inn::Neuron::doCreateNewReceptorCluster(const std::vector<double>& PosVecto
 bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, const std::vector<inn::WaveDefinition>& Wv) {
     auto entry = Entries.find(From);
     entry -> second -> doIn(X, t);
+    State = NotProcessed;
     for (auto &e: Entries) {
         if (!e.second->doCheckState(t)) {
 //            std::cout << "In to entry of " << Name << " from " << From << " (" << t << ") - not ready" << std::endl;
@@ -100,13 +101,14 @@ bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, const std
         }
     }
 //    std::cout << "In to entry of " << Name << " from " << From << " (" << t << ") - ready" << std::endl;
-    Pending = true;
+    State = Pending;
     ComputeBackend -> doProcessNeuron((void*)this);
     return true;
 }
 
 std::pair<int64_t, double> inn::Neuron::doSignalReceive() {
     int64_t tr = t;
+    State = Received;
     return std::make_pair(tr, Y);
 }
 
@@ -130,7 +132,7 @@ void inn::Neuron::doCreateCheckpoint() {
 void inn::Neuron::doFinalizeInput(double P) {
     Y = P;
     t++;
-    Pending = false;
+    State = Computed;
 //    std::cout << "Object processed " << Name << std::endl;
 }
 
@@ -332,8 +334,8 @@ std::string inn::Neuron::getName() {
     return Name;
 }
 
-bool inn::Neuron::isPending() const {
-    return Pending;
+int inn::Neuron::getState() const {
+    return State;
 }
 
 inn::Neuron::~Neuron() {
