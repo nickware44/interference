@@ -13,18 +13,21 @@
 
 std::vector<std::queue<void*>> DataQueues;
 std::vector<inn::Event*> Events;
+std::mutex Lock;
 
 inn::ComputeBackendMultithread::ComputeBackendMultithread(int WorkersCount) {
     LastWorker = 0;
     for (int i = 0; i < WorkersCount; i++) {
         Events.emplace_back(new inn::Event());
         DataQueues.emplace_back();
+        //Locks.emplace_back();
         Workers.emplace_back(tWorker, i);
     }
 }
 
 void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
     if (LastWorker >= Workers.size()) LastWorker = 0;
+    std::lock_guard<std::mutex> GLock(Lock);
     DataQueues[LastWorker].push(Object);
     Events[LastWorker] -> doNotifyOne();
     LastWorker++;
@@ -86,6 +89,7 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
 
         //std::cout << "From Thread ID : " << std::this_thread::get_id() << " num: " << n << ", t: " << N->getTime() << std::endl;
         N -> doFinalizeInput(P);
-        inn::doNeuralNetSync();
+        std::lock_guard<std::mutex> GLock(Lock);
+        //inn::doNeuralNetSync();
     }
 }

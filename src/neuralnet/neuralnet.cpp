@@ -231,24 +231,28 @@ void inn::NeuralNet::doSignalProcessStart() {
 
                 if (inn::isSynchronizationNeeded()) {
                     std::vector<std::string> pending_n = pending;
+//                    if (i == begin && pending.size() == 1) {
+//                        auto p = pending_n.back();
+//                        auto ne = Neurons.find(p);
+//                        std::cout << "Checking pending of " << p << " " << (ne!=Neurons.end()?std::to_string(ne->second->getState()):"no") << std::endl;
+//                    }
                     pending.clear();
                     while (!pending_n.empty()) {
                         auto p = pending_n.back();
-//                        std::cout << "Checking pending of " << p << std::endl;
                         pending_n.pop_back();
                         auto ne = Neurons.find(p);
                         if (ne->second->getState() == inn::Neuron::States::Computed) {
                             if (i == end-1) {
                                 end++;
-                                std::cout << "end " << end << std::endl;
+//                                std::cout << "end " << end << std::endl;
                             }
                             auto nlinks = ne -> second -> getLinkOutput();
                             for (auto &nl: nlinks) {
                                 auto nr = ne->second->doSignalReceive().second;
                                 auto nt = ne->second->getTime();
                                 queue.push(std::make_tuple(p, nl, nr, nt));
-                                std::cout  << "(" << ne->second->getTime() << ", " << i << ") " << "Added "
-                                           << p << " -> " << nl << " (" << ne->second->doSignalReceive().second << ")" << std::endl;
+//                                std::cout  << "(" << ne->second->getTime() << ", " << i << ") " << "Added "
+//                                           << p << " -> " << nl << " (" << ne->second->doSignalReceive().second << ")" << std::endl;
                             }
                             //inn::doNeuralNetSyncWait();
                         } else pending.push_back(p);
@@ -268,7 +272,7 @@ void inn::NeuralNet::doSignalProcessStart() {
                 if (n->second->getState() == inn::Neuron::States::Pending || (n->second->getState() == inn::Neuron::States::Computed && !n->second->getLinkOutput().empty()) ||
 //                      (nf != Neurons.end() && !(nf->second->getTime() == n->second->getTime()+1 || nf->second->getTime() == n->second->getTime())))) {
                         (nf != Neurons.end() && !(tt == n->second->getTime()+1 || tt == n->second->getTime()))) {
-#if 0
+#if 1
 //                    if (i == begin) {
                         std::cout << "Queue size " << queue.size() << std::endl;
                         std::cout << "Waiting " << std::get<0>(e) << " " << std::get<1>(e) <<
@@ -325,6 +329,21 @@ void inn::NeuralNet::doSignalProcessStart() {
                     }
                 }
                 //std::cout << "queue " << queue.size() << std::endl;
+            }
+
+            if (i == begin) {
+                if (!pending.empty()) {
+                    auto f = Neurons.find(pending[0]);
+                    auto w = f -> second -> getWaitingEntries();
+                    std::cout << "closing " << i << " queue size " <<  queue.size() << " pending size " << pending.size() <<
+                              " (" << pending[0] << " " << f->second->getState() << " " << w.size() << ")" << std::endl;
+                    for (auto &we: w) {
+                        std::cout << we << " ";
+                        auto x = Neurons.find(we);
+                        std::cout << "state " << x->second->getState();
+                    }
+                    std::cout << std::endl;
+                }
             }
 
             if (queue.empty() && pending.empty() && i == begin) {
