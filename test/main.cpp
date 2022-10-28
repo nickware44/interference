@@ -11,7 +11,7 @@ uint64_t getTimestampMS() {
 }
 
 int main() {
-    inn::setComputeBackend(inn::ComputeBackends::Multithread, 6);
+    inn::setComputeBackend(inn::ComputeBackends::Multithread, 12);
 
     std::ifstream structure("../../test/structure2.json");
     auto NN = new inn::NeuralNet();
@@ -30,6 +30,21 @@ int main() {
     NN -> doReplicateEnsemble("A1", "A13");
     NN -> doReplicateEnsemble("A1", "A14");
     NN -> doReplicateEnsemble("A1", "A15");
+    NN -> doReplicateEnsemble("A1", "A16");
+    NN -> doReplicateEnsemble("A1", "A17");
+    NN -> doReplicateEnsemble("A1", "A18");
+    NN -> doReplicateEnsemble("A1", "A19");
+    NN -> doReplicateEnsemble("A1", "A20");
+    NN -> doReplicateEnsemble("A1", "A21");
+    NN -> doReplicateEnsemble("A1", "A22");
+    NN -> doReplicateEnsemble("A1", "A23");
+    NN -> doReplicateEnsemble("A1", "A24");
+    NN -> doReplicateEnsemble("A1", "A25");
+    NN -> doReplicateEnsemble("A1", "A26");
+    NN -> doReplicateEnsemble("A1", "A27");
+    NN -> doReplicateEnsemble("A1", "A28");
+    NN -> doReplicateEnsemble("A1", "A29");
+    NN -> doReplicateEnsemble("A1", "A30");
 
     std::cout << "Model name  : " << NN->getName() << std::endl;
     std::cout << "Model desc  : " << NN->getDescription() << std::endl;

@@ -46,6 +46,8 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
 }
 
 [[noreturn]] void inn::ComputeBackendMultithread::tWorker(int n) {
+    auto dRPos = new inn::Position(500, 3);
+    auto nRPos = new inn::Position(500, 3);
     while (true) {
         std::unique_lock<std::mutex> lk(DataLines[n]->m);
         while (DataLines[n]->q.isEmpty()) {
@@ -64,9 +66,6 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
         auto Xm = N -> getXm();
         auto DimensionsCount = N -> getDimensionsCount();
         auto RPr = new inn::Position(Xm, {0, 0, 0});
-
-        auto dRPos = new inn::Position(Xm, DimensionsCount);
-        auto nRPos = new inn::Position(Xm, DimensionsCount);
 
         inn::Position *RPos;
 

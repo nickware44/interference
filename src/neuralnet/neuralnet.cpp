@@ -222,45 +222,42 @@ void inn::NeuralNet::doSignalProcessStart() {
             auto &context = ContextCascade[i];
             auto &queue = context.first;
             auto &pending = context.second;
-            if (i == begin)
+            //if (i == begin)
 //                std::cout << "running " << i << " queue size " <<  queue.size() << " pending size " << pending.size() << std::endl;
 //            std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
-            while (!queue.empty() || !pending.empty()) {
-//                std::cout << "entering while" << std::endl;
-
-                if (inn::isSynchronizationNeeded()) {
-                    std::vector<std::string> pending_n = pending;
+            if (inn::isSynchronizationNeeded() && !pending.empty()) {
+                std::vector<std::string> pending_n = pending;
 //                    if (i == begin && pending.size() == 1) {
 //                        auto p = pending_n.back();
 //                        auto ne = Neurons.find(p);
 //                        std::cout << "Checking pending of " << p << " " << (ne!=Neurons.end()?std::to_string(ne->second->getState()):"no") << std::endl;
 //                    }
-                    pending.clear();
-                    while (!pending_n.empty()) {
-                        auto p = pending_n.back();
-                        pending_n.pop_back();
-                        auto ne = Neurons.find(p);
-                        if (ne->second->getState() == inn::Neuron::States::Computed) {
-                            if (i == end-1) {
-                                end++;
-//                                std::cout << "end " << end << std::endl;
-                            }
-                            auto nlinks = ne -> second -> getLinkOutput();
-                            for (auto &nl: nlinks) {
-                                auto nr = ne->second->doSignalReceive().second;
-                                auto nt = ne->second->getTime();
-                                queue.push(std::make_tuple(p, nl, nr, nt));
+                pending.clear();
+                while (!pending_n.empty()) {
+                    auto p = pending_n.back();
+                    pending_n.pop_back();
+                    auto ne = Neurons.find(p);
+                    if (ne->second->getState() == inn::Neuron::States::Computed) {
+                        if (i == end-1) {
+                            end++;
+//                            std::cout << "dw end " << end-begin << std::endl;
+                        }
+                        auto nlinks = ne -> second -> getLinkOutput();
+                        for (auto &nl: nlinks) {
+                            auto nr = ne->second->doSignalReceive().second;
+                            auto nt = ne->second->getTime();
+                            queue.push(std::make_tuple(p, nl, nr, nt));
 //                                std::cout  << "(" << ne->second->getTime() << ", " << i << ") " << "Added "
 //                                           << p << " -> " << nl << " (" << ne->second->doSignalReceive().second << ")" << std::endl;
-                            }
-                            //inn::doNeuralNetSyncWait();
-                        } else pending.push_back(p);
-                    }
+                        }
+                        //inn::doNeuralNetSyncWait();
+                    } else pending.push_back(p);
                 }
+            }
 
-                if (queue.empty()) break;
-
+            while (!queue.empty()) {
+//                std::cout << "entering while" << std::endl;
                 auto e = queue.front();
 
                 auto n = Neurons.find(std::get<1>(e));
@@ -272,7 +269,7 @@ void inn::NeuralNet::doSignalProcessStart() {
                 if (n->second->getState() == inn::Neuron::States::Pending || (n->second->getState() == inn::Neuron::States::Computed && !n->second->getLinkOutput().empty()) ||
 //                      (nf != Neurons.end() && !(nf->second->getTime() == n->second->getTime()+1 || nf->second->getTime() == n->second->getTime())))) {
                         (nf != Neurons.end() && !(tt == n->second->getTime()+1 || tt == n->second->getTime()))) {
-#if 1
+#if 0
 //                    if (i == begin) {
                         std::cout << "Queue size " << queue.size() << std::endl;
                         std::cout << "Waiting " << std::get<0>(e) << " " << std::get<1>(e) <<
@@ -331,41 +328,10 @@ void inn::NeuralNet::doSignalProcessStart() {
                 //std::cout << "queue " << queue.size() << std::endl;
             }
 
-            if (i == begin) {
-                if (!pending.empty()) {
-                    auto f = Neurons.find(pending[0]);
-                    auto w = f -> second -> getWaitingEntries();
-
-//                    if (f->second->getState() == 1) {
-//                        std::cout << "closing " << i << " queue size " <<  queue.size() << " pending size " << pending.size() <<
-//                                  " (" << pending[0] << " " << f->second->getState() << " " << w.size() << ")" << std::endl;
-//                        std::cout << "new run " << begin << " to " << end << " total " << ContextCascade.size() << std::endl;
-//                        auto s = f->second->getState();
-//                        auto nx = f->second;
-//                        auto nxtime = nx->getTime();
-//                        if (nxtime > 1)
-//                            std::cout << " pending lock " << nxtime << std::endl;
-//                    }
-                    for (auto &we: w) {
-                        auto x = Neurons.find(we);
-                        if (x != Neurons.end()) {
-                            if (x->second->getState() == 1) {
-                                std::cout << we << " ";
-                                std::cout << "state " << x->second->getState();
-                                std::cout << "new run " << begin << " to " << end << " total " << ContextCascade.size() << std::endl;
-                                auto s = x->second->getState();
-                                auto nx = x->second;
-                                auto nxtime = nx->getTime();
-                                std::cout << " pending lock " << nxtime << std::endl;
-                            }
-                        }
-                    }
-                }
-            }
-
             if (queue.empty() && pending.empty() && i == begin && begin+1 < end) {
-//                std::cout << "begin " << begin << std::endl;
                 begin++;
+//                end++;
+//                std::cout << "dw " << end-begin << std::endl;
             }
         }
     }
