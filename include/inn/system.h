@@ -47,37 +47,36 @@ namespace inn {
         bool isEmpty();
     private:
         std::queue<Data> Q;
-        std::mutex m_oMutex;
-        std::condition_variable m_oConditionVariable;
+        std::mutex Mutex;
     };
 
     template<typename Data>
     void Queue<Data>::doPush(Data D) {
-        if (inn::isSynchronizationNeeded()) std::unique_lock<std::mutex> lock(m_oMutex);
+//        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(Mutex);
         Q.push(D);
     }
 
     template<typename Data>
     void Queue<Data>::doPop() {
-        if (inn::isSynchronizationNeeded()) std::unique_lock<std::mutex> lock(m_oMutex);
+//        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(Mutex);
         Q.pop();
     }
 
     template<typename Data>
     Data Queue<Data>::getFront() {
-        if (inn::isSynchronizationNeeded()) std::unique_lock<std::mutex> lock(m_oMutex);
+//        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(Mutex);
         return Q.front();
     }
 
     template<typename Data>
     bool Queue<Data>::isEmpty() {
-        if (inn::isSynchronizationNeeded()) std::unique_lock<std::mutex> lock(m_oMutex);
+//        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(Mutex);
         return Q.empty();
     }
 
     template<typename Data>
     long Queue<Data>::getSize() {
-        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(m_oMutex);
+//        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(Mutex);
         return Q.size();
     }
 

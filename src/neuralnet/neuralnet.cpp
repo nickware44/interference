@@ -216,14 +216,14 @@ void inn::NeuralNet::doSignalProcessStart() {
     int64_t begin = 0, end = 1;
     while (begin != end && end <= ContextCascade.size()) {
         //if (inn::isSynchronizationNeeded()) inn::doNeuralNetSyncWait();
-        std::cout << "new run " << begin << " to " << end << " total " << ContextCascade.size() << std::endl;
+//        std::cout << "new run " << begin << " to " << end << " total " << ContextCascade.size() << std::endl;
 
         for (auto i = begin; i < end && i < ContextCascade.size(); i++) {
             auto &context = ContextCascade[i];
             auto &queue = context.first;
             auto &pending = context.second;
             if (i == begin)
-                std::cout << "running " << i << " queue size " <<  queue.size() << " pending size " << pending.size() << std::endl;
+//                std::cout << "running " << i << " queue size " <<  queue.size() << " pending size " << pending.size() << std::endl;
 //            std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
             while (!queue.empty() || !pending.empty()) {
@@ -325,7 +325,7 @@ void inn::NeuralNet::doSignalProcessStart() {
 
                     if (i == end-1) {
                         end++;
-                        std::cout << "end " << end << std::endl;
+//                        std::cout << "end " << end << std::endl;
                     }
                 }
                 //std::cout << "queue " << queue.size() << std::endl;
@@ -335,19 +335,36 @@ void inn::NeuralNet::doSignalProcessStart() {
                 if (!pending.empty()) {
                     auto f = Neurons.find(pending[0]);
                     auto w = f -> second -> getWaitingEntries();
-                    std::cout << "closing " << i << " queue size " <<  queue.size() << " pending size " << pending.size() <<
-                              " (" << pending[0] << " " << f->second->getState() << " " << w.size() << ")" << std::endl;
+
+//                    if (f->second->getState() == 1) {
+//                        std::cout << "closing " << i << " queue size " <<  queue.size() << " pending size " << pending.size() <<
+//                                  " (" << pending[0] << " " << f->second->getState() << " " << w.size() << ")" << std::endl;
+//                        std::cout << "new run " << begin << " to " << end << " total " << ContextCascade.size() << std::endl;
+//                        auto s = f->second->getState();
+//                        auto nx = f->second;
+//                        auto nxtime = nx->getTime();
+//                        if (nxtime > 1)
+//                            std::cout << " pending lock " << nxtime << std::endl;
+//                    }
                     for (auto &we: w) {
-                        std::cout << we << " ";
                         auto x = Neurons.find(we);
-                        std::cout << "state " << x->second->getState();
+                        if (x != Neurons.end()) {
+                            if (x->second->getState() == 1) {
+                                std::cout << we << " ";
+                                std::cout << "state " << x->second->getState();
+                                std::cout << "new run " << begin << " to " << end << " total " << ContextCascade.size() << std::endl;
+                                auto s = x->second->getState();
+                                auto nx = x->second;
+                                auto nxtime = nx->getTime();
+                                std::cout << " pending lock " << nxtime << std::endl;
+                            }
+                        }
                     }
-                    std::cout << std::endl;
                 }
             }
 
-            if (queue.empty() && pending.empty() && i == begin) {
-                std::cout << "begin " << begin << std::endl;
+            if (queue.empty() && pending.empty() && i == begin && begin+1 < end) {
+//                std::cout << "begin " << begin << std::endl;
                 begin++;
             }
         }

@@ -11,25 +11,35 @@
 #include "../../include/inn/neuron.h"
 #include "../../include/inn/system.h"
 
-std::vector<std::queue<void*>> DataQueues;
-std::vector<inn::Event*> Events;
-std::mutex Lock;
+typedef struct data {
+    std::mutex m;
+    std::condition_variable cv;
+    inn::Queue<void*> q;
+} DataLine;
+
+std::vector<DataLine*> DataLines;
 
 inn::ComputeBackendMultithread::ComputeBackendMultithread(int WorkersCount) {
     LastWorker = 0;
     for (int i = 0; i < WorkersCount; i++) {
-        Events.emplace_back(new inn::Event());
-        DataQueues.emplace_back();
-        //Locks.emplace_back();
+        auto d = new DataLine;
+        DataLines.emplace_back(d);
         Workers.emplace_back(tWorker, i);
     }
 }
 
 void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
     if (LastWorker >= Workers.size()) LastWorker = 0;
-    std::lock_guard<std::mutex> GLock(Lock);
-    DataQueues[LastWorker].push(Object);
-    Events[LastWorker] -> doNotifyOne();
+    //std::lock_guard<std::mutex> GLock(Lock);
+//    std::cout << "Got neuron " << Object << std::endl;
+    //std::shared_ptr<void*> threadMsg = std::make_shared<void*>(Object);
+    std::unique_lock<std::mutex> lk(DataLines[LastWorker]->m);
+    DataLines[LastWorker]->q.doPush(Object);
+
+//    std::cout << "Loaded neuron " << g << std::endl;
+
+    DataLines[LastWorker]->cv.notify_one();
+    //Events[LastWorker] -> doNotifyOne();
     LastWorker++;
 //    std::cout << "Pushed object to data queue " << ((inn::Neuron*)Object)->getName()
 //        << " " << ((inn::Neuron*)Object)->getTime() << std::endl;
@@ -37,11 +47,18 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
 
 [[noreturn]] void inn::ComputeBackendMultithread::tWorker(int n) {
     while (true) {
-        if (DataQueues[n].empty()) {
-            Events[n] -> doWait();
+        std::unique_lock<std::mutex> lk(DataLines[n]->m);
+        while (DataLines[n]->q.isEmpty()) {
+            DataLines[n]->cv.wait(lk);
         }
-        auto N = (inn::Neuron*)DataQueues[n].front();
-        DataQueues[n].pop();
+
+        if (DataLines[n]->q.isEmpty()) {
+            continue;
+        }
+
+        auto N = (inn::Neuron*)DataLines[n]->q.getFront();
+
+        DataLines[n]->q.doPop();
 
         double FiSum, D, P = 0;
         auto Xm = N -> getXm();
@@ -89,7 +106,7 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
 
         //std::cout << "From Thread ID : " << std::this_thread::get_id() << " num: " << n << ", t: " << N->getTime() << std::endl;
         N -> doFinalizeInput(P);
-        std::lock_guard<std::mutex> GLock(Lock);
+        //std::lock_guard<std::mutex> GLock(Lock);
         //inn::doNeuralNetSync();
     }
 }
