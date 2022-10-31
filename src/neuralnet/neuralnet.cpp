@@ -15,13 +15,6 @@
 #include "../../include/inn/error.h"
 
 typedef nlohmann::json json;
-//std::queue<std::tuple<std::string, std::string, double, int64_t>> nqueue;
-//inn::Queue<std::tuple<std::string, std::string, double, int64_t>> nqueue;
-std::vector<std::pair<std::queue<std::tuple<std::string, std::string, double, int64_t>>, std::vector<std::string>>> ContextCascade;
-std::map<std::string, inn::Neuron*> Neurons;
-std::map<std::string, int> Latencies;
-inn::Event *DataDoneEvent;
-std::mutex m;
 
 inn::NeuralNet::NeuralNet() {
     EntriesCount = 0;
@@ -214,7 +207,9 @@ void inn::NeuralNet::doReset() {
 
 void inn::NeuralNet::doSignalProcessStart() {
     int64_t begin = 0, end = 1;
-    while (begin != end && end <= ContextCascade.size()) {
+//    std::cout << ContextCascade.size() << std::endl;
+    while (begin < ContextCascade.size()) {
+//    (end > ContextCascade.size() && !ContextCascade.back().first.empty() && !ContextCascade.back().second.empty())) {
         //if (inn::isSynchronizationNeeded()) inn::doNeuralNetSyncWait();
 //        std::cout << "new run " << begin << " to " << end << " total " << ContextCascade.size() << std::endl;
 
@@ -333,10 +328,10 @@ void inn::NeuralNet::doSignalProcessStart() {
 //                end++;
 //                std::cout << "dw " << end-begin << std::endl;
             }
+//            std::cout << "closing " << begin << " " << end << std::endl;
         }
     }
     ContextCascade.clear();
-    if (inn::isSynchronizationNeeded()) DataDoneEvent -> doNotifyOne();
 }
 
 void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
@@ -356,8 +351,6 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
 
     if (!inn::isSynchronizationNeeded()) {
         doSignalProcessStart();
-    } else {
-        //doNeuralNetSync();
     }
 }
 
@@ -368,11 +361,7 @@ std::vector<double> inn::NeuralNet::doSignalTransfer(const std::vector<std::vect
     }
 
     if (inn::isSynchronizationNeeded()) {
-//        doNeuralNetSync();
         doSignalProcessStart();
-        //DataDoneEvent -> doWait();
-    } else {
-//        doSignalProcessStart();
     }
 
     return doSignalReceive();
@@ -385,12 +374,9 @@ void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<double>
         for (auto &X: Xx) {
             doSignalSend(X);
         }
-
         if (inn::isSynchronizationNeeded()) {
-//            doNeuralNetSync();
+             doSignalProcessStart();
         }
-
-        DataDoneEvent -> doWait();
         if (Callback) {
             auto Y = doSignalReceive();
             Callback(Y);

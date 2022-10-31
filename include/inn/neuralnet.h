@@ -31,6 +31,10 @@ namespace inn {
         std::vector<std::string> Outputs;
         void doPrepare();
         void doSignalProcessStart();
+        std::vector<std::pair<std::queue<std::tuple<std::string, std::string, double, int64_t>>, std::vector<std::string>>> ContextCascade;
+        std::map<std::string, inn::Neuron*> Neurons;
+        std::map<std::string, int> Latencies;
+        inn::Event *DataDoneEvent;
     public:
         NeuralNet();
         std::vector<double> doComparePatterns();

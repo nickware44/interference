@@ -29,6 +29,7 @@ inn::ComputeBackendMultithread::ComputeBackendMultithread(int WorkersCount) {
 }
 
 void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
+    std::lock_guard<std::mutex> ProcessLock(m);
     if (LastWorker >= Workers.size()) LastWorker = 0;
     //std::lock_guard<std::mutex> GLock(Lock);
 //    std::cout << "Got neuron " << Object << std::endl;
@@ -46,8 +47,6 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
 }
 
 [[noreturn]] void inn::ComputeBackendMultithread::tWorker(int n) {
-    auto dRPos = new inn::Position(500, 3);
-    auto nRPos = new inn::Position(500, 3);
     while (true) {
         std::unique_lock<std::mutex> lk(DataLines[n]->m);
         while (DataLines[n]->q.isEmpty()) {
@@ -66,6 +65,9 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
         auto Xm = N -> getXm();
         auto DimensionsCount = N -> getDimensionsCount();
         auto RPr = new inn::Position(Xm, {0, 0, 0});
+
+        auto dRPos = new inn::Position(Xm, DimensionsCount);
+        auto nRPos = new inn::Position(Xm, DimensionsCount);
 
         inn::Position *RPos;
 

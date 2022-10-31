@@ -10,6 +10,7 @@
 #define INTERFERENCE_MULTITHREAD_H
 
 #include <thread>
+#include <mutex>
 #include "../computer.h"
 
 #define INN_MULTITHREAD_DEFAULT_NUM 2
@@ -19,6 +20,7 @@ namespace inn {
     private:
         std::vector<std::thread> Workers;
         unsigned int LastWorker;
+        std::mutex m;
 
         [[noreturn]] static void tWorker(int);
     public:
