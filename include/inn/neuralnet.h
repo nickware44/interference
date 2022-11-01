@@ -22,14 +22,10 @@ namespace inn {
     private:
         std::string Name, Description, Version;
         int64_t t;
-        unsigned int EntriesCount;
-        unsigned int LDRCounterE, LDRCounterN;
-        bool DataDone;
         bool Learned;
         std::map<std::string, std::vector<std::string>> Entries;
         std::map<std::string, std::vector<std::string>> Ensembles;
         std::vector<std::string> Outputs;
-        void doPrepare();
         void doSignalProcessStart();
         std::vector<std::pair<std::queue<std::tuple<std::string, std::string, double, int64_t>>, std::vector<std::string>>> ContextCascade;
         std::map<std::string, inn::Neuron*> Neurons;

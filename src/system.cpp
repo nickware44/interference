@@ -11,17 +11,13 @@
 #include "../include/inn/backends/default.h"
 #include "../include/inn/backends/multithread.h"
 
-int CurrentComputeBackend;
+int CurrentComputeBackend, VerbosityLevel = 1;
 bool SynchronizationNeeded;
 inn::Computer *inn::ComputeBackend;
-
-//std::shared_ptr<inn::Event> NNSyncEvent;
-inn::Event *NNSyncEvent;
 
 void inn::setComputeBackend(int Backend, int Parameter) {
     CurrentComputeBackend = Backend;
     delete ComputeBackend;
-    delete NNSyncEvent;
 
     switch (CurrentComputeBackend) {
         case inn::ComputeBackends::Default:
@@ -30,7 +26,6 @@ void inn::setComputeBackend(int Backend, int Parameter) {
             break;
         case inn::ComputeBackends::Multithread:
             SynchronizationNeeded = true;
-            NNSyncEvent = new inn::Event();
             ComputeBackend = new inn::ComputeBackendMultithread(Parameter?Parameter:INN_MULTITHREAD_DEFAULT_NUM);
             break;
     }
@@ -74,11 +69,10 @@ void inn::Event::doNotifyOne() {
     m_oConditionVariable.notify_one();
 }
 
-bool inn::doNeuralNetSyncWait() {
-    return NNSyncEvent->doWait();
+void inn::setVerbosityLevel(int VL) {
+    VerbosityLevel = VL;
 }
 
-void inn::doNeuralNetSync() {
-    NNSyncEvent -> doNotifyOne();
+int inn::getVerbosityLevel() {
+    return VerbosityLevel;
 }
-

@@ -147,7 +147,7 @@ void inn::Neuron::doFinalize() {
     Learned = true;
 }
 
-void inn::Neuron::doReinit() {
+void inn::Neuron::doReset() {
     t = 0;
     for (auto R: Receptors) {
         R -> doReset();

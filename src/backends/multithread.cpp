@@ -14,7 +14,7 @@
 typedef struct data {
     std::mutex m;
     std::condition_variable cv;
-    inn::Queue<void*> q;
+    std::queue<void*> q;
 } DataLine;
 
 std::vector<DataLine*> DataLines;
@@ -31,35 +31,26 @@ inn::ComputeBackendMultithread::ComputeBackendMultithread(int WorkersCount) {
 void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
     std::lock_guard<std::mutex> ProcessLock(m);
     if (LastWorker >= Workers.size()) LastWorker = 0;
-    //std::lock_guard<std::mutex> GLock(Lock);
-//    std::cout << "Got neuron " << Object << std::endl;
-    //std::shared_ptr<void*> threadMsg = std::make_shared<void*>(Object);
     std::unique_lock<std::mutex> lk(DataLines[LastWorker]->m);
-    DataLines[LastWorker]->q.doPush(Object);
-
-//    std::cout << "Loaded neuron " << g << std::endl;
-
+    DataLines[LastWorker]->q.push(Object);
     DataLines[LastWorker]->cv.notify_one();
-    //Events[LastWorker] -> doNotifyOne();
     LastWorker++;
-//    std::cout << "Pushed object to data queue " << ((inn::Neuron*)Object)->getName()
-//        << " " << ((inn::Neuron*)Object)->getTime() << std::endl;
 }
 
 [[noreturn]] void inn::ComputeBackendMultithread::tWorker(int n) {
     while (true) {
         std::unique_lock<std::mutex> lk(DataLines[n]->m);
-        while (DataLines[n]->q.isEmpty()) {
+        while (DataLines[n]->q.empty()) {
             DataLines[n]->cv.wait(lk);
         }
 
-        if (DataLines[n]->q.isEmpty()) {
+        if (DataLines[n]->q.empty()) {
             continue;
         }
 
-        auto N = (inn::Neuron*)DataLines[n]->q.getFront();
+        auto N = (inn::Neuron*)DataLines[n]->q.front();
 
-        DataLines[n]->q.doPop();
+        DataLines[n]->q.pop();
 
         double FiSum, D, P = 0;
         auto Xm = N -> getXm();
@@ -105,9 +96,6 @@ void inn::ComputeBackendMultithread::doProcessNeuron(void* Object) {
         }
         P /= (double)N->getReceptorsCount();
 
-        //std::cout << "From Thread ID : " << std::this_thread::get_id() << " num: " << n << ", t: " << N->getTime() << std::endl;
         N -> doFinalizeInput(P);
-        //std::lock_guard<std::mutex> GLock(Lock);
-        //inn::doNeuralNetSync();
     }
 }

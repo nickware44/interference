@@ -58,7 +58,7 @@ namespace inn {
         void doFinalizeInput(double);
         void doPrepare();
         void doFinalize();
-        void doReinit();
+        void doReset();
         void doCreateCheckpoint();
         inn::Neuron::PatternDefinition doComparePattern() const;
         void doLinkOutput(const std::string&);

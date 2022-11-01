@@ -17,9 +17,9 @@ namespace inn {
     extern inn::Computer *ComputeBackend;
     void setComputeBackend(int Backend, int Parameter = 0);
     int getComputeBackend();
-    bool doNeuralNetSyncWait();
-    void doNeuralNetSync();
     bool isSynchronizationNeeded();
+    void setVerbosityLevel(int);
+    int getVerbosityLevel();
 
     class Event {
     public:
@@ -34,51 +34,6 @@ namespace inn {
         std::condition_variable m_oConditionVariable;
         bool m_bEvent;
     };
-
-    template<typename Data>
-    class Queue {
-    public:
-        Queue() = default;
-        ~Queue()= default;
-        void doPush(Data);
-        void doPop();
-        Data getFront();
-        long getSize();
-        bool isEmpty();
-    private:
-        std::queue<Data> Q;
-        std::mutex Mutex;
-    };
-
-    template<typename Data>
-    void Queue<Data>::doPush(Data D) {
-//        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(Mutex);
-        Q.push(D);
-    }
-
-    template<typename Data>
-    void Queue<Data>::doPop() {
-//        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(Mutex);
-        Q.pop();
-    }
-
-    template<typename Data>
-    Data Queue<Data>::getFront() {
-//        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(Mutex);
-        return Q.front();
-    }
-
-    template<typename Data>
-    bool Queue<Data>::isEmpty() {
-//        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(Mutex);
-        return Q.empty();
-    }
-
-    template<typename Data>
-    long Queue<Data>::getSize() {
-//        if (inn::isSynchronizationNeeded()) std::lock_guard<std::mutex> lock(Mutex);
-        return Q.size();
-    }
 
     typedef enum {Default,
                   Multithread,
