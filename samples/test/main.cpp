@@ -16,7 +16,7 @@ int main() {
     inn::setVerbosityLevel(1);
     inn::setComputeBackend(inn::ComputeBackends::Default);
 
-    std::ifstream structure("../../test/structure.json");
+    std::ifstream structure("../samples/test/structure.json");
     auto NN = new inn::NeuralNet();
     NN -> setStructure(structure);
 
