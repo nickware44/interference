@@ -48,7 +48,7 @@ namespace inn {
         Neuron();
         Neuron(const inn::Neuron&);
         Neuron(unsigned int, unsigned int, int64_t, const std::vector<std::string>& InputSignals);
-        void doCreateNewSynapse(const std::string&, std::vector<double>, double, unsigned int);
+        void doCreateNewSynapse(const std::string&, std::vector<double>, double, int64_t, int);
         void doCreateNewReceptor(std::vector<double>);
         void doCreateNewReceptorCluster(const std::vector<double>& PosVector, unsigned R, unsigned C);
         bool doSignalSendEntry(const std::string&, double, const std::vector<inn::WaveDefinition>&);
@@ -101,7 +101,7 @@ namespace inn {
         Entry();
         Entry(const inn::Neuron::Entry&);
         bool doCheckState(int64_t) const;
-        void doAddSynapse(inn::Position*, unsigned int, double, unsigned int);
+        void doAddSynapse(inn::Position*, unsigned int, double, int64_t, int);
         void doIn(double, int64_t);
         void doProcess();
         void doSendToQueue(double, int64_t, double);
@@ -122,6 +122,7 @@ namespace inn {
         inn::Position* SPos;
         double ok1, ok2, k1, k2;
         double Lambda;
+        int NeurotransmitterType;
         int64_t Tl;
         inn::WaveType WTs;
         double Gamma, dGamma;
@@ -131,7 +132,7 @@ namespace inn {
     public:
         Synapse();
         Synapse(const inn::Neuron::Synapse&);
-        Synapse(inn::Position*, double, double, int64_t);
+        Synapse(inn::Position*, double, double, int64_t, int);
         void doIn(double);
         void doSendToQueue(double, double);
         bool doInFromQueue(int64_t);
@@ -149,6 +150,7 @@ namespace inn {
         inn::WaveType getWTs() const;
         double getGamma() const;
         double getdGamma() const;
+        int getNeurotransmitterType() const;
         int64_t getQSize();
         ~Synapse() = default;
     };

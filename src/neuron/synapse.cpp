@@ -40,7 +40,7 @@ inn::Neuron::Synapse::Synapse(const Synapse &S) {
     QSize = 0;
 }
 
-inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, int64_t _Tl) {
+inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, int64_t _Tl, int NT) {
     SPos = _SPos;
     ok1 = _k1;
     ok2 = ok1 * 9e-1;
@@ -53,6 +53,7 @@ inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, 
     dGamma = 0;
     QCounter = -1;
     QSize = 0;
+    NeurotransmitterType = NT;
 }
 
 void inn::Neuron::Synapse::doIn(double X) {
@@ -143,4 +144,8 @@ double inn::Neuron::Synapse::getdGamma() const {
 
 int64_t inn::Neuron::Synapse::getQSize() {
     return QSize;
+}
+
+int inn::Neuron::Synapse::getNeurotransmitterType() const {
+    return NeurotransmitterType;
 }

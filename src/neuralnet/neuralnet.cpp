@@ -338,6 +338,7 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
     Latencies.clear();
     Neurons.clear();
     Ensembles.clear();
+
     try {
         auto j = json::parse(Str);
         //std::cout << j.dump(4) << std::endl;
@@ -417,8 +418,12 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                 if (jsynapse.value()["tl"] != nullptr) tl = jsynapse.value()["tl"].get<unsigned int>();
                 auto sentryid = jsynapse.value()["entry"].get<unsigned int>();
                 auto sentry = jneuron.value()["input_signals"][sentryid];
-
-                N -> doCreateNewSynapse(sentry, pos, k1, tl);
+                int nt = 0;
+                if (jsynapse.value()["neurotransmitter"] != nullptr) {
+                    if (jsynapse.value()["neurotransmitter"].get<std::string>() == "deactivation")
+                        nt = 1;
+                }
+                N -> doCreateNewSynapse(sentry, pos, k1, tl, nt);
             }
             for (auto &jreceptor: jneuron.value()["receptors"].items()) {
                 std::vector<double> pos;
@@ -463,7 +468,101 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
 }
 
 std::string inn::NeuralNet::getStructure() {
-    return {};
+//    auto j = json::parse(R"({"entries": [],
+//                                            "neurons": [],
+//                                            "output_signals": [],
+//                                            "name": "",
+//                                            "desc": "",
+//                                            "version": ""})");
+
+    json j;
+
+    for (const auto& e: Entries) {
+        j["entries"].push_back(e.first);
+    }
+
+    for (const auto& n: Neurons) {
+        json jn;
+        jn["name"] = n.second -> getName();
+        jn["size"] = n.second -> getXm();
+        jn["dimensions"] = n.second -> getDimensionsCount();
+
+        auto nentries = n.second -> getEntries();
+        for (const auto& ne: nentries) {
+            jn["input_signals"].push_back(ne);
+        }
+        for (const auto& en: Ensembles) {
+            for (const auto& nen: en.second) {
+                if (nen == n.second->getName()) {
+                    jn["ensemble"] = en.first;
+                    break;
+                }
+            }
+        }
+
+        for (int i = 0; i < n.second->getEntriesCount(); i++) {
+            auto ne = n.second -> getEntry(i);
+            for (int s = 0; s < ne->getSynapsesCount(); s++) {
+                auto ns = ne -> getSynapse(s);
+                json js;
+                js["entry"] = i;
+                js["k1"] = ns -> getk1();
+
+                switch (ns->getNeurotransmitterType()) {
+                    case 0:
+                        js["neurotransmitter"] = "activation";
+                        break;
+                    case 1:
+                        js["neurotransmitter"] = "deactivation";
+                        break;
+                }
+
+                for (int p = 0; p < n.second -> getDimensionsCount(); p++) {
+                    js["position"].push_back(ns->getPos()->getPositionValue(p));
+                }
+                jn["synapses"].push_back(js);
+            }
+        }
+
+        for (int r = 0; r < n.second->getReceptorsCount(); r++) {
+            auto nr = n.second ->getReceptor(r);
+            json jr;
+            jr["type"] = "single";
+            for (int p = 0; p < n.second -> getDimensionsCount(); p++) {
+                jr["position"].push_back(nr->getPos0()->getPositionValue(p));
+            }
+            if (nr->isLocked()) {
+                for (int p = 0; p < n.second -> getDimensionsCount(); p++) {
+                    jr["learned_position"].push_back(nr->getPos()->getPositionValue(p));
+                }
+            }
+
+            jn["receptors"].push_back(jr);
+        }
+
+        for (const auto& ne: nentries) {
+            jn["input_signals"].push_back(ne);
+        }
+
+        auto l = Latencies.find(n.second->getName());
+        if (l != Latencies.end()) {
+            jn["latency"] = l->second;
+        }
+
+        j["neurons"].push_back(jn);
+    }
+
+    for (const auto& o: Outputs) {
+        j["output_signals"].push_back(o);
+    }
+
+    j["name"] = Name;
+    j["desc"] = Description;
+    j["version"] = Version;
+
+    std::cout << j.dump(4) << std::endl;
+
+    return j.dump();
 }
 
 std::string inn::NeuralNet::getName() {

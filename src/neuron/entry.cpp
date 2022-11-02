@@ -28,8 +28,8 @@ bool inn::Neuron::Entry::doCheckState(int64_t tn) const {
     return tn == t;
 }
 
-void inn::Neuron::Entry::doAddSynapse(inn::Position *SPos, unsigned int Xm, double k1, unsigned int Tl) {
-	auto *S = new Synapse(SPos, k1, inn::Computer::getLambdaValue(Xm), Tl);
+void inn::Neuron::Entry::doAddSynapse(inn::Position *SPos, unsigned int Xm, double k1, int64_t Tl, int NT) {
+	auto *S = new Synapse(SPos, k1, inn::Computer::getLambdaValue(Xm), Tl, NT);
     Synapses.push_back(S);
 }
 

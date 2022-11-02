@@ -56,13 +56,13 @@ inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::
     State = NotProcessed;
 }
 
-void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<double> PosVector, double k1, unsigned int Tl) {
+void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<double> PosVector, double k1, int64_t Tl, int NT) {
 	if (PosVector.size() != DimensionsCount) {
         throw inn::Error(inn::EX_POSITION_DIMENSIONS);
 	}
     auto nentry = Entries.find(EName);
     if (nentry != Entries.end()) {
-        nentry -> second -> doAddSynapse(new inn::Position(Xm, std::move(PosVector)), Xm, k1, Tl);
+        nentry -> second -> doAddSynapse(new inn::Position(Xm, std::move(PosVector)), Xm, k1, Tl, NT);
     }
 }
 
