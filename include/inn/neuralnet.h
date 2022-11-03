@@ -34,15 +34,20 @@ namespace inn {
     public:
         NeuralNet();
         std::vector<double> doComparePatterns();
-        void doFinalize();
         void doReset();
         void doSignalSend(const std::vector<double>&);
         std::vector<double> doSignalTransfer(const std::vector<std::vector<double>>&);
-        void doSignalTransferAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)> Callback = nullptr);
+        void doSignalTransferAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
+        std::vector<double> doLearn(const std::vector<std::vector<double>>&);
+        std::vector<double> doRecognise(const std::vector<std::vector<double>>&);
+        void doLearnAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
+        void doRecogniseAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
         std::vector<double> doSignalReceive();
         void doReplicateEnsemble(const std::string& From, const std::string& To);
         void setStructure(std::ifstream&);
         void setStructure(const std::string &Str);
+        void setLearned(bool LearnedFlag);
+        bool isLearned();
         std::string getStructure();
         std::string getName();
         std::string getDescription();

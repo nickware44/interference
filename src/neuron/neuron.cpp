@@ -151,10 +151,8 @@ void inn::Neuron::doReset() {
     t = 0;
     for (auto R: Receptors) {
         R -> doReset();
-        R -> doPrepare();
     }
-    OutputSignalQ.clear();
-    doPrepare();
+    //doPrepare();
 }
 
 std::vector<double> inn::Neuron::doCompareCheckpoints() {
@@ -240,6 +238,19 @@ void inn::Neuron::setNID(int _NID) {
 
 void inn::Neuron::setName(const std::string& NName) {
     Name = NName;
+}
+
+void inn::Neuron::setLearned(bool LearnedFlag) {
+    Learned = LearnedFlag;
+
+    if (Learned)
+        for (auto R: Receptors) R -> doLock();
+    else
+        for (auto R: Receptors) R -> doUnlock();
+}
+
+bool inn::Neuron::isLearned() const {
+    return Learned;
 }
 
 std::vector<std::string> inn::Neuron::getWaitingEntries() {

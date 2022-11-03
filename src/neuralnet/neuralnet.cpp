@@ -183,7 +183,6 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
 }
 
 std::vector<double> inn::NeuralNet::doSignalTransfer(const std::vector<std::vector<double>>& Xx) {
-    t = 0;
 
     for (auto &X: Xx) {
         doSignalSend(X);
@@ -196,7 +195,7 @@ std::vector<double> inn::NeuralNet::doSignalTransfer(const std::vector<std::vect
     return doSignalReceive();
 }
 
-void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<double>>& Xx, const std::function<void(std::vector<double>)> Callback) {
+void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<double>>& Xx, const std::function<void(std::vector<double>)>& Callback) {
     t = 0;
 
     std::function<void()> tCallback([this, Xx, Callback] () {
@@ -215,6 +214,30 @@ void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<double>
     });
     std::thread CallbackThread(tCallback);
     CallbackThread.detach();
+}
+
+std::vector<double> inn::NeuralNet::doLearn(const std::vector<std::vector<double>>& Xx) {
+    setLearned(false);
+    doReset();
+    return doSignalTransfer(Xx);
+}
+
+std::vector<double> inn::NeuralNet::doRecognise(const std::vector<std::vector<double>>& Xx) {
+    setLearned(true);
+    doReset();
+    return doSignalTransfer(Xx);
+}
+
+void inn::NeuralNet::doLearnAsync(const std::vector<std::vector<double>>& Xx, const std::function<void(std::vector<double>)>& Callback) {
+    setLearned(false);
+    doReset();
+    doSignalTransferAsync(Xx, Callback);
+}
+
+void inn::NeuralNet::doRecogniseAsync(const std::vector<std::vector<double>>& Xx, const std::function<void(std::vector<double>)>& Callback) {
+    setLearned(true);
+    doReset();
+    doSignalTransferAsync(Xx, Callback);
 }
 
 std::vector<double> inn::NeuralNet::doSignalReceive() {
@@ -306,16 +329,6 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
         }
         std::cout << std::endl;
     }
-}
-
-inn::Neuron* inn::NeuralNet::getNeuron(const std::string& NName) {
-    auto N = Neurons.find(NName);
-    if (N != Neurons.end()) return N->second;
-    return nullptr;
-}
-
-uint64_t inn::NeuralNet::getNeuronCount() {
-    return Neurons.size();
 }
 
 void inn::NeuralNet::setStructure(std::ifstream &Stream) {
@@ -465,6 +478,29 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
     } catch (std::exception &e) {
         if (inn::getVerbosityLevel() > 0) std::cerr << "Error parsing structure: " << e.what() << std::endl;
     }
+}
+
+void inn::NeuralNet::setLearned(bool LearnedFlag) {
+    for (const auto& N: Neurons) {
+        N.second -> setLearned(LearnedFlag);
+    }
+}
+
+bool inn::NeuralNet::isLearned() {
+    for (const auto& N: Neurons) {
+        if (!N.second -> isLearned()) return false;
+    }
+    return true;
+}
+
+inn::Neuron* inn::NeuralNet::getNeuron(const std::string& NName) {
+    auto N = Neurons.find(NName);
+    if (N != Neurons.end()) return N->second;
+    return nullptr;
+}
+
+uint64_t inn::NeuralNet::getNeuronCount() {
+    return Neurons.size();
 }
 
 std::string inn::NeuralNet::getStructure() {

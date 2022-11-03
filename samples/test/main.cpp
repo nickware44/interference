@@ -20,7 +20,7 @@ int main() {
     auto NN = new inn::NeuralNet();
     NN -> setStructure(structure);
 
-    for (int i = 2; i < 100; i++) {
+    for (int i = 2; i < 101; i++) {
         NN -> doReplicateEnsemble("A1", "A"+std::to_string(i));
     }
 
@@ -38,7 +38,7 @@ int main() {
 
     std::cout << "Superstructure test: ";
     auto T = getTimestampMS();
-    auto Y = NN -> doSignalTransfer(X);
+    auto Y = NN -> doLearn(X);
     T = getTimestampMS() - T;
     std::cout << "done [" << T << " ms]" << std::endl;
 
@@ -56,12 +56,11 @@ int main() {
         std::cout << "[PASSED]" << std::endl;
     }
 
-    NN -> doReset();
     std::cout << std::endl;
     std::cout << "Superstructure multithread test: ";
     inn::setComputeBackend(inn::ComputeBackends::Multithread, 6);
     T = getTimestampMS();
-    Y = NN -> doSignalTransfer(X);
+    Y = NN ->doLearn(X);
     T = getTimestampMS() - T;
     std::cout << "done [" << T << " ms]" << std::endl;
 

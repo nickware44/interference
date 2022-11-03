@@ -70,6 +70,8 @@ namespace inn {
         void setk3(double);
         void setNID(int);
         void setName(const std::string&);
+        void setLearned(bool LearnedFlag);
+        bool isLearned() const;
         std::vector<std::string> getLinkOutput() const;
         std::vector<std::string> getEntries() const;
         inn::Neuron::Entry*  getEntry(int64_t) const;
