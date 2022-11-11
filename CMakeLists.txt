@@ -11,6 +11,9 @@ add_library(interference src/neuron/neuron.cpp include/inn/neuron.h
         src/backends/default.cpp include/inn/backends/default.h
         src/backends/multithread.cpp include/inn/backends/multithread.h)
 
+find_package(Threads REQUIRED)
+target_link_libraries(${PROJECT_NAME} Threads::Threads -latomic)
+
 install(TARGETS interference ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/lib)
 
 add_subdirectory(samples/test)
