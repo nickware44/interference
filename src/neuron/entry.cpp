@@ -63,7 +63,8 @@ bool inn::Neuron::Entry::doInFromQueue(int64_t tT) {
 }
 
 void inn::Neuron::Entry::doPrepare() {
-    for (auto S: Synapses) S -> doPrepare();
+    for (auto S: Synapses) S -> doReset();
+    //for (auto S: Synapses) S -> doPrepare();
 }
 
 void inn::Neuron::Entry::doFinalize() {

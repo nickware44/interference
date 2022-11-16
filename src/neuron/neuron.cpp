@@ -152,7 +152,7 @@ void inn::Neuron::doReset() {
     for (auto R: Receptors) {
         R -> doReset();
     }
-    //doPrepare();
+    doPrepare();
 }
 
 std::vector<double> inn::Neuron::doCompareCheckpoints() {
