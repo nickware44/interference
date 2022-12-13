@@ -613,6 +613,18 @@ std::string inn::NeuralNet::getVersion() {
     return Version;
 }
 
+std::vector<inn::Neuron*> inn::NeuralNet::getEnsemble(const std::string& ename) {
+    auto e = Ensembles.find(ename);
+    if (e != Ensembles.end()) {
+        std::vector<inn::Neuron*> neurons;
+        for (const auto& en: e->second) {
+            neurons.push_back(getNeuron(en));
+        }
+        return neurons;
+    }
+    return {};
+}
+
 inn::NeuralNet::~NeuralNet() {
     for (const auto& N: Neurons) delete N.second;
 }

@@ -61,6 +61,8 @@ void inn::ComputeBackendDefault::doProcessNeuron(void* Object) {
         R -> doUpdateSensitivityValue();
     }
     P /= (double)N->getReceptorsCount();
+    delete dRPos;
+    delete nRPos;
 
     N -> doFinalizeInput(P);
 }

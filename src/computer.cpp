@@ -31,7 +31,7 @@ double inn::Computer::doCompareCPFunctionD(std::vector<inn::Position*> CP, std::
 }
 
 double inn::Computer::doCompareFunction(inn::Position *R, inn::Position *Rf) {
-    return 1;//inn::Position::getDistance(R, Rf);
+    return inn::Position::getDistance(R, Rf);
 }
 
 double inn::Computer::getGammaFunctionValue(double oG, double k1, double k2, double Xt) {

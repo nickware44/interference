@@ -52,6 +52,7 @@ namespace inn {
         std::string getName();
         std::string getDescription();
         std::string getVersion();
+        std::vector<inn::Neuron*> getEnsemble(const std::string&);
         inn::Neuron* getNeuron(const std::string&);
         uint64_t getNeuronCount();
         ~NeuralNet();
