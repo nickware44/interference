@@ -25,6 +25,10 @@ inn::NeuralNet::NeuralNet() {
     }
 }
 
+/**
+ * Compare neuron patterns (learning and recognition patterns).
+ * @return
+ */
 std::vector<double> inn::NeuralNet::doComparePatterns() {
     std::vector<double> PDiffR, PDiffL, PDiff;
     for (auto O: Outputs) {
@@ -51,6 +55,9 @@ std::vector<double> inn::NeuralNet::doComparePatterns() {
     return PDiffR;
 }
 
+/**
+ * Resets all neurons in the network.
+ */
 void inn::NeuralNet::doReset() {
     t = 0;
     for (const auto& N: Neurons) N.second -> doReset();
@@ -162,6 +169,10 @@ void inn::NeuralNet::doSignalProcessStart() {
     ContextCascade.clear();
 }
 
+/**
+ * Send signals to neural network.
+ * @param X Input data vector that contain signals for current time.
+ */
 void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
     t++;
     int xi = 0;
@@ -182,6 +193,11 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
     }
 }
 
+/**
+ * Send signals to neural network and get output signals.
+ * @param Xx Input data vector that contain signals.
+ * @return Output signals.
+ */
 std::vector<double> inn::NeuralNet::doSignalTransfer(const std::vector<std::vector<double>>& Xx) {
 
     for (auto &X: Xx) {
@@ -195,6 +211,11 @@ std::vector<double> inn::NeuralNet::doSignalTransfer(const std::vector<std::vect
     return doSignalReceive();
 }
 
+/**
+ * Send signals to neural network asynchronously.
+ * @param Xx Input data vector that contain signals.
+ * @param Callback Callback function for output signals.
+ */
 void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<double>>& Xx, const std::function<void(std::vector<double>)>& Callback) {
     t = 0;
 
@@ -216,30 +237,54 @@ void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<double>
     CallbackThread.detach();
 }
 
+/**
+ * Start neural network learning process.
+ * @param Xx Input data vector that contain signals for learning.
+ * @return Output signals.
+ */
 std::vector<double> inn::NeuralNet::doLearn(const std::vector<std::vector<double>>& Xx) {
     setLearned(false);
     doReset();
     return doSignalTransfer(Xx);
 }
 
+/**
+ * Recognize data by neural network.
+ * @param Xx Input data vector that contain signals for recognizing.
+ * @return Output signals.
+ */
 std::vector<double> inn::NeuralNet::doRecognise(const std::vector<std::vector<double>>& Xx) {
     setLearned(true);
     doReset();
     return doSignalTransfer(Xx);
 }
 
+/**
+ * Start neural network learning process asynchronously.
+ * @param Xx Input data vector that contain signals for learning.
+ * @param Callback Callback function for output signals.
+ */
 void inn::NeuralNet::doLearnAsync(const std::vector<std::vector<double>>& Xx, const std::function<void(std::vector<double>)>& Callback) {
     setLearned(false);
     doReset();
     doSignalTransferAsync(Xx, Callback);
 }
 
+/**
+ * Recognize data by neural network asynchronously.
+ * @param Xx Input data vector that contain signals for recognizing.
+ * @param Callback Callback function for output signals.
+ */
 void inn::NeuralNet::doRecogniseAsync(const std::vector<std::vector<double>>& Xx, const std::function<void(std::vector<double>)>& Callback) {
     setLearned(true);
     doReset();
     doSignalTransferAsync(Xx, Callback);
 }
 
+/**
+ * Get output signals.
+ * @return Output signals vector.
+ */
 std::vector<double> inn::NeuralNet::doSignalReceive() {
     std::vector<double> ny;
     for (const auto& oname: Outputs) {
