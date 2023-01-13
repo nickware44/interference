@@ -147,6 +147,9 @@ void inn::Neuron::doFinalize() {
     Learned = true;
 }
 
+/**
+ * Reset neuron state. During the reset, the neuron parameters (time, receptors, synapses) will be reset to the default state.
+ */
 void inn::Neuron::doReset() {
     t = 0;
     for (auto R: Receptors) {

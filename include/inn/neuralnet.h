@@ -18,6 +18,9 @@
 #include "../../include/inn/system.h"
 
 namespace inn {
+    /**
+     * Main neural net class.
+     */
     class NeuralNet {
     private:
         std::string Name, Description, Version;

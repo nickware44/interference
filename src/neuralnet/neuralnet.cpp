@@ -57,6 +57,7 @@ std::vector<double> inn::NeuralNet::doComparePatterns() {
 
 /**
  * Resets all neurons in the network.
+ * See inn::Neuron::doReset() method for details.
  */
 void inn::NeuralNet::doReset() {
     t = 0;
@@ -294,6 +295,11 @@ std::vector<double> inn::NeuralNet::doSignalReceive() {
     return ny;
 }
 
+/**
+ * Creates full copy of group of neurons.
+ * @param From Source ensemble name.
+ * @param To Name of new ensemble.
+ */
 void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::string& To) {
     std::vector<std::string> enew;
     auto efrom = Ensembles.find(From);
@@ -376,6 +382,10 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
     }
 }
 
+/**
+ * Load neural network structure.
+ * @param Stream Input stream of file that contains neural network structure in JSON format.
+ */
 void inn::NeuralNet::setStructure(std::ifstream &Stream) {
     if (!Stream.is_open()) {
         if (inn::getVerbosityLevel() > 0) std::cerr << "Error opening file" << std::endl;
@@ -390,6 +400,47 @@ void inn::NeuralNet::setStructure(std::ifstream &Stream) {
     setStructure(jstr);
 }
 
+/** \example samples/test/structure.json
+ * Example of interference neural net structure. It can be used by NeuralNet class and inn::NeuralNet::setStructure method.
+ */
+
+/**
+ * Load neural network structure.
+ * @param Str JSON string that contains neural network structure.
+ *
+ * @note
+ * Format of neural network structure:
+ * \code
+ * {
+ *      "entries": [<list of neural network entries>],
+ *      "neurons": [{
+ *          "name": <name of neuron>,
+            "size": <size of neuron>,
+            "dimensions": 3,
+            "input_signals": [<list of input signals, it can be network entries or other neurons>],
+            "ensemble": <the name of the ensemble to which the neuron will be connected>,
+            "synapses": [{
+                "entry": 0,
+                "position": [100, 100, 100],
+                "neurotransmitter": "activation",
+                "k1": 1
+            }],
+            "receptors": [{
+                "type": "cluster",
+                "position": [100, 210, 100],
+                "count": 15,
+                "radius": 10
+            }]
+ *      }],
+ *      "output_signals": [<list of output sources>],
+ *      "name": "neural network structure name",
+ *      "desc": "neural network structure description",
+ *      "version": "neural network structure version"
+ * }
+ * \endcode
+ * <a href="samples_2test_2structure_8json-example.html">Example</a>
+ *
+ */
 void inn::NeuralNet::setStructure(const std::string &Str) {
     Entries.clear();
     Outputs.clear();
@@ -525,12 +576,20 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
     }
 }
 
+/**
+ * Set neural network to `learned` state.
+ * @param LearnedFlag
+ */
 void inn::NeuralNet::setLearned(bool LearnedFlag) {
     for (const auto& N: Neurons) {
         N.second -> setLearned(LearnedFlag);
     }
 }
 
+/**
+ * Check if neural network is in learned state.
+ * @return
+ */
 bool inn::NeuralNet::isLearned() {
     for (const auto& N: Neurons) {
         if (!N.second -> isLearned()) return false;
@@ -538,16 +597,29 @@ bool inn::NeuralNet::isLearned() {
     return true;
 }
 
+/**
+ * Get neuron by name.
+ * @param NName Neuron name.
+ * @return inn::Neuron object pointer.
+ */
 inn::Neuron* inn::NeuralNet::getNeuron(const std::string& NName) {
     auto N = Neurons.find(NName);
     if (N != Neurons.end()) return N->second;
     return nullptr;
 }
 
+/**
+ * Get count of neurons in neural network.
+ * @return Count of neurons.
+ */
 uint64_t inn::NeuralNet::getNeuronCount() {
     return Neurons.size();
 }
 
+/**
+ * Get neural network structure in JSON format.
+ * @return JSON string that contains neural network structure.
+ */
 std::string inn::NeuralNet::getStructure() {
 //    auto j = json::parse(R"({"entries": [],
 //                                            "neurons": [],
@@ -646,18 +718,35 @@ std::string inn::NeuralNet::getStructure() {
     return j.dump();
 }
 
+/**
+ * Get neural network structure name.
+ * @return String that contains name.
+ */
 std::string inn::NeuralNet::getName() {
     return Name;
 }
 
+/**
+ * Get neural network structure description.
+ * @return String that contains description.
+ */
 std::string inn::NeuralNet::getDescription() {
     return Description;
 }
 
+/**
+ * Get neural network structure version.
+ * @return String that contains version.
+ */
 std::string inn::NeuralNet::getVersion() {
     return Version;
 }
 
+/**
+ * Get group of neurons by name.
+ * @param ename Ensemble name.
+ * @return Vector of inn::Neuron object pointers.
+ */
 std::vector<inn::Neuron*> inn::NeuralNet::getEnsemble(const std::string& ename) {
     auto e = Ensembles.find(ename);
     if (e != Ensembles.end()) {
