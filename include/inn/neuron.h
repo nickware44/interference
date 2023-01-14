@@ -43,7 +43,19 @@ namespace inn {
         int State;
         std::string Name;
     public:
-        typedef enum {NotProcessed, Pending, Computed, Received} States;
+        /**
+         * Neuron states.
+         */
+        typedef enum {
+            /// Neuron not processed (initial state).
+            NotProcessed,
+            /// Neuron is processing now.
+            Pending,
+            /// Processing of neuron is done.
+            Computed,
+            ///  Output value has been retrieved at least once.
+            Received
+        } States;
         typedef std::tuple<double, double> PatternDefinition;
         Neuron();
         Neuron(const inn::Neuron&);

@@ -16,19 +16,44 @@
 #include <string>
 
 namespace inn {
-    typedef unsigned int ExceptionType;
-    enum {EX_NEURALNET_NEURONS, EX_NEURALNET_INPUT, EX_NEURALNET_ENTRIES, EX_NEURALNET_NEURON_ENTRIES,
-            EX_NEURALNET_LINKTYPE, EX_NEURON_INPUT, EX_NEURON_ENTRIES, EX_NEURON_RECEPTORS, EX_POSITION_OUT_RANGES, EX_POSITION_RANGES, EX_POSITION_DIMENSIONS};
-
+    /// Error handler class.
     class Error: public std::exception {
-    private:
-        ExceptionType ET;
-        std::vector<double> ED;
     public:
+        typedef unsigned int ExceptionType;
+        /**
+         * Exception types.
+         */
+        typedef enum {
+            /// Out of neuron list.
+            EX_NEURALNET_NEURONS,
+            /// The number of input signals does not match the neural net entries count.
+            EX_NEURALNET_INPUT,
+            /// Out of neural net entries list.
+            EX_NEURALNET_ENTRIES,
+            /// The number of links more than the neuron entries count.
+            EX_NEURALNET_NEURON_ENTRIES,
+            EX_NEURALNET_LINKTYPE,
+            /// The number of input signals does not match the neuron entries count.
+            EX_NEURON_INPUT,
+            /// Out of entry list.
+            EX_NEURON_ENTRIES,
+            /// Out of receptor list.
+            EX_NEURON_RECEPTORS,
+            /// Coordinates out of range.
+            EX_POSITION_OUT_RANGES,
+            /// Not equal coordinates ranges.
+            EX_POSITION_RANGES,
+            /// Not equal space dimensions of positions.
+            EX_POSITION_DIMENSIONS
+        } Exceptions;
+
         Error();
         explicit Error(ExceptionType);
         explicit Error(ExceptionType, std::vector<double>);
         const char* what() const noexcept override;
+    private:
+        ExceptionType ET;
+        std::vector<double> ED;
     };
 }
 

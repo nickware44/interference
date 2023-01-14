@@ -36,7 +36,7 @@ inn::Position::Position(unsigned int _Xm, std::vector<double> _X) {
     X = new double[DimensionsCount];
     for (int i = 0; i < DimensionsCount; i++) {
         if (_X[i] < 0 || _X[i] > Xm) {
-//            throw inn::Error(inn::EX_POSITION_OUT_RANGES, {_X[i], (double)Xm});
+//            throw inn::Error(inn::Error::EX_POSITION_OUT_RANGES, {_X[i], (double)Xm});
         }
         X[i] = _X[i];
     }
@@ -44,30 +44,30 @@ inn::Position::Position(unsigned int _Xm, std::vector<double> _X) {
 
 void inn::Position::doAdd(const inn::Position *P) {
     if (DimensionsCount != P->getDimensionsCount()) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     if (Xm != P->getXm()) {
-        throw inn::Error(inn::EX_POSITION_RANGES);
+        throw inn::Error(inn::Error::EX_POSITION_RANGES);
     }
     for (unsigned int i = 0; i < DimensionsCount; i++) {
         X[i] += P->getPositionValue(i);
         if (X[i] < 0 || X[i] > Xm) {
-//            throw inn::Error(inn::EX_POSITION_OUT_RANGES, {X[i], (double)Xm});
+//            throw inn::Error(inn::Error::EX_POSITION_OUT_RANGES, {X[i], (double)Xm});
         }
     }
 }
 
 void inn::Position::doSubtract(const inn::Position *P) {
     if (DimensionsCount != P->getDimensionsCount()) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     if (Xm != P->getXm()) {
-        throw inn::Error(inn::EX_POSITION_RANGES);
+        throw inn::Error(inn::Error::EX_POSITION_RANGES);
     }
     for (unsigned int i = 0; i < DimensionsCount; i++) {
         X[i] = fabs(X[i]-P->getPositionValue(i));
         if (X[i] < 0 || X[i] > Xm) {
-//            throw inn::Error(inn::EX_POSITION_OUT_RANGES, {X[i], (double)Xm});
+//            throw inn::Error(inn::Error::EX_POSITION_OUT_RANGES, {X[i], (double)Xm});
         }
     }
 }
@@ -82,7 +82,7 @@ void inn::Position::doMultiply(double M) {
     for (unsigned int i = 0; i < DimensionsCount; i++) {
         X[i] *= M;
         if (X[i] < 0 || X[i] > Xm) {
-//            throw inn::Error(inn::EX_POSITION_OUT_RANGES, {X[i], (double)Xm});
+//            throw inn::Error(inn::Error::EX_POSITION_OUT_RANGES, {X[i], (double)Xm});
         }
     }
 }
@@ -93,25 +93,25 @@ void inn::Position::doZeroPosition() {
 
 void inn::Position::setPosition(const inn::Position &P) {
     if (P.getDimensionsCount() < DimensionsCount) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     for (unsigned int i = 0; i < DimensionsCount; i++) X[i] = P.getPositionValue(i);
 }
 
 void inn::Position::setPosition(const inn::Position *P) {
     if (P->getDimensionsCount() < DimensionsCount) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     for (unsigned int i = 0; i < DimensionsCount; i++) X[i] = P -> getPositionValue(i);
 }
 
 void inn::Position::setPosition(std::vector<double> _X) {
     if (_X.size() != DimensionsCount) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     for (int i = 0; i < DimensionsCount; i++) {
         if (_X[i] < 0 || _X[i] > Xm) {
-//            throw inn::Error(inn::EX_POSITION_OUT_RANGES, {_X[i], (double)Xm});
+//            throw inn::Error(inn::Error::EX_POSITION_OUT_RANGES, {_X[i], (double)Xm});
         }
         X[i] = _X[i];
     }
@@ -132,7 +132,7 @@ double inn::Position::getPositionValue(unsigned int DNum) const {
 
 double inn::Position::getDistanceFrom(const inn::Position *P) {
     if (DimensionsCount != P->getDimensionsCount()) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     double D = 0, CValue;
     for (unsigned int i = 0; i < DimensionsCount; i++) {
@@ -158,10 +158,10 @@ inn::Position& inn::Position::operator=(const inn::Position &P) {
 
 const inn::Position inn::operator+(const inn::Position &L, const inn::Position &R) {
 	if (L.getDimensionsCount() != R.getDimensionsCount()) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     if (L.getXm() != R.getXm()) {
-        throw inn::Error(inn::EX_POSITION_RANGES);
+        throw inn::Error(inn::Error::EX_POSITION_RANGES);
     }
     std::vector<double> PV;
     for (unsigned int i = 0; i < L.getDimensionsCount(); i++) {
@@ -172,10 +172,10 @@ const inn::Position inn::operator+(const inn::Position &L, const inn::Position &
 
 const inn::Position inn::operator-(const inn::Position &L, const inn::Position &R) {
     if (L.getDimensionsCount() != R.getDimensionsCount()) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     if (L.getXm() != R.getXm()) {
-        throw inn::Error(inn::EX_POSITION_RANGES);
+        throw inn::Error(inn::Error::EX_POSITION_RANGES);
     }
     std::vector<double> PV;
     for (unsigned int i = 0; i < L.getDimensionsCount(); i++) {
@@ -202,7 +202,7 @@ const inn::Position inn::operator*(const inn::Position &P, double M) {
 
 const double inn::Position::getDistance(const inn::Position &L, const inn::Position &R) {
     if (L.getDimensionsCount() != R.getDimensionsCount()) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     double D = 0;
     for (unsigned int i = 0; i < L.getDimensionsCount(); i++) {
@@ -213,10 +213,10 @@ const double inn::Position::getDistance(const inn::Position &L, const inn::Posit
 
 inn::Position* inn::Position::getSum(const inn::Position *L, const inn::Position *R) {
     if (L->getDimensionsCount() != R->getDimensionsCount()) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     if (L->getXm() != R->getXm()) {
-        throw inn::Error(inn::EX_POSITION_RANGES);
+        throw inn::Error(inn::Error::EX_POSITION_RANGES);
     }
     std::vector<double> PV;
     for (unsigned int i = 0; i < L->getDimensionsCount(); i++) {
@@ -227,10 +227,10 @@ inn::Position* inn::Position::getSum(const inn::Position *L, const inn::Position
 
 inn::Position* inn::Position::getDiff(const inn::Position *L, const inn::Position *R) {
     if (L->getDimensionsCount() != R->getDimensionsCount()) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     if (L->getXm() != R->getXm()) {
-        throw inn::Error(inn::EX_POSITION_RANGES);
+        throw inn::Error(inn::Error::EX_POSITION_RANGES);
     }
     std::vector<double> PV;
     for (unsigned int i = 0; i < L->getDimensionsCount(); i++) {
@@ -257,7 +257,7 @@ inn::Position* inn::Position::getProduct(const inn::Position *P, double M) {
 
 const double inn::Position::getDistance(const inn::Position *L, const inn::Position *R) {
     if (L->getDimensionsCount() != R->getDimensionsCount()) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     double D = 0;
     for (unsigned int i = 0; i < L->getDimensionsCount(); i++) {

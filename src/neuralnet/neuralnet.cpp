@@ -26,8 +26,8 @@ inn::NeuralNet::NeuralNet() {
 }
 
 /**
- * Compare neuron patterns (learning and recognition patterns).
- * @return
+ * Compare neuron patterns (learning and recognition patterns) for all output neurons.
+ * @return Vector of pattern difference values for each output neuron.
  */
 std::vector<double> inn::NeuralNet::doComparePatterns() {
     std::vector<double> PDiffR, PDiffL, PDiff;
@@ -408,7 +408,6 @@ void inn::NeuralNet::setStructure(std::ifstream &Stream) {
  * Load neural network structure.
  * @param Str JSON string that contains neural network structure.
  *
- * @note
  * Format of neural network structure:
  * \code
  * {
@@ -438,7 +437,12 @@ void inn::NeuralNet::setStructure(std::ifstream &Stream) {
  *      "version": "neural network structure version"
  * }
  * \endcode
- * <a href="samples_2test_2structure_8json-example.html">Example</a>
+ *
+ *
+ * @note
+ * Example of neural network structure can be found in the samples:
+ * <a href="samples_2test_2structure_8json-example.html">test sample</a>,
+ * <a href="samples_2test_2structure_8json-example.html">vision sample</a>
  *
  */
 void inn::NeuralNet::setStructure(const std::string &Str) {

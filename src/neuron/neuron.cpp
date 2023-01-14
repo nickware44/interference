@@ -56,9 +56,17 @@ inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::
     State = NotProcessed;
 }
 
+/**
+ * Create new synapse.
+ * @param EName Entry name to connect synapse.
+ * @param PosVector Synapse position.
+ * @param k1 Neurotransmitter intensity value.
+ * @param Tl Reserved. Must be 0.
+ * @param NT Neurotransmitter type.
+ */
 void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<double> PosVector, double k1, int64_t Tl, int NT) {
 	if (PosVector.size() != DimensionsCount) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
 	}
     auto nentry = Entries.find(EName);
     if (nentry != Entries.end()) {
@@ -66,15 +74,25 @@ void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<doubl
     }
 }
 
+/**
+ * Create new receptor.
+ * @param PosVector Start position of receptor.
+ */
 void inn::Neuron::doCreateNewReceptor(std::vector<double> PosVector) {
 //    std::cout << PosVector.size() << " " << DimensionsCount << std::endl;
     if (PosVector.size() != DimensionsCount) {
-        throw inn::Error(inn::EX_POSITION_DIMENSIONS);
+        throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
     }
     auto *R = new Receptor(new inn::Position(Xm, std::move(PosVector)), 1);
     Receptors.push_back(R);
 }
 
+/**
+ * Create receptor cluster.
+ * @param PosVector Position of center of receptor cluster,
+ * @param R Cluster radius.
+ * @param C Count of receptors in cluster.
+ */
 void inn::Neuron::doCreateNewReceptorCluster(const std::vector<double>& PosVector, unsigned R, unsigned C) {
     double x = PosVector[0];
     double y = PosVector[1];
@@ -106,6 +124,10 @@ bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, const std
     return true;
 }
 
+/**
+ * Get signal element for current time.
+ * @return
+ */
 std::pair<int64_t, double> inn::Neuron::doSignalReceive() {
     int64_t tr = t;
     State = Received;
@@ -136,6 +158,9 @@ void inn::Neuron::doFinalizeInput(double P) {
 //    std::cout << "Object processed " << Name << std::endl;
 }
 
+/**
+ * Prepare synapses for new signal.
+ */
 void inn::Neuron::doPrepare() {
     for (auto E: Entries) E.second -> doPrepare();
 }
@@ -176,6 +201,10 @@ std::vector<double> inn::Neuron::doCompareCheckpoints() {
     return Result;
 }
 
+/**
+ * Compare neuron patterns (learning and recognition patterns).
+ * @return Pattern difference value.
+ */
 inn::Neuron::PatternDefinition inn::Neuron::doComparePattern() const {
     inn::Position *RPos, *RPosf;
     double Result = 0;
@@ -210,6 +239,11 @@ void inn::Neuron::doClearOutputLinks() {
     Links.clear();
 }
 
+/**
+ * Relink neuron by replacing entry name.
+ * @param Original Name of entry to rename.
+ * @param New New name of entry.
+ */
 void inn::Neuron::doReplaceEntryName(const std::string& Original, const std::string& New) {
     auto e = Entries.find(Original);
     if (e != Entries.end()) {
@@ -219,10 +253,18 @@ void inn::Neuron::doReplaceEntryName(const std::string& Original, const std::str
     }
 }
 
+/**
+ * Set time.
+ * @param ts Time.
+ */
 void inn::Neuron::setTime(int64_t ts) {
     t = ts;
 }
 
+/**
+ * Set neurotransmitter intensity for all synapses.
+ * @param _k1
+ */
 void inn::Neuron::setk1(double _k1) {
     for (auto E: Entries) E.second -> setk1(_k1);
 }
@@ -243,6 +285,10 @@ void inn::Neuron::setName(const std::string& NName) {
     Name = NName;
 }
 
+/**
+ * Set neuron to `learned` state
+ * @param LearnedFlag `Learned` state flag.
+ */
 void inn::Neuron::setLearned(bool LearnedFlag) {
     Learned = LearnedFlag;
 
@@ -252,6 +298,10 @@ void inn::Neuron::setLearned(bool LearnedFlag) {
         for (auto R: Receptors) R -> doUnlock();
 }
 
+/**
+ * Check if neuron is in `learned` state.
+ * @return Neuron state.
+ */
 bool inn::Neuron::isLearned() const {
     return Learned;
 }
@@ -279,42 +329,71 @@ std::vector<std::string> inn::Neuron::getEntries() const {
 
 inn::Neuron::Entry* inn::Neuron::getEntry(int64_t EID) const {
     if (EID >= Entries.size()) {
-        throw inn::Error(inn::EX_NEURON_ENTRIES);
+        throw inn::Error(inn::Error::EX_NEURON_ENTRIES);
     }
     auto it = Entries.begin();
     std::advance(it, EID);
     return it->second;
 }
 
+/**
+ * Get receptor by index.
+ * @param RID Receptor index.
+ * @return inn::Neuron::Receptor object pointer.
+ */
 inn::Neuron::Receptor* inn::Neuron::getReceptor(int64_t RID) const {
     if (RID >= Receptors.size()) {
-        throw inn::Error(inn::EX_NEURON_RECEPTORS);
+        throw inn::Error(inn::Error::EX_NEURON_RECEPTORS);
     }
     return Receptors[RID];
 }
 
+/**
+ * Get count of neuron entries.
+ * @return Entry count.
+ */
 int64_t inn::Neuron::getEntriesCount() const {
     return Entries.size();
 }
 
+/**
+ * Get count of neuron synapses.
+ * @return Synapse count.
+ */
 unsigned int inn::Neuron::getSynapsesCount() const {
     unsigned int SSum = 0;
     for (auto E: Entries) SSum += E.second -> getSynapsesCount();
     return SSum;
 }
 
+/**
+ * Get count of neuron receptors.
+ * @return Receptor count.
+ */
 int64_t inn::Neuron::getReceptorsCount() const {
     return Receptors.size();
 }
 
+/**
+ * Get current time.
+ * @return Time value.
+ */
 int64_t inn::Neuron::getTime() const {
     return t;
 }
 
+/**
+ * Get neuron space size.
+ * @return Neuron space size value.
+ */
 unsigned int inn::Neuron::getXm() const {
     return Xm;
 }
 
+/**
+ * Get count of neuron dimensions.
+ * @return Count of dimensions.
+ */
 unsigned int inn::Neuron::getDimensionsCount() const {
     return DimensionsCount;
 }
@@ -344,10 +423,18 @@ int inn::Neuron::getNID() const {
     return NID;
 }
 
+/**
+ * Get neuron name.
+ * @return Neuron name.
+ */
 std::string inn::Neuron::getName() {
     return Name;
 }
 
+/**
+ * Get current state of neuron.
+ * @return Neuron state.
+ */
 int inn::Neuron::getState() const {
     return State;
 }
