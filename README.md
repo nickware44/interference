@@ -1,18 +1,27 @@
-# interference
-Cross-platform C++ library - universal neurobiology-based machine learning framework.
+<p align="center">
+  <img width="750" height="200" src="https://nickware.group/repository/products/inn/logo.png"><br><br>
+Cross-platform C++ library - universal neurobiology-based machine learning framework.<br>
+Version 2.0.0
+</p>
 
-Version 1.1.0
 
 ----------------------------------------------------------------
 ### PLATFORMS
-- Windows (MinGW) (x86)
-- Linux (x86, ARM)
+|             | x86 | armle.v7 |   |
+|:-----------:|:---:|:--------:|:---:|
+| **Windows** |  +  |          |   |
+|  **Linux**  |  +  |    +     |   |
+|   **QNX**   |  +  |    +     |   |
+
+----------------------------------------------------------------
+### COMPUTING
+- Native CPU (single thread)
+- Native CPU (multithread)
 
 ----------------------------------------------------------------
 ### REQUIREMENTS
 - CMake 3.12 or newer
 - g++ 7.4.0 or newer (MinGW under Windows)
-- [LodePNG library](https://github.com/lvandeve/lodepng) (for building inn_vision example only)
 
 ----------------------------------------------------------------
 ### LICENCE
@@ -79,25 +88,4 @@ Now you can run example using this commands:
 > ./%SAMPLE_NAME%_sample
 ```
 
-----------------------------------------------------------------
-### RELEASE NOTES
-#### 1.1.0
-- Interference library performance increased about 15 times
-- Added multithreading support for multicore CPUs
-- Added experimental support of ARM architecture
-- Added ultimate example of image recognition system
-- Exceptions raised by inn::Error class are more informative now
-- Added doCheckSignal(), doResetSignalController(), getSignal() and getTime() methods for inn::NeuralNet::Link class
-- Fixed doAddNeuron(...) method in inn::NeuralNet class (now allowed feedback links)
-- Added doComparePatterns() and getNeuronCount() methods for inn::NeuralNet class
-- Added new modes of neuron link definition: LinkDefinitionRange and LinkDefinitionRangeNext
-- Now getEntries() and getReceptors() methods in inn::Neuron are named as getEntry(...) and getReceptor(...)
-- Added doPrepare(), setk1(...) and setk2(...) methods for inn::Neuron, inn::Neuron::Entry and inn::Neuron::Synaps classes
-- Added setNeurotransmitterType(...) method for inn::Neuron::Entry and inn::Neuron::Synaps classes
-- Added getQSize() method for inn::Neuron::Synaps class
-- Added setk3(...) and getdFi() methods for inn::Neuron::Receptor class
-- Added getReceptorInfluenceValue(...) and getSynapticSensitivityValue(...) static methods for inn::Neuron::System class
-- Added new arithmetic operations methods for inn::Position class
-- Added doZeroPosition() and getDistanceFrom(...) methods for inn::Position class
 
-Release notes for all releases can be found in RELEASES.md file.
