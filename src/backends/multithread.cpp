@@ -11,18 +11,13 @@
 #include "../../include/inn/neuron.h"
 #include "../../include/inn/system.h"
 
-typedef struct data {
-    std::mutex m;
-    std::condition_variable cv;
-    std::queue<void*> q;
-} DataLine;
 
-std::vector<DataLine*> DataLines;
+std::vector<inn::DataLine*> DataLines;
 
 inn::ComputeBackendMultithread::ComputeBackendMultithread(int WorkersCount) {
     LastWorker = 0;
     for (int i = 0; i < WorkersCount; i++) {
-        auto d = new DataLine;
+        auto d = new inn::DataLine;
         DataLines.emplace_back(d);
         Workers.emplace_back(tWorker, i);
     }

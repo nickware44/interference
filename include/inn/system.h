@@ -15,11 +15,48 @@
 
 namespace inn {
     extern inn::Computer *ComputeBackend;
-    void setComputeBackend(int Backend, int Parameter = 0);
-    int getComputeBackend();
-    bool isSynchronizationNeeded();
-    void setVerbosityLevel(int);
-    int getVerbosityLevel();
+
+    class System {
+    public:
+        static bool isSynchronizationNeeded();
+
+        /**
+        * Set compute backend.
+        * @param Backend Compute backend value.
+        * @param Parameter Custom parameter.
+        */
+        static void setComputeBackend(int Backend, int Parameter = 0);
+
+        /**
+         * Set library verbosity level.
+         * @param VL New verbosity level value.
+         */
+        static void setVerbosityLevel(int);
+
+        /**
+         * Get current compute backend.
+         * @return Current compute value.
+         */
+        static int getComputeBackend();
+
+        /**
+         * Get current verbosity level.
+         * @return Verbosity level value.
+         */
+        static int getVerbosityLevel();
+
+        /**
+         * Compute backends enum.
+         */
+        typedef enum {
+            /// Native CPU compute backend.
+            Default,
+            /// Native CPU multithread compute backend. You can set the number of threads by `parameter` argument of setComputeBackend method.
+            Multithread,
+            /// OpenCL compute backend.
+            OpenCL
+        } ComputeBackends;
+    };
 
     class Event {
     public:
@@ -34,10 +71,6 @@ namespace inn {
         std::condition_variable m_oConditionVariable;
         bool m_bEvent;
     };
-
-    typedef enum {Default,
-                  Multithread,
-                  OpenCLGPU} ComputeBackends;
 
 
 }

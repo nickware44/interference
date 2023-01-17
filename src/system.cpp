@@ -15,28 +15,36 @@ int CurrentComputeBackend, VerbosityLevel = 1;
 bool SynchronizationNeeded;
 inn::Computer *inn::ComputeBackend;
 
-void inn::setComputeBackend(int Backend, int Parameter) {
+void inn::System::setComputeBackend(int Backend, int Parameter) {
     CurrentComputeBackend = Backend;
     delete ComputeBackend;
 
     switch (CurrentComputeBackend) {
-        case inn::ComputeBackends::Default:
+        case inn::System::ComputeBackends::Default:
             SynchronizationNeeded = false;
             ComputeBackend = new inn::ComputeBackendDefault();
             break;
-        case inn::ComputeBackends::Multithread:
+        case inn::System::ComputeBackends::Multithread:
             SynchronizationNeeded = true;
             ComputeBackend = new inn::ComputeBackendMultithread(Parameter?Parameter:INN_MULTITHREAD_DEFAULT_NUM);
             break;
     }
 }
 
-int inn::getComputeBackend() {
+int inn::System::getComputeBackend() {
     return CurrentComputeBackend;
 }
 
-bool inn::isSynchronizationNeeded() {
+bool inn::System::isSynchronizationNeeded() {
     return SynchronizationNeeded;
+}
+
+void inn::System::setVerbosityLevel(int VL) {
+    VerbosityLevel = VL;
+}
+
+int inn::System::getVerbosityLevel() {
+    return VerbosityLevel;
 }
 
 template<typename DurationType>
@@ -53,7 +61,6 @@ bool inn::Event::TimedWait(DurationType const& rTimeout) {
     return bRet;
 }
 
-
 bool inn::Event::doWait() {
     bool bRet;
     std::unique_lock<std::mutex> oNotifierLock(m_oMutex);
@@ -67,12 +74,4 @@ void inn::Event::doNotifyOne() {
     std::unique_lock<std::mutex> oNotifierLock(m_oMutex);
     m_bEvent = true;
     m_oConditionVariable.notify_one();
-}
-
-void inn::setVerbosityLevel(int VL) {
-    VerbosityLevel = VL;
-}
-
-int inn::getVerbosityLevel() {
-    return VerbosityLevel;
 }

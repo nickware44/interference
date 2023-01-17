@@ -20,7 +20,7 @@ inn::NeuralNet::NeuralNet() {
     t = 0;
     Learned = false;
 
-    if (inn::isSynchronizationNeeded()) {
+    if (inn::System::isSynchronizationNeeded()) {
         DataDoneEvent = new inn::Event();
     }
 }
@@ -74,7 +74,7 @@ void inn::NeuralNet::doSignalProcessStart() {
             auto &queue = context.first;
             auto &pending = context.second;
 
-            if (inn::isSynchronizationNeeded() && !pending.empty()) {
+            if (inn::System::isSynchronizationNeeded() && !pending.empty()) {
                 std::vector<std::string> pending_n = pending;
                 pending.clear();
                 while (!pending_n.empty()) {
@@ -90,7 +90,7 @@ void inn::NeuralNet::doSignalProcessStart() {
                             auto nr = ne->second->doSignalReceive().second;
                             auto nt = ne->second->getTime();
                             queue.push(std::make_tuple(p, nl, nr, nt));
-                            if (inn::getVerbosityLevel() > 3) {
+                            if (inn::System::getVerbosityLevel() > 3) {
                                 std::cout << "(" << ne->second->getTime() << ", " << i << ") " << "Added "
                                           << p << " -> " << nl << " (" << ne->second->doSignalReceive().second << ")"
                                           << std::endl;
@@ -111,7 +111,7 @@ void inn::NeuralNet::doSignalProcessStart() {
                 if (n->second->getState() == inn::Neuron::States::Pending || (n->second->getState() == inn::Neuron::States::Computed && !n->second->getLinkOutput().empty()) ||
                         (nf != Neurons.end() && !(tt == n->second->getTime()+1 || tt == n->second->getTime()))) {
 
-                    if (inn::getVerbosityLevel() > 3) {
+                    if (inn::System::getVerbosityLevel() > 3) {
                         std::cout << "Queue size " << queue.size() << std::endl;
                         std::cout << "Waiting " << std::get<0>(e) << " " << std::get<1>(e) <<
                                   " " << (nf != Neurons.end() ? nf->second->getTime() : 0) << " "
@@ -125,7 +125,7 @@ void inn::NeuralNet::doSignalProcessStart() {
 
                 queue.pop();
 
-                if (inn::getVerbosityLevel() > 2) {
+                if (inn::System::getVerbosityLevel() > 2) {
                     std::cout << "(" << tt << ", " << i << ") " << std::get<0>(e) << " -> "
                               << std::get<1>(e) << " (" << (nf != Neurons.end() ? nf->second->getTime() : 0) << "-"
                               << n->second->getTime()
@@ -189,7 +189,7 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
 
     ContextCascade.emplace_back(q, p);
 
-    if (!inn::isSynchronizationNeeded()) {
+    if (!inn::System::isSynchronizationNeeded()) {
         doSignalProcessStart();
     }
 }
@@ -205,7 +205,7 @@ std::vector<double> inn::NeuralNet::doSignalTransfer(const std::vector<std::vect
         doSignalSend(X);
     }
 
-    if (inn::isSynchronizationNeeded()) {
+    if (inn::System::isSynchronizationNeeded()) {
         doSignalProcessStart();
     }
 
@@ -225,7 +225,7 @@ void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<double>
             doSignalSend(X);
         }
 
-        if (inn::isSynchronizationNeeded()) {
+        if (inn::System::isSynchronizationNeeded()) {
              doSignalProcessStart();
         }
 
@@ -367,7 +367,7 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
         if (eto == Ensembles.end()) Ensembles.insert(std::make_pair(To, enew));
     }
 
-    if (inn::getVerbosityLevel() > 1) {
+    if (inn::System::getVerbosityLevel() > 1) {
         auto e = Ensembles.find(To);
         std::cout << e->first << " -";
         for (const auto& en: e->second) {
@@ -388,7 +388,7 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
  */
 void inn::NeuralNet::setStructure(std::ifstream &Stream) {
     if (!Stream.is_open()) {
-        if (inn::getVerbosityLevel() > 0) std::cerr << "Error opening file" << std::endl;
+        if (inn::System::getVerbosityLevel() > 0) std::cerr << "Error opening file" << std::endl;
         return;
     }
     std::string jstr;
@@ -474,14 +474,14 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
             auto l = links.equal_range(ename);
             for (auto it = l.first; it != l.second; it++) {
                 elinks.push_back(it->second);
-                if (inn::getVerbosityLevel() > 1) std::cout << ename << " -> " << it->second << std::endl;
+                if (inn::System::getVerbosityLevel() > 1) std::cout << ename << " -> " << it->second << std::endl;
             }
             Entries.insert(std::make_pair(ename, elinks));
         }
 
         for (auto &joutput: j["output_signals"].items()) {
             auto oname = joutput.value().get<std::string>();
-            if (inn::getVerbosityLevel() > 1) std::cout <<  "Output " << oname << std::endl;
+            if (inn::System::getVerbosityLevel() > 1) std::cout <<  "Output " << oname << std::endl;
             Outputs.push_back(oname);
         }
 
@@ -495,7 +495,7 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
             auto ndimensions = jneuron.value()["dimensions"].get<unsigned int>();
             if (jneuron.value()["latency"] != nullptr) {
                 auto nlatency = jneuron.value()["latency"].get<int>();
-                if (inn::getVerbosityLevel() > 1) std::cout << nname << " with latency " << nlatency << std::endl;
+                if (inn::System::getVerbosityLevel() > 1) std::cout << nname << " with latency " << nlatency << std::endl;
                 Latencies.insert(std::make_pair(nname, nlatency));
             }
             std::vector<std::string> nentries;
@@ -559,14 +559,14 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
             auto l = links.equal_range(nname);
             for (auto it = l.first; it != l.second; it++) {
                 N -> doLinkOutput(it->second);
-                if (inn::getVerbosityLevel() > 1) std::cout << nname << " -> " << it->second << std::endl;
+                if (inn::System::getVerbosityLevel() > 1) std::cout << nname << " -> " << it->second << std::endl;
             }
 
             N -> setName(nname);
             Neurons.insert(std::make_pair(nname, N));
         }
 
-        if (inn::getVerbosityLevel() > 1) {
+        if (inn::System::getVerbosityLevel() > 1) {
             for (const auto &e: Ensembles) {
                 std::cout << e.first << " -";
                 for (const auto &en: e.second) {
@@ -576,7 +576,7 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
             }
         }
     } catch (std::exception &e) {
-        if (inn::getVerbosityLevel() > 0) std::cerr << "Error parsing structure: " << e.what() << std::endl;
+        if (inn::System::getVerbosityLevel() > 0) std::cerr << "Error parsing structure: " << e.what() << std::endl;
     }
 }
 

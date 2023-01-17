@@ -11,13 +11,22 @@
 
 #include <thread>
 #include <mutex>
+#include <condition_variable>
 #include "../computer.h"
 
 #define INN_MULTITHREAD_DEFAULT_NUM 2
 
 namespace inn {
+    /// \private
+    typedef struct data {
+        std::mutex m;
+        std::condition_variable cv;
+        std::queue<void*> q;
+    } DataLine;
+
     class ComputeBackendMultithread : public Computer {
     private:
+
         std::vector<std::thread> Workers;
         unsigned int LastWorker;
         std::mutex m;
