@@ -36,8 +36,6 @@ inn::Neuron::Neuron(const inn::Neuron &N) {
     for (int64_t i = 0; i < N.getReceptorsCount(); i++) Receptors.push_back(new Receptor(*N.getReceptor(i)));
     Links = N.getLinkOutput();
     //ReceptorPositionComputer = nullptr;
-    WTin = N.getWTin();
-    WTout = N.getWTout();
     State = NotProcessed;
 }
 
@@ -108,7 +106,7 @@ void inn::Neuron::doCreateNewReceptorCluster(const std::vector<double>& PosVecto
     }
 }
 
-bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, const std::vector<inn::WaveDefinition>& Wv) {
+bool inn::Neuron::doSignalSendEntry(const std::string& From, double X) {
     auto entry = Entries.find(From);
     entry -> second -> doIn(X, t);
     State = NotProcessed;
@@ -396,23 +394,6 @@ unsigned int inn::Neuron::getXm() const {
  */
 unsigned int inn::Neuron::getDimensionsCount() const {
     return DimensionsCount;
-}
-
-inn::WaveType inn::Neuron::getWTin() const {
-    return WTin;
-}
-
-inn::WaveType inn::Neuron::getWTout() const {
-    return WTout;
-}
-
-inn::WaveDefinition inn::Neuron::getWave() const {
-    double WV = 0;
-    if (WTout != inn::WaveType::NOWAVE && t > 1000) {
-        auto PD = doComparePattern();
-        //WV = 1 / std::get<0>(PD);
-    }
-    return std::pair<inn::WaveType, double>(WTout, WV);
 }
 
 int64_t inn::Neuron::getTlo() const {

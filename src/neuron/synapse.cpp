@@ -18,7 +18,6 @@ inn::Neuron::Synapse::Synapse() {
     k2 = 0;
     Lambda = 0;
     Tl = 0;
-    WTs = inn::WaveType::NOWAVE;
     Gamma = 0;
     dGamma = 0;
     QCounter = -1;
@@ -33,7 +32,6 @@ inn::Neuron::Synapse::Synapse(const Synapse &S) {
     k2 = ok2;
     Lambda = S.getLambda();
     Tl = S.getTl();
-    WTs = S.getWTs();
     Gamma = S.getGamma();
     dGamma = S.getdGamma();
     QCounter = -1;
@@ -48,7 +46,6 @@ inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, 
 	k2 = ok2;
     Lambda = _Lambda;
     Tl = _Tl;
-    WTs = inn::WaveType::NOWAVE;
     Gamma = 0;
     dGamma = 0;
     QCounter = -1;
@@ -106,10 +103,6 @@ void inn::Neuron::Synapse::setLambda(double L) {
     Lambda = L;
 }
 
-void inn::Neuron::Synapse::setWTs(inn::WaveType _WTs) {
-    WTs = _WTs;
-}
-
 inn::Position* inn::Neuron::Synapse::getPos() const {
     return SPos;
 }
@@ -128,10 +121,6 @@ double inn::Neuron::Synapse::getLambda() const {
 
 int64_t inn::Neuron::Synapse::getTl() const {
     return Tl;
-}
-
-inn::WaveType inn::Neuron::Synapse::getWTs() const {
-    return WTs;
 }
 
 double inn::Neuron::Synapse::getGamma() const {

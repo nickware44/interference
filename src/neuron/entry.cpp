@@ -86,10 +86,6 @@ void inn::Neuron::Entry::setk2(double _k2) {
     for (auto S: Synapses) S -> setk2(_k2);
 }
 
-void inn::Neuron::Entry::setWTs(inn::WaveType _WTs) {
-    for (auto S: Synapses) S -> setWTs(_WTs);
-}
-
 inn::Neuron::Synapse* inn::Neuron::Entry::getSynapse(int64_t SID) const {
     return Synapses[SID];
 }

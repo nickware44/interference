@@ -19,8 +19,6 @@
 
 namespace inn {
     typedef unsigned int TopologyID;
-    enum class WaveType: int {NOWAVE = -1, WAVETYPE1, WAVETYPE2, WAVETYPE3};
-    typedef std::pair<inn::WaveType, double> WaveDefinition;
 
     class Neuron {
     private:
@@ -37,7 +35,6 @@ namespace inn {
         int NID;
         bool Learned;
         std::vector<double> OutputSignalQ;
-        inn::WaveType WTin, WTout;
         std::vector<double> doCompareCheckpoints();
         double LastWVSum;
         int State;
@@ -63,7 +60,7 @@ namespace inn {
         void doCreateNewSynapse(const std::string&, std::vector<double>, double, int64_t, int);
         void doCreateNewReceptor(std::vector<double>);
         void doCreateNewReceptorCluster(const std::vector<double>& PosVector, unsigned R, unsigned C);
-        bool doSignalSendEntry(const std::string&, double, const std::vector<inn::WaveDefinition>&);
+        bool doSignalSendEntry(const std::string&, double);
         std::pair<int64_t, double> doSignalReceive();
         double doSignalReceive(int64_t);
         bool doCheckOutputSignalQ(int64_t);
@@ -95,9 +92,6 @@ namespace inn {
         int64_t getTime() const;
         unsigned int getXm() const;
         unsigned int getDimensionsCount() const;
-        inn::WaveType getWTin() const;
-        inn::WaveType getWTout() const;
-        inn::WaveDefinition getWave() const;
         int64_t getTlo() const;
         int getNID() const;
         std::string getName();
@@ -123,7 +117,6 @@ namespace inn {
         void doPrepare();
         void doFinalize();
         void doClearSignal();
-        void setWTs(inn::WaveType);
         void setk1(double);
         void setk2(double);
         inn::Neuron::Synapse* getSynapse(int64_t) const;
@@ -138,7 +131,6 @@ namespace inn {
         double Lambda;
         int NeurotransmitterType;
         int64_t Tl;
-        inn::WaveType WTs;
         double Gamma, dGamma;
         long long QCounter;
         std::vector<double> GammaQ;
@@ -155,13 +147,11 @@ namespace inn {
         void setk1(double);
         void setk2(double);
         void setLambda(double);
-        void setWTs(inn::WaveType);
         inn::Position* getPos() const;
         double getk1() const;
         double getk2() const;
         double getLambda() const;
         int64_t getTl() const;
-        inn::WaveType getWTs() const;
         double getGamma() const;
         double getdGamma() const;
         int getNeurotransmitterType() const;

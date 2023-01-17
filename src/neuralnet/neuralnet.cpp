@@ -139,12 +139,12 @@ void inn::NeuralNet::doSignalProcessStart() {
                     for (auto &we: waiting) {
                         auto nfrom = Latencies.find(we);
                         if (nfrom != Latencies.end() && nfrom->second > latency && std::get<0>(e) != we) {
-                            n -> second -> doSignalSendEntry(we, 0, {});
+                            n -> second -> doSignalSendEntry(we, 0);
                         }
                     }
                 }
 
-                auto done = n -> second -> doSignalSendEntry(std::get<0>(e), std::get<2>(e), {});
+                auto done = n -> second -> doSignalSendEntry(std::get<0>(e), std::get<2>(e));
 
                 if (done) {
                     if (n->second->getState() == inn::Neuron::States::Pending) {
