@@ -1,7 +1,7 @@
 # Getting started
 
 <p align="center">
-  <img width="750" height="200" src="https://nickware.group/repository/products/inn/logo.png"><br><br>
+  <img src="https://nickware.group/repository/products/inn/logo.png"><br><br>
 </p>
 
 
