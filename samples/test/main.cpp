@@ -81,5 +81,7 @@ int main() {
     std::cout << std::endl;
     std::cout << "Tests passed: [" << TestDoneCount << "/" << TestTotalCount << "]" << std::endl;
     delete NN;
+
+    if (!PassedFlag) return 1;
     return 0;
 }
