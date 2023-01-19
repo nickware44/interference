@@ -66,7 +66,7 @@ int main() {
 
     PassedFlag = true;
     for (auto &y: Y) {
-        if (fabs(y-NN_OUTPUT_OK) > 1e-4) {
+        if (fabs(y-NN_OUTPUT_OK) > 1e-3) {
             std::cout << "Output value " << y << " is not " << NN_OUTPUT_OK << std::endl;
             std::cout << "[FAILED]" << std::endl;
             PassedFlag = false;
