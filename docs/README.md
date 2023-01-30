@@ -6,11 +6,12 @@
 
 
 ## Platforms
-|             | x86 | armle.v7 |   |
-|:-----------:|:---:|:--------:|:---:|
-| **Windows** |  +  |          |   |
-|  **Linux**  |  +  |    +     |   |
-|   **QNX**   |  +  |    +     |   |
+|                                | x86 | armle.v7 | PowerPC | e2k | MIPS |
+|:------------------------------:|:---:|:--------:|:-------:|:---:|:----:|
+|          **Windows**           |  +  |          |         |     |      |
+|           **Linux**            |  +  |    +     |         |     |      |
+|            **QNX**             |  +  |    +     |         |     |      |
+| **Secured RTOS KPDA 10964-01** |  +  |    +     |    +    |  +  |  +   |
 
 
 ## Computing
@@ -20,7 +21,7 @@
 
 ## Requirements
 - CMake 3.12 or newer
-- g++ 7.4.0 or newer (MinGW under Windows)
+- g++ 4.8.3 or newer (MinGW under Windows)
 
 ----------------------------------------------------------------
 ## Building library and samples
