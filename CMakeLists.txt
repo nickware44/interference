@@ -17,3 +17,4 @@ target_link_libraries(${PROJECT_NAME} Threads::Threads -latomic)
 install(TARGETS interference ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/lib)
 
 add_subdirectory(samples/test)
+add_subdirectory(samples/vision)
