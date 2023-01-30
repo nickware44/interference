@@ -360,7 +360,7 @@ int64_t inn::Neuron::getEntriesCount() const {
  */
 unsigned int inn::Neuron::getSynapsesCount() const {
     unsigned int SSum = 0;
-    for (auto E: Entries) SSum += E.second -> getSynapsesCount();
+    for (const auto& E: Entries) SSum += E.second -> getSynapsesCount();
     return SSum;
 }
 
