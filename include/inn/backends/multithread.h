@@ -26,7 +26,6 @@ namespace inn {
 
     class ComputeBackendMultithread : public Computer {
     private:
-
         std::vector<std::thread> Workers;
         unsigned int LastWorker;
         std::mutex m;

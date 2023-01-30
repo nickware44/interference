@@ -175,6 +175,7 @@ void inn::NeuralNet::doSignalProcessStart() {
  * @param X Input data vector that contain signals for current time.
  */
 void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
+    if (inn::System::getComputeBackendKind() == -1) inn::System::setComputeBackend(inn::System::ComputeBackends::Default);
     t++;
     int xi = 0;
     std::queue<std::tuple<std::string, std::string, double, int64_t>> q;

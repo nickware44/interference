@@ -14,8 +14,6 @@
 #include "computer.h"
 
 namespace inn {
-    extern inn::Computer *ComputeBackend;
-
     class System {
     public:
         static bool isSynchronizationNeeded();
@@ -35,9 +33,15 @@ namespace inn {
 
         /**
          * Get current compute backend.
-         * @return Current compute value.
+         * @return Pointer of current compute backend object.
          */
-        static int getComputeBackend();
+        static inn::Computer* getComputeBackend();
+
+        /**
+         * Get current compute backend.
+         * @return ID of current compute backend.
+         */
+        static int getComputeBackendKind();
 
         /**
          * Get current verbosity level.

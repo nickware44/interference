@@ -11,9 +11,9 @@
 #include "../include/inn/backends/default.h"
 #include "../include/inn/backends/multithread.h"
 
-int CurrentComputeBackend, VerbosityLevel = 1;
+int CurrentComputeBackend = -1, VerbosityLevel = 1;
 bool SynchronizationNeeded;
-inn::Computer *inn::ComputeBackend;
+inn::Computer *ComputeBackend;
 
 void inn::System::setComputeBackend(int Backend, int Parameter) {
     CurrentComputeBackend = Backend;
@@ -31,7 +31,11 @@ void inn::System::setComputeBackend(int Backend, int Parameter) {
     }
 }
 
-int inn::System::getComputeBackend() {
+inn::Computer* inn::System::getComputeBackend() {
+    return ComputeBackend;
+}
+
+int inn::System::getComputeBackendKind() {
     return CurrentComputeBackend;
 }
 

@@ -54,7 +54,7 @@ inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, 
 }
 
 void inn::Neuron::Synapse::doIn(double X) {
-    double nGamma = ComputeBackend->getGammaFunctionValue(Gamma, k1, k2, X);
+    double nGamma = inn::Computer::getGammaFunctionValue(Gamma, k1, k2, X);
     dGamma = nGamma - Gamma;
     Gamma = nGamma;
 }
