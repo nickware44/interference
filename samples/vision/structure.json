@@ -23,13 +23,13 @@
           "k1": 1
         },
         {
-          "entry": 0,
+          "entry": 2,
           "position": [100, 100, 100],
           "neurotransmitter": "deactivation",
           "k1": 1
         },
         {
-          "entry": 1,
+          "entry": 3,
           "position": [100, 102, 100],
           "neurotransmitter": "activation",
           "k1": 1
@@ -60,19 +60,19 @@
           "k1": 1
         },
         {
-          "entry": 0,
+          "entry": 1,
           "position": [100, 101, 100],
           "neurotransmitter": "activation",
           "k1": 1
         },
         {
-          "entry": 0,
+          "entry": 2,
           "position": [100, 102, 100],
           "neurotransmitter": "activation",
           "k1": 1
         },
         {
-          "entry": 0,
+          "entry": 3,
           "position": [100, 103, 100],
           "neurotransmitter": "activation",
           "k1": 1
@@ -154,19 +154,13 @@
           "entry": 0,
           "position": [100, 100, 100],
           "neurotransmitter": "activation",
-          "k1": 2
+          "k1": 0.00001
         }
       ],
       "receptors": [
         {
           "type": "cluster",
-          "position": [100, 210, 100],
-          "count": 15,
-          "radius": 10
-        },
-        {
-          "type": "cluster",
-          "position": [100, 211, 100],
+          "position": [100, 100, 100],
           "count": 15,
           "radius": 10
         }

@@ -31,7 +31,7 @@ inn::NeuralNet::NeuralNet() {
  */
 std::vector<double> inn::NeuralNet::doComparePatterns() {
     std::vector<double> PDiffR, PDiffL, PDiff;
-    for (auto O: Outputs) {
+    for (const auto& O: Outputs) {
         auto n = Neurons.find(O);
         if (n == Neurons.end()) break;
         auto P = n -> second -> doComparePattern();
@@ -43,13 +43,13 @@ std::vector<double> inn::NeuralNet::doComparePatterns() {
 
     double PDLMin = PDiffL[std::distance(PDiffL.begin(), std::min_element(PDiffL.begin(), PDiffL.end()))];
     double PDLMax = PDiffL[std::distance(PDiffL.begin(), std::max_element(PDiffL.begin(), PDiffL.end()))] - PDLMin;
-
+    std::cout << PDRMin << " " << PDRMax << " " << PDLMin << " " << PDLMax << std::endl;
 //    for (auto &PDR: PDiffR) {
 //        PDR = 1 - (PDR-PDRMin) / PDRMax;
 //    }
     for (auto &PDL: PDiffL) {
         PDL = 1 - (PDL-PDLMin) / PDLMax;
-        //std::cout << PDL << std::endl;
+//        std::cout << PDL << std::endl;
     }
     for (auto i = 0; i < Outputs.size(); i++) {
         PDiff.push_back((PDiffR[i]+PDiffL[i])/2);

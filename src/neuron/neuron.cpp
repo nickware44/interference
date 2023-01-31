@@ -211,19 +211,19 @@ inn::Neuron::PatternDefinition inn::Neuron::doComparePattern() const {
         if (R->isLocked()) {
             RPos = R -> getPos();
             RPosf = R -> getPosf();
-            //std::cout << RPos->getPositionValue(0) << ", " <<  RPos->getPositionValue(1) << ", " <<  RPos->getPositionValue(2) << std::endl;
-            //std::cout << RPosf->getPositionValue(0) << ", " <<  RPosf->getPositionValue(1) << ", " <<  RPosf->getPositionValue(2) << std::endl;
+            std::cout << Name << " " << RPos->getPositionValue(0) << ", " <<  RPos->getPositionValue(1) << ", " <<  RPos->getPositionValue(2) << std::endl;
+            std::cout << RPosf->getPositionValue(0) << ", " <<  RPosf->getPositionValue(1) << ", " <<  RPosf->getPositionValue(2) << std::endl;
             double Rc = inn::Computer::doCompareFunction(RPos, RPosf);
-            //double Lc = fabs(R->getL()-R->getLf());
+            double Lc = fabs(R->getL()-R->getLf());
 //            std::cout << R->getL() << std::endl;
 //            std::cout << R->getLf() << std::endl;
             Result += Rc;
-            //ResultL += Lc;
+            ResultL += Lc;
         }
     }
     //std::cout << "=====" << std::endl;
     Result /= Receptors.size();
-    //ResultL /= Receptors.size();
+    ResultL /= Receptors.size();
     //std::cout << ResultL << std::endl;
     //std::cout << "=====" << std::endl;
     return inn::Neuron::PatternDefinition(Result, ResultL);

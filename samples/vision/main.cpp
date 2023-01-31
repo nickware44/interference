@@ -18,15 +18,15 @@ uint64_t getTimestampMS() {
             time_since_epoch()).count();
 }
 
-std::vector<std::vector<double>> doPerformInputVector(std::vector<BMPImage> &images) {
+std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &images) {
     std::vector<std::vector<double>> input;
     for (int d = 0; d < images[0].size(); d+=8) {
         input.emplace_back();
         for (int i = 0; i < images.size(); i++) {
             for (int s = 0; s < 8; s++) {
-                input.back().emplace_back((double)images[i][d+s][0]);
-                input.back().emplace_back((double)images[i][d+s][1]);
-                input.back().emplace_back((double)images[i][d+s][2]);
+                input.back().emplace_back(images[i][d+s][0]/255.);
+                input.back().emplace_back(images[i][d+s][1]/255.);
+                input.back().emplace_back(images[i][d+s][2]/255.);
             }
         }
     }
@@ -70,7 +70,7 @@ int main() {
         }
     }
     T = getTimestampMS() - T;
-    auto input = doPerformInputVector(images);
+    auto input = doBuildInputVector(images);
     std::cout << "Images load done [" << T << " ms]" << std::endl;
 
     // teach the neural network
@@ -83,8 +83,12 @@ int main() {
     for (int b = 1; b <= TEST_COUNT; b++) {
         std::cout << "===========================" << std::endl;
         auto image = doReadBMP(IMAGES_TESTING_PATH+std::to_string(b)+".bmp");
+        std::vector<BMPImage> rimages;
+        for (int i = 1; i <= TEST_COUNT; i++) rimages.push_back(image);
+        auto rinput = doBuildInputVector(rimages);
+
         T = getTimestampMS();
-        NN -> doRecognise(input);
+        NN -> doRecognise(rinput);
         auto patterns = NN -> doComparePatterns();
         T = getTimestampMS() - T;
 
