@@ -9,7 +9,6 @@
 
 #include <cstdint>
 #include <chrono>
-#include <fstream>
 #include "inn/system.h"
 #include "inn/neuralnet.h"
 #include "bmp.hpp"
@@ -19,61 +18,79 @@ uint64_t getTimestampMS() {
             time_since_epoch()).count();
 }
 
-unsigned char* ReadBMP(char* filename)
-{
-    int i;
-    FILE* f = fopen(filename, "rb");
-
-    if(f == NULL)
-        throw "Argument Exception";
-
-    unsigned char info[54];
-    fread(info, sizeof(unsigned char), 54, f); // read the 54-byte header
-
-    // extract image height and width from header
-    int width = *(int*)&info[18];
-    int height = *(int*)&info[22];
-
-    std::cout << std::endl;
-    std::cout << "  Name: " << filename << std::endl;
-    std::cout << " Width: " << width << std::endl;
-    std::cout << "Height: " << height << std::endl;
-
-    int row_padded = (width*3 + 3) & (~3);
-    unsigned char* data = new unsigned char[row_padded];
-    unsigned char tmp;
-    int x = 0;
-    for(int i = 0; i < height; i++)
-    {
-        fread(data, sizeof(unsigned char), row_padded, f);
-        x = 0;
-        for(int j = 0; j < width*3; j += 3)
-        {
-            x++;
-            // Convert (B, G, R) to (R, G, B)
-            tmp = data[j];
-            data[j] = data[j+2];
-            data[j+2] = tmp;
-
-            std::cout << i+1 << "x" << x <<  " R: "<< (int)data[j] << " G: " << (int)data[j+1]<< " B: " << (int)data[j+2]<< std::endl;
+std::vector<std::vector<double>> doPerformInputVector(std::vector<BMPImage> &images) {
+    std::vector<std::vector<double>> input;
+    for (int d = 0; d < images[0].size(); d+=8) {
+        input.emplace_back();
+        for (int i = 0; i < images.size(); i++) {
+            for (int s = 0; s < 8; s++) {
+                input.back().emplace_back((double)images[i][d+s][0]);
+                input.back().emplace_back((double)images[i][d+s][1]);
+                input.back().emplace_back((double)images[i][d+s][2]);
+            }
         }
     }
-
-    fclose(f);
-    return data;
+    return input;
 }
 
 int main() {
     inn::System::setVerbosityLevel(1);
+    //inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 6);
 
-    std::ifstream structure("../samples/vision/structure.json");
+    constexpr uint8_t LEARNING_COUNT = 10;
+    constexpr uint8_t TEST_COUNT = 10;
+    constexpr char STRUCTURE_PATH[128] = "../samples/vision/structure.json";
+    constexpr char IMAGES_LEARNING_PATH[128] = "../samples/vision/images/learn/";
+    constexpr char IMAGES_TESTING_PATH[128] = "../samples/vision/images/test/";
+
+    // load neural network structure from file
+    std::ifstream structure(STRUCTURE_PATH);
     auto NN = new inn::NeuralNet();
     NN -> setStructure(structure);
+
+    for (int i = 2; i <= LEARNING_COUNT; i++) {
+        NN -> doReplicateEnsemble("A1", "A"+std::to_string(i));
+    }
 
     std::cout << "Model name  : " << NN->getName() << std::endl;
     std::cout << "Model desc  : " << NN->getDescription() << std::endl;
     std::cout << "Model ver   : " << NN->getVersion() << std::endl;
+    std::cout << "Neuron count: " << NN->getNeuronCount() << std::endl;
     std::cout << std::endl;
 
-    ReadBMP("../samples/vision/images/1.bmp");
+    // load the images
+    auto T = getTimestampMS();
+    std::vector<BMPImage> images;
+    for (int b = 1; b <= LEARNING_COUNT; b++) {
+        auto image = doReadBMP(IMAGES_LEARNING_PATH+std::to_string(b)+".bmp");
+        images.push_back(image);
+        if (image.size() != 128*128) {
+            std::cout << "Error loading image " << b << ".bmp" << std::endl;
+            return 1;
+        }
+    }
+    T = getTimestampMS() - T;
+    auto input = doPerformInputVector(images);
+    std::cout << "Images load done [" << T << " ms]" << std::endl;
+
+    // teach the neural network
+    T = getTimestampMS();
+    NN -> doLearn(input);
+    T = getTimestampMS() - T;
+    std::cout << "Learning done [" << T << " ms]" << std::endl;
+
+    // recognize the images
+    for (int b = 1; b <= TEST_COUNT; b++) {
+        std::cout << "===========================" << std::endl;
+        auto image = doReadBMP(IMAGES_TESTING_PATH+std::to_string(b)+".bmp");
+        T = getTimestampMS();
+        NN -> doRecognise(input);
+        auto patterns = NN -> doComparePatterns();
+        T = getTimestampMS() - T;
+
+        std::cout << "Recognition done [" << T << " ms]" << std::endl;
+        std::cout << std::endl;
+        std::cout << "Difference for outputs:" << std::endl;
+        for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
+    }
 }
