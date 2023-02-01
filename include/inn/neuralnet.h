@@ -46,7 +46,7 @@ namespace inn {
         void doLearnAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
         void doRecogniseAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
         std::vector<double> doSignalReceive();
-        void doReplicateEnsemble(const std::string& From, const std::string& To);
+        void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);
         void setStructure(std::ifstream&);
         void setStructure(const std::string &Str);
         void setLearned(bool LearnedFlag);

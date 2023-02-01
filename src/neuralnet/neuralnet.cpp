@@ -229,7 +229,7 @@ void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<double>
         }
 
         if (inn::System::isSynchronizationNeeded()) {
-             doSignalProcessStart();
+            doSignalProcessStart();
         }
 
         if (Callback) {
@@ -302,8 +302,10 @@ std::vector<double> inn::NeuralNet::doSignalReceive() {
  * Creates full copy of group of neurons.
  * @param From Source ensemble name.
  * @param To Name of new ensemble.
+ * @param CopyEntries Copy entries during replication. So, if neuron `A1N1` (ensemble `A1`) has an entry `A1E1`
+ * and you replicating to ensemble `A2`, a new entry `A2E1` will be added.
  */
-void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::string& To) {
+void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries) {
     std::vector<std::string> enew;
     auto efrom = Ensembles.find(From);
 
@@ -330,13 +332,25 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
 
                 auto entries = nnew -> getEntries();
                 for (auto &e: entries) {
+                    std::string ename = e;
                     auto r = newnames.find(e);
                     if (r != newnames.end()) {
                         nnew -> doReplaceEntryName(e, r->second);
+                    } else if (CopyEntries) {
+                        if (e.substr(0, From.size()) == From) {
+                            ename = e;
+                            ename.replace(0, From.size(), To);
+                        } else ename = To + e;
+                        nnew -> doReplaceEntryName(e, ename);
                     }
-                    auto ne = Entries.find(e);
+
+                    auto ne = Entries.find(ename);
                     if (ne != Entries.end()) {
                         ne->second.push_back(nname);
+                    } else if (CopyEntries && r == newnames.end()) {
+                        std::vector<std::string> elinks;
+                        elinks.push_back(nname);
+                        Entries.insert(std::make_pair(ename, elinks));
                     }
                 }
 
@@ -372,6 +386,11 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
 
     if (inn::System::getVerbosityLevel() > 1) {
         auto e = Ensembles.find(To);
+        std::cout << "Entries: ";
+        for (const auto& ne: Entries) {
+            std::cout << ne.first << " ";
+        }
+        std::cout << std::endl;
         std::cout << e->first << " -";
         for (const auto& en: e->second) {
             std::cout << " " << en;
@@ -700,10 +719,6 @@ std::string inn::NeuralNet::getStructure() {
             jn["receptors"].push_back(jr);
         }
 
-        for (const auto& ne: nentries) {
-            jn["input_signals"].push_back(ne);
-        }
-
         auto l = Latencies.find(n.second->getName());
         if (l != Latencies.end()) {
             jn["latency"] = l->second;
@@ -720,7 +735,9 @@ std::string inn::NeuralNet::getStructure() {
     j["desc"] = Description;
     j["version"] = Version;
 
-    std::cout << j.dump(4) << std::endl;
+    if (inn::System::getVerbosityLevel() > 2) {
+        std::cout << j.dump(4) << std::endl;
+    }
 
     return j.dump();
 }

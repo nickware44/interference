@@ -49,7 +49,7 @@ int main() {
     NN -> setStructure(structure);
 
     // replicate neurons for classification
-    for (int i = 2; i <= LEARNING_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i));
+    for (int i = 2; i <= LEARNING_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
 
     std::cout << "Model name  : " << NN->getName() << std::endl;
     std::cout << "Model desc  : " << NN->getDescription() << std::endl;
