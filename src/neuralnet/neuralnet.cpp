@@ -43,7 +43,7 @@ std::vector<double> inn::NeuralNet::doComparePatterns() {
 
     double PDLMin = PDiffL[std::distance(PDiffL.begin(), std::min_element(PDiffL.begin(), PDiffL.end()))];
     double PDLMax = PDiffL[std::distance(PDiffL.begin(), std::max_element(PDiffL.begin(), PDiffL.end()))] - PDLMin;
-    std::cout << PDRMin << " " << PDRMax << " " << PDLMin << " " << PDLMax << std::endl;
+//    std::cout << PDRMin << " " << PDRMax << " " << PDLMin << " " << PDLMax << std::endl;
 //    for (auto &PDR: PDiffR) {
 //        PDR = 1 - (PDR-PDRMin) / PDRMax;
 //    }

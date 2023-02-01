@@ -4,7 +4,7 @@
   "neurons": [
     {
       "name": "N1",
-      "size": 10000,
+      "size": 1000,
       "dimensions": 3,
       "input_signals": ["E1", "E2", "E3", "E4", "E5", "E6"],
       "ensemble": "A1",
@@ -12,34 +12,46 @@
       "synapses": [
         {
           "entry": 0,
-          "position": [100, 100, 100],
+          "position": [200, 100, 0],
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 2.415
         },
         {
           "entry": 1,
-          "position": [100, 100, 100],
+          "position": [342, 342, 0],
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 2.415
         },
         {
           "entry": 2,
-          "position": [100, 100, 100],
+          "position": [58, 342, 0],
           "neurotransmitter": "deactivation",
-          "k1": 1
+          "k1": 2.415
         },
         {
           "entry": 3,
-          "position": [100, 102, 100],
+          "position": [200, 400, 0],
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 2.415
+        },
+        {
+          "entry": 4,
+          "position": [58, 58, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
+        },
+        {
+          "entry": 5,
+          "position": [342, 58, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
         }
       ],
 
       "receptors": [
         {
           "type": "cluster",
-          "position": [100, 210, 100],
+          "position": [200, 200, 10],
           "count": 15,
           "radius": 10
         }
@@ -47,7 +59,7 @@
     },
     {
       "name": "N2",
-      "size": 10000,
+      "size": 1000,
       "dimensions": 3,
       "input_signals": ["E7", "E8", "E9", "E10", "E11", "E12"],
       "ensemble": "A1",
@@ -55,33 +67,46 @@
       "synapses": [
         {
           "entry": 0,
-          "position": [100, 100, 100],
+          "position": [200, 100, 0],
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 2.415
         },
         {
           "entry": 1,
-          "position": [100, 101, 100],
+          "position": [342, 342, 0],
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 2.415
         },
         {
           "entry": 2,
-          "position": [100, 102, 100],
-          "neurotransmitter": "activation",
-          "k1": 1
+          "position": [58, 342, 0],
+          "neurotransmitter": "deactivation",
+          "k1": 2.415
         },
         {
           "entry": 3,
-          "position": [100, 103, 100],
+          "position": [200, 400, 0],
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 2.415
+        },
+        {
+          "entry": 4,
+          "position": [58, 58, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
+        },
+        {
+          "entry": 5,
+          "position": [342, 58, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
         }
       ],
+
       "receptors": [
         {
           "type": "cluster",
-          "position": [100, 210, 100],
+          "position": [200, 200, 10],
           "count": 15,
           "radius": 10
         }
@@ -89,7 +114,7 @@
     },
     {
       "name": "N3",
-      "size": 10000,
+      "size": 1000,
       "dimensions": 3,
       "input_signals": ["E13", "E14", "E15", "E16", "E17", "E18"],
       "ensemble": "A1",
@@ -97,15 +122,46 @@
       "synapses": [
         {
           "entry": 0,
-          "position": [100, 100, 100],
+          "position": [200, 100, 0],
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 2.415
+        },
+        {
+          "entry": 1,
+          "position": [342, 342, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
+        },
+        {
+          "entry": 2,
+          "position": [58, 342, 0],
+          "neurotransmitter": "deactivation",
+          "k1": 2.415
+        },
+        {
+          "entry": 3,
+          "position": [200, 400, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
+        },
+        {
+          "entry": 4,
+          "position": [58, 58, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
+        },
+        {
+          "entry": 5,
+          "position": [342, 58, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
         }
       ],
+
       "receptors": [
         {
           "type": "cluster",
-          "position": [100, 210, 100],
+          "position": [200, 200, 10],
           "count": 15,
           "radius": 10
         }
@@ -113,7 +169,7 @@
     },
     {
       "name": "N4",
-      "size": 10000,
+      "size": 1000,
       "dimensions": 3,
       "input_signals": ["E19", "E20", "E21", "E22", "E23", "E24"],
       "latency": 1,
@@ -122,21 +178,46 @@
       "synapses": [
         {
           "entry": 0,
-          "position": [100, 100, 100],
+          "position": [200, 100, 0],
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 2.415
+        },
+        {
+          "entry": 1,
+          "position": [342, 342, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
+        },
+        {
+          "entry": 2,
+          "position": [58, 342, 0],
+          "neurotransmitter": "deactivation",
+          "k1": 2.415
+        },
+        {
+          "entry": 3,
+          "position": [200, 400, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
+        },
+        {
+          "entry": 4,
+          "position": [58, 58, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
+        },
+        {
+          "entry": 5,
+          "position": [342, 58, 0],
+          "neurotransmitter": "activation",
+          "k1": 2.415
         }
       ],
+
       "receptors": [
         {
           "type": "cluster",
-          "position": [100, 210, 100],
-          "count": 15,
-          "radius": 10
-        },
-        {
-          "type": "cluster",
-          "position": [100, 211, 100],
+          "position": [200, 200, 10],
           "count": 15,
           "radius": 10
         }
@@ -144,7 +225,7 @@
     },
     {
       "name": "N5",
-      "size": 10000,
+      "size": 2000,
       "dimensions": 3,
       "input_signals": ["N1", "N2", "N3", "N4"],
       "ensemble": "A1",
@@ -152,15 +233,33 @@
       "synapses": [
         {
           "entry": 0,
-          "position": [100, 100, 100],
+          "position": [50, 100, 0],
           "neurotransmitter": "activation",
-          "k1": 0.00001
+          "k1": 0.001
+        },
+        {
+          "entry": 1,
+          "position": [100, 150, 0],
+          "neurotransmitter": "activation",
+          "k1": 0.001
+        },
+        {
+          "entry": 2,
+          "position": [100, 50, 0],
+          "neurotransmitter": "activation",
+          "k1": 0.001
+        },
+        {
+          "entry": 3,
+          "position": [150, 100, 0],
+          "neurotransmitter": "activation",
+          "k1": 0.001
         }
       ],
       "receptors": [
         {
           "type": "cluster",
-          "position": [100, 100, 100],
+          "position": [100, 100, 5],
           "count": 15,
           "radius": 10
         }

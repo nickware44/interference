@@ -116,7 +116,7 @@ bool inn::Neuron::doSignalSendEntry(const std::string& From, double X) {
             return false;
         }
     }
-//    std::cout << "In to entry of " << Name << " from " << From << " (" << t << ") - ready" << std::endl;
+//    std::cout << "In to entry of " << Name << " from " << From << " value " << X <<  " (" << t << ") - ready" << std::endl;
     State = Pending;
     inn::System::getComputeBackend() -> doProcessNeuron((void*)this);
     return true;
@@ -129,6 +129,7 @@ bool inn::Neuron::doSignalSendEntry(const std::string& From, double X) {
 std::pair<int64_t, double> inn::Neuron::doSignalReceive() {
     int64_t tr = t;
     State = Received;
+//    std::cout << "Out of " << Name << " value " << Y <<  " (" << t << ")" << std::endl;
     return std::make_pair(tr, Y);
 }
 
@@ -138,7 +139,7 @@ double inn::Neuron::doSignalReceive(int64_t tT) {
         if (tT < Tlo) return 0;
         return OutputSignalQ[tT-Tlo];
     }
-    return Y;
+   return Y;
 }
 
 bool inn::Neuron::doCheckOutputSignalQ(int64_t tT) {
@@ -211,8 +212,8 @@ inn::Neuron::PatternDefinition inn::Neuron::doComparePattern() const {
         if (R->isLocked()) {
             RPos = R -> getPos();
             RPosf = R -> getPosf();
-            std::cout << Name << " " << RPos->getPositionValue(0) << ", " <<  RPos->getPositionValue(1) << ", " <<  RPos->getPositionValue(2) << std::endl;
-            std::cout << RPosf->getPositionValue(0) << ", " <<  RPosf->getPositionValue(1) << ", " <<  RPosf->getPositionValue(2) << std::endl;
+//            std::cout << Name << " " << RPos->getPositionValue(0) << ", " <<  RPos->getPositionValue(1) << ", " <<  RPos->getPositionValue(2) << std::endl;
+//            std::cout << RPosf->getPositionValue(0) << ", " <<  RPosf->getPositionValue(1) << ", " <<  RPosf->getPositionValue(2) << std::endl;
             double Rc = inn::Computer::doCompareFunction(RPos, RPosf);
             double Lc = fabs(R->getL()-R->getLf());
 //            std::cout << R->getL() << std::endl;

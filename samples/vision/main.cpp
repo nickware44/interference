@@ -48,9 +48,8 @@ int main() {
     auto NN = new inn::NeuralNet();
     NN -> setStructure(structure);
 
-    for (int i = 2; i <= LEARNING_COUNT; i++) {
-        NN -> doReplicateEnsemble("A1", "A"+std::to_string(i));
-    }
+    // replicate neurons for classification
+    for (int i = 2; i <= LEARNING_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i));
 
     std::cout << "Model name  : " << NN->getName() << std::endl;
     std::cout << "Model desc  : " << NN->getDescription() << std::endl;
