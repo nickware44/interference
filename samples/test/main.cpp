@@ -2,7 +2,7 @@
 #include <fstream>
 #include <inn/neuralnet.h>
 
-#define NN_OUTPUT_OK 251.145
+#define NN_OUTPUT_OK 65.1773
 #define NN_TEST_COUNT 2
 
 uint64_t getTimestampMS() {
@@ -33,7 +33,7 @@ int main() {
     // creating data array
     std::vector<std::vector<double>> X;
     for (int i = 0; i < 50; i++) {
-        X.push_back({1.02094, 1.02094});
+        X.push_back({1.020938, 1.020938});
     }
 
     std::cout << "Superstructure test: ";
@@ -44,7 +44,7 @@ int main() {
 
     PassedFlag = true;
     for (auto &y: Y) {
-        if (fabs(y-NN_OUTPUT_OK) > 1e-3) {
+        if (fabs(y-NN_OUTPUT_OK) > 1e-4) {
             std::cout << "Output value " << y << " is not " << NN_OUTPUT_OK << std::endl;
             std::cout << "[FAILED]" << std::endl;
             PassedFlag = false;
