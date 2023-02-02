@@ -8,11 +8,12 @@
 #include <iostream>
 #include <vector>
 #include <fstream>
+#include <cstring>
 
 typedef std::vector<std::array<uint8_t, 3>> BMPImage;
 
 inline BMPImage doReadBMP(const std::string& filename) {
-    std::ifstream fbmp(filename);
+    std::ifstream fbmp(filename, std::ios::binary);
     unsigned char info[54];
     std::vector<std::array<uint8_t, 3>> dbmp;
 
@@ -21,15 +22,12 @@ inline BMPImage doReadBMP(const std::string& filename) {
 
     int width = *(int*)&info[18];
     int height = *(int*)&info[22];
-
-    int row_padded = (width*3 + 3) & (~3);
-    auto* data = new uint8_t[row_padded];
-
-    for(int i = 0; i < height; i++) {
-        fbmp.read((char*)data, row_padded);
-        for(int j = 0; j < width*3; j += 3) {
-            dbmp.push_back({data[j+2], data[j+1], data[j]});
-        }
+    auto datasize = width * height * 3;
+    auto* data = new uint8_t[datasize];
+    memset(data, 0x0, datasize);
+    fbmp.read(reinterpret_cast<char*>(data), datasize);
+    for (int i = 0; i < datasize; i+=3) {
+        dbmp.push_back({data[i+2], data[i+1], data[i]});
     }
 
     fbmp.close();
