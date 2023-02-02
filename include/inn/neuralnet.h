@@ -14,6 +14,7 @@
 #include <algorithm>
 #include <tuple>
 #include <functional>
+#include <unordered_map>
 #include "neuron.h"
 #include "../../include/inn/system.h"
 
@@ -26,9 +27,10 @@ namespace inn {
         std::string Name, Description, Version;
         int64_t t;
         bool Learned;
-        std::map<std::string, std::vector<std::string>> Entries;
+        std::vector<std::pair<std::string, std::vector<std::string>>> Entries;
         std::map<std::string, std::vector<std::string>> Ensembles;
         std::vector<std::string> Outputs;
+
         void doSignalProcessStart();
         std::vector<std::pair<std::queue<std::tuple<std::string, std::string, double, int64_t>>, std::vector<std::string>>> ContextCascade;
         std::map<std::string, inn::Neuron*> Neurons;

@@ -37,6 +37,7 @@ std::vector<double> inn::NeuralNet::doComparePatterns() {
         auto P = n -> second -> doComparePattern();
         PDiffR.push_back(std::get<0>(P));
         PDiffL.push_back(std::get<1>(P));
+//        std::cout << O << " " << std::get<0>(P) << " " << std::get<1>(P) << std::endl;
     }
     double PDRMin = PDiffR[std::distance(PDiffR.begin(), std::min_element(PDiffR.begin(), PDiffR.end()))];
     double PDRMax = PDiffR[std::distance(PDiffR.begin(), std::max_element(PDiffR.begin(), PDiffR.end()))] - PDRMin;
@@ -44,17 +45,18 @@ std::vector<double> inn::NeuralNet::doComparePatterns() {
     double PDLMin = PDiffL[std::distance(PDiffL.begin(), std::min_element(PDiffL.begin(), PDiffL.end()))];
     double PDLMax = PDiffL[std::distance(PDiffL.begin(), std::max_element(PDiffL.begin(), PDiffL.end()))] - PDLMin;
 //    std::cout << PDRMin << " " << PDRMax << " " << PDLMin << " " << PDLMax << std::endl;
-//    for (auto &PDR: PDiffR) {
-//        PDR = 1 - (PDR-PDRMin) / PDRMax;
-//    }
+    for (auto &PDR: PDiffR) {
+        //PDR = 1 - (PDR-PDRMin) / PDRMax;
+        PDiff.push_back(1 - (PDR-PDRMin) / PDRMax);
+    }
     for (auto &PDL: PDiffL) {
-        PDL = 1 - (PDL-PDLMin) / PDLMax;
+//        PDL = 1 - (PDL-PDLMin) / PDLMax;
 //        std::cout << PDL << std::endl;
     }
-    for (auto i = 0; i < Outputs.size(); i++) {
-        PDiff.push_back((PDiffR[i]+PDiffL[i])/2);
-    }
-    return PDiffR;
+//    for (auto i = 0; i < Outputs.size(); i++) {
+//        PDiff.push_back((PDiffR[i]+PDiffL[i])/2);
+//    }
+    return PDiff;
 }
 
 /**
@@ -344,13 +346,15 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
                         nnew -> doReplaceEntryName(e, ename);
                     }
 
-                    auto ne = Entries.find(ename);
+                    auto ne = std::find_if(Entries.begin(), Entries.end(), [ename](const std::pair<std::string, std::vector<std::string>>& e){
+                        return e.first == ename;
+                    });
                     if (ne != Entries.end()) {
                         ne->second.push_back(nname);
                     } else if (CopyEntries && r == newnames.end()) {
                         std::vector<std::string> elinks;
                         elinks.push_back(nname);
-                        Entries.insert(std::make_pair(ename, elinks));
+                        Entries.emplace_back(ename, elinks);
                     }
                 }
 
@@ -498,7 +502,7 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                 elinks.push_back(it->second);
                 if (inn::System::getVerbosityLevel() > 1) std::cout << ename << " -> " << it->second << std::endl;
             }
-            Entries.insert(std::make_pair(ename, elinks));
+            Entries.emplace_back(ename, elinks);
         }
 
         for (auto &joutput: j["output_signals"].items()) {
