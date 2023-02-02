@@ -34,11 +34,9 @@ std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &image
 }
 
 int main() {
-    inn::System::setVerbosityLevel(1);
-    //inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 6);
-
     constexpr uint8_t LEARNING_COUNT = 10;
     constexpr uint8_t TEST_COUNT = 10;
+    constexpr uint8_t TEST_ELEMENTS = 10;
     constexpr char STRUCTURE_PATH[128] = "../samples/vision/structure.json";
     constexpr char IMAGES_LEARNING_PATH[128] = "../samples/vision/images/learn/";
     constexpr char IMAGES_TESTING_PATH[128] = "../samples/vision/images/test/";
@@ -79,21 +77,38 @@ int main() {
     std::cout << "Learning done [" << T << " ms]" << std::endl;
 
     // recognize the images
+    float rcount = 0;
     for (int b = 1; b <= TEST_COUNT; b++) {
-        std::cout << "===========================" << std::endl;
-        auto image = doReadBMP(IMAGES_TESTING_PATH+std::to_string(b)+".bmp");
-        std::vector<BMPImage> rimages;
-        for (int i = 1; i <= TEST_COUNT; i++) rimages.push_back(image);
-        auto rinput = doBuildInputVector(rimages);
+        for (int e = 1; e <= TEST_ELEMENTS; e++) {
+            std::string name = std::to_string(b)+"-"+std::to_string(e)+".bmp";
+            std::cout << "======================= " << name << " =======================" << std::endl;
+            auto image = doReadBMP(IMAGES_TESTING_PATH+name);
+            std::vector<BMPImage> rimages;
+            for (int i = 1; i <= TEST_COUNT; i++) rimages.push_back(image);
+            auto rinput = doBuildInputVector(rimages);
 
-        T = getTimestampMS();
-        NN -> doRecognise(rinput);
-        auto patterns = NN -> doComparePatterns();
-        T = getTimestampMS() - T;
+            T = getTimestampMS();
+            NN -> doRecognise(rinput);
+            auto patterns = NN -> doComparePatterns();
+            T = getTimestampMS() - T;
+            // Compute speed
+            auto S = (128*128*24./1024/1024)*1000 / T;
 
-        std::cout << "Recognition done [" << T << " ms]" << std::endl;
-        std::cout << std::endl;
-        std::cout << "Difference for outputs:" << std::endl;
-        for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
+            std::cout << "Recognition for " << b << "-" << e << ".bmp done [" << T << " ms, " << S << " mbit/s]" << std::endl;
+            auto r = std::max_element(patterns.begin(), patterns.end());
+            if (std::distance(patterns.begin(), r) == b-1) {
+                std::cout << "[RECOGNIZED]" << std::endl;
+                rcount++;
+            } else {
+                std::cout << "[NOT RECOGNIZED]" << std::endl;
+                std::cout << std::endl;
+                std::cout << "Difference for outputs:" << std::endl;
+                for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
+            }
+        }
     }
+
+    std::cout << std::endl;
+    std::cout << "=================== SUMMARY ===================" << std::endl;
+    std::cout << "Recognition precision: " << rcount/(TEST_COUNT*TEST_ELEMENTS) << std::endl;
 }
