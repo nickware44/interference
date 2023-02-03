@@ -8,6 +8,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "../../include/inn/neuron.h"
+#include "../../include/inn/system.h"
 
 inn::Neuron::Receptor::Receptor() {
 	RPos = new inn::Position();
@@ -51,6 +52,7 @@ inn::Neuron::Receptor::Receptor(inn::Position *_RPos, double _k3) {
 }
 
 bool inn::Neuron::Receptor::doCheckActive() {
+//    std::cout << Fi << std::endl;
     return Fi >= Rs;
 }
 
@@ -68,6 +70,9 @@ void inn::Neuron::Receptor::doReset() {
     Lf = 0;
     Fi = 0;
     dFi = 0;
+    if (Locked) RPosf -> setPosition(RPos0);
+    else RPos -> setPosition(RPos0);
+
 }
 
 void inn::Neuron::Receptor::doPrepare() {
@@ -80,7 +85,7 @@ void inn::Neuron::Receptor::doSavePos() {
 }
 
 void inn::Neuron::Receptor::doUpdateSensitivityValue() {
-    Rs = inn::Neuron::System::getRcValue(k3, Rs, Fi, dFi);
+    Rs = inn::Computer::getRcValue(k3, Rs, Fi, dFi);
 }
 
 void inn::Neuron::Receptor::setPos(inn::Position *_RPos) {

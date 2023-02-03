@@ -15,6 +15,10 @@
 #include <vector>
 
 namespace inn {
+    /// Object position class. Provides the ability to store Cartesian
+    /// coordinates of object positions in n-dimensional space,
+    /// and also allows you to perform basic arithmetic operations on them:
+    /// add, subtract, multiply, and divide.
     class Position {
     private:
         unsigned int Xm;

@@ -8,61 +8,74 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include "../../include/inn/neuron.h"
+#include "../../include/inn/system.h"
 
-inn::Neuron::Entry::Entry(const Entry &E) {
-    for (unsigned long long i = 0; i < E.getSynapsesCount(); i++) {
-        auto *S = new Synaps(*E.getSynaps(i));
-        Synapses.push_back(S);
-    }
+inn::Neuron::Entry::Entry() {
+    t = -1;
+    X = 0;
 }
 
-void inn::Neuron::Entry::doAddSynaps(inn::Position *SPos, unsigned int Xm, unsigned int Tl, int Type) {
-	auto *S = new Synaps(SPos, 0.8, inn::Neuron::System::getLambdaValue(Xm), Tl, Type);
+inn::Neuron::Entry::Entry(const Entry &E) {
+    for (int64_t i = 0; i < E.getSynapsesCount(); i++) {
+        auto *S = new Synapse(*E.getSynapse(i));
+        Synapses.push_back(S);
+    }
+    t = -1;
+    X = 0;
+}
+
+bool inn::Neuron::Entry::doCheckState(int64_t tn) const {
+    return tn == t;
+}
+
+void inn::Neuron::Entry::doAddSynapse(inn::Position *SPos, unsigned int Xm, double k1, int64_t Tl, int NT) {
+	auto *S = new Synapse(SPos, k1, inn::Computer::getLambdaValue(Xm), Tl, NT);
     Synapses.push_back(S);
 }
 
-void inn::Neuron::Entry::doIn(double X, unsigned long long t) {
-    //Signal.push_back(X);
+void inn::Neuron::Entry::doIn(double Xt, int64_t tn) {
+    t = tn;
+    X = Xt;
+}
 
-    unsigned long long STl = 0;
-
+void inn::Neuron::Entry::doProcess() {
     for (auto S: Synapses) {
-        STl = S -> getTl();
-        if (t >= STl) S -> doIn(X);
+        if (t >= S->getTl()) S -> doIn(X);
         else S -> doIn(0);
     }
 }
 
-void inn::Neuron::Entry::doSendToQueue(double X, unsigned long long t) {
+void inn::Neuron::Entry::doSendToQueue(double X, int64_t t, double WVSum) {
     //Signal.push_back(X);
 
-    unsigned long long STl = 0;
+    int64_t STl = 0;
 
     for (auto S: Synapses) {
         STl = S -> getTl();
-        if (t >= STl) S -> doSendToQueue(X);
-        else S -> doSendToQueue(0);
+        if (t >= STl) S -> doSendToQueue(X, WVSum);
+        else S -> doSendToQueue(0, WVSum);
     }
 }
 
-bool inn::Neuron::Entry::doInFromQueue(unsigned long long tT) {
+bool inn::Neuron::Entry::doInFromQueue(int64_t tT) {
     for (auto S: Synapses) if (!S->doInFromQueue(tT)) return false;
     return true;
 }
 
 void inn::Neuron::Entry::doPrepare() {
-    for (auto S: Synapses) S -> doPrepare();
+    for (auto S: Synapses) S -> doReset();
+    //for (auto S: Synapses) S -> doPrepare();
 }
 
 void inn::Neuron::Entry::doFinalize() {
     //for (auto Sig: Signal)
         //for (auto S: Synapses) S -> doIn(Sig);
     for (auto S: Synapses) S -> doReset();
-    Signal.clear();
+    //Signal.clear();
 }
 
 void inn::Neuron::Entry::doClearSignal() {
-    Signal.clear();
+    //Signal.clear();
 }
 
 void inn::Neuron::Entry::setk1(double _k1) {
@@ -73,15 +86,11 @@ void inn::Neuron::Entry::setk2(double _k2) {
     for (auto S: Synapses) S -> setk2(_k2);
 }
 
-void inn::Neuron::Entry::setNeurotransmitterType(int NTType) {
-    for (auto S: Synapses) S -> setNeurotransmitterType(NTType);
-}
-
-inn::Neuron::Synaps* inn::Neuron::Entry::getSynaps(unsigned long long SID) const {
+inn::Neuron::Synapse* inn::Neuron::Entry::getSynapse(int64_t SID) const {
     return Synapses[SID];
 }
 
-unsigned long long inn::Neuron::Entry::getSynapsesCount() const {
+int64_t inn::Neuron::Entry::getSynapsesCount() const {
     return Synapses.size();
 }
 

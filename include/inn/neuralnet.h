@@ -13,69 +13,54 @@
 #include <map>
 #include <algorithm>
 #include <tuple>
+#include <functional>
+#include <unordered_map>
 #include "neuron.h"
+#include "../../include/inn/system.h"
 
 namespace inn {
-    typedef unsigned int LinkType;
-    typedef std::pair<inn::LinkType, unsigned int> LinkDefinition;
-    typedef std::tuple<inn::LinkType, unsigned int, unsigned int> LinkDefinitionRange;
-    typedef std::tuple<inn::LinkType, unsigned int> LinkDefinitionRangeNext;
-    enum {LINK_ENTRY2NEURON, LINK_NEURON2NEURON};
-
+    /**
+     * Main neural net class.
+     */
     class NeuralNet {
     private:
-        class Link;
-        typedef std::tuple<unsigned long long, unsigned int, inn::Neuron*> NeuronDefinition;
-        typedef std::multimap<inn::Neuron*, inn::NeuralNet::Link> LinkMap;
-        typedef std::pair<inn::NeuralNet::LinkMap::iterator, inn::NeuralNet::LinkMap::iterator> LinkMapRange;
-        unsigned int EntriesCount;
-        unsigned int LDRCounterE, LDRCounterN;
-        unsigned long long t;
-        bool DataDone;
-        std::vector<inn::NeuralNet::NeuronDefinition> Neurons;
-        inn::NeuralNet::LinkMap NeuronLinks;
-        std::vector<inn::Neuron*> Outputs;
+        std::string Name, Description, Version;
+        int64_t t;
+        bool Learned;
+        std::vector<std::pair<std::string, std::vector<std::string>>> Entries;
+        std::map<std::string, std::vector<std::string>> Ensembles;
+        std::vector<std::string> Outputs;
+
+        void doSignalProcessStart();
+        std::vector<std::pair<std::queue<std::tuple<std::string, std::string, double, int64_t>>, std::vector<std::string>>> ContextCascade;
+        std::map<std::string, inn::Neuron*> Neurons;
+        std::map<std::string, int> Latencies;
+        inn::Event *DataDoneEvent;
     public:
         NeuralNet();
-        void doAddNeuron(Neuron*, std::vector<inn::LinkDefinition>);
-        void doAddNeuron(Neuron*, std::vector<inn::LinkDefinitionRange>);
-        void doAddNeuron(Neuron*, inn::LinkDefinitionRangeNext);
-        void doCreateNewEntries(unsigned int);
-        void doCreateNewOutput(unsigned long long);
         std::vector<double> doComparePatterns();
-        void doEnableMultithreading();
-        void doPrepare();
-        void doFinalize();
-        void doReinit();
-        void doSignalSend(std::vector<double>);
+        void doReset();
+        void doSignalSend(const std::vector<double>&);
+        std::vector<double> doSignalTransfer(const std::vector<std::vector<double>>&);
+        void doSignalTransferAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
+        std::vector<double> doLearn(const std::vector<std::vector<double>>&);
+        std::vector<double> doRecognise(const std::vector<std::vector<double>>&);
+        void doLearnAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
+        void doRecogniseAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
         std::vector<double> doSignalReceive();
-        bool isMultithreadingEnabled();
-        inn::Neuron* getNeuron(unsigned long long);
-        unsigned long long getNeuronCount();
+        void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);
+        void setStructure(std::ifstream&);
+        void setStructure(const std::string &Str);
+        void setLearned(bool LearnedFlag);
+        bool isLearned();
+        std::string getStructure();
+        std::string getName();
+        std::string getDescription();
+        std::string getVersion();
+        std::vector<inn::Neuron*> getEnsemble(const std::string&);
+        inn::Neuron* getNeuron(const std::string&);
+        uint64_t getNeuronCount();
         ~NeuralNet();
-    };
-
-    class NeuralNet::Link {
-    private:
-        unsigned int Latency;
-        inn::LinkType LT;
-        int LinkFromEID;
-        inn::Neuron *LinkFromE;
-        unsigned long long t;
-    public:
-        Link() = default;
-        Link(inn::LinkType, int);
-        Link(inn::LinkType, inn::Neuron*);
-        bool doCheckSignal();
-        void doResetSignalController();
-        void setLatency(unsigned int);
-        inn::LinkType getLinkType();
-        unsigned int getLatency();
-        int getLinkFromEID();
-        inn::Neuron* getLinkFromE();
-        double getSignal();
-        unsigned long long getTime();
-        ~Link() = default;
     };
 }
 
