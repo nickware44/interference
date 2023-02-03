@@ -34,6 +34,11 @@ inn_vision example uses the part of COIL-100 dataset.
 http://www1.cs.columbia.edu/CAVE/software/softlib/coil-100.php
 
 ----------------------------------------------------------------
+### SAMPLES
+- [Test](samples/test)
+- [Vision](samples/vision)
+
+----------------------------------------------------------------
 ### HOW TO BUILD
 Note that %INTERFERENCE_ROOT% is root directory of Interference library files, %BUILD_TYPE% is "debug" or "release". After the last step, library and binaries will be in %INTERFERENCE_ROOT%/lib and %INTERFERENCE_ROOT%/bin respectively.
 #### Building for Windows (MinGW)
