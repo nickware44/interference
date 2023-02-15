@@ -73,6 +73,26 @@ void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<doubl
 }
 
 /**
+ * Create synapse cluster.
+ * @param PosVector Position of center of synapse cluster,
+ * @param R Cluster radius.
+ */
+void inn::Neuron::doCreateNewSynapseCluster(const std::vector<double>& PosVector, unsigned R, double k1, int64_t Tl, int NT) {
+    double x = PosVector[0];
+    double y = PosVector[1];
+
+    double dfi = 360. / Entries.size();
+    double fi = 0;
+    double xr, yr;
+    for (auto &ne: Entries) {
+        xr = x + R * cos(fi/180*M_PI);
+        yr = y + R * sin(fi/180*M_PI);
+        doCreateNewSynapse(ne.first, {xr, yr, 0}, k1, Tl, NT);
+        fi += dfi;
+    }
+}
+
+/**
  * Create new receptor.
  * @param PosVector Start position of receptor.
  */

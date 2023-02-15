@@ -58,6 +58,7 @@ namespace inn {
         Neuron(const inn::Neuron&);
         Neuron(unsigned int, unsigned int, int64_t, const std::vector<std::string>& InputSignals);
         void doCreateNewSynapse(const std::string&, std::vector<double>, double, int64_t, int);
+        void doCreateNewSynapseCluster(const std::vector<double>& PosVector, unsigned R, double k1, int64_t Tl, int NT);
         void doCreateNewReceptor(std::vector<double>);
         void doCreateNewReceptorCluster(const std::vector<double>& PosVector, unsigned R, unsigned C);
         bool doSignalSendEntry(const std::string&, double);
