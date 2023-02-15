@@ -94,15 +94,14 @@ void inn::Neuron::doCreateNewReceptor(std::vector<double> PosVector) {
 void inn::Neuron::doCreateNewReceptorCluster(const std::vector<double>& PosVector, unsigned R, unsigned C) {
     double x = PosVector[0];
     double y = PosVector[1];
-    double xr = x - R, yr;
-    int s = 1;
+    double dfi = 360. / C;
+    double fi = 0;
+    double xr, yr;
     for (int i = 0; i < C; i++) {
-        yr = s*sqrt(fabs(R*R-(xr-x)*(xr-x))) + y;
+        xr = x + R * cos(fi/180*M_PI);
+        yr = y + R * sin(fi/180*M_PI);
         doCreateNewReceptor({xr, yr, 0});
-        if (xr == x + R) {
-            s = -1;
-        }
-        xr += s*((double)R/2);
+        fi += dfi;
     }
 }
 

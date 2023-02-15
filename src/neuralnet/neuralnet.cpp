@@ -575,7 +575,7 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                 }
                 if (jreceptor.value()["type"] != nullptr && jreceptor.value()["type"].get<std::string>() == "cluster") {
                     auto rcount = jreceptor.value()["count"].get<unsigned int>();
-                    auto rradius = jreceptor.value()["count"].get<unsigned int>();
+                    auto rradius = jreceptor.value()["radius"].get<unsigned int>();
                     N -> doCreateNewReceptorCluster(pos, rradius, rcount);
                 } else {
                     N -> doCreateNewReceptor(pos);
