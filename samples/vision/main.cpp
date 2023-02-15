@@ -20,13 +20,21 @@ uint64_t getTimestampMS() {
 
 std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &images) {
     std::vector<std::vector<double>> input;
-    for (int d = 0; d < images[0].size(); d+=8) {
+    for (int d = 0; d < images[0].size(); d+=2) {
         input.emplace_back();
         for (int i = 0; i < images.size(); i++) {
-            for (int s = 0; s < 8; s++) {
-                input.back().emplace_back(images[i][d+s][0]/255.);
-                input.back().emplace_back(images[i][d+s][1]/255.);
-                input.back().emplace_back(images[i][d+s][2]/255.);
+            for (int s = 0; s < 2; s++) {
+                auto rgb = std::vector<double>({images[i][d+s][0]/255., images[i][d+s][1]/255., images[i][d+s][2]/255.});
+                auto max = std::max_element(rgb.begin(), rgb.end());
+                auto k = 1 - rgb[std::distance(rgb.begin(), max)];
+                auto c = (1-rgb[0]-k) / (1-k);
+                auto m = (1-rgb[1]-k) / (1-k);
+                auto y = (1-rgb[2]-k) / (1-k);
+
+                input.back().emplace_back(c);
+                input.back().emplace_back(m);
+                input.back().emplace_back(y);
+                input.back().emplace_back(k);
             }
         }
     }

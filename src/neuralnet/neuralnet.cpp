@@ -555,14 +555,27 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                 if (jsynapse.value()["k1"] != nullptr) k1 = jsynapse.value()["k1"].get<double>();
                 unsigned int tl = 0;
                 if (jsynapse.value()["tl"] != nullptr) tl = jsynapse.value()["tl"].get<unsigned int>();
-                auto sentryid = jsynapse.value()["entry"].get<unsigned int>();
-                auto sentry = jneuron.value()["input_signals"][sentryid];
                 int nt = 0;
                 if (jsynapse.value()["neurotransmitter"] != nullptr) {
                     if (jsynapse.value()["neurotransmitter"].get<std::string>() == "deactivation")
                         nt = 1;
                 }
-                N -> doCreateNewSynapse(sentry, pos, k1, tl, nt);
+                if (jsynapse.value()["type"] != nullptr && jsynapse.value()["type"].get<std::string>() == "cluster") {
+                    auto sradius = jsynapse.value()["radius"].get<unsigned int>();
+                    N -> doCreateNewSynapseCluster(pos, sradius, k1, tl, nt);
+                } else {
+                    auto sentryid = -1;
+                    if (jsynapse.value()["entry"] != nullptr) {
+                        sentryid = jsynapse.value()["entry"].get<unsigned int>();
+                    } else {
+                        std::cout << "Error: entry number must be set" << std::endl;
+                        return;
+                    }
+                    auto sentry = jneuron.value()["input_signals"][sentryid];
+                    N -> doCreateNewSynapse(sentry, pos, k1, tl, nt);
+                }
+
+
             }
             for (auto &jreceptor: jneuron.value()["receptors"].items()) {
                 std::vector<double> pos;
@@ -575,7 +588,7 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                 }
                 if (jreceptor.value()["type"] != nullptr && jreceptor.value()["type"].get<std::string>() == "cluster") {
                     auto rcount = jreceptor.value()["count"].get<unsigned int>();
-                    auto rradius = jreceptor.value()["count"].get<unsigned int>();
+                    auto rradius = jreceptor.value()["radius"].get<unsigned int>();
                     N -> doCreateNewReceptorCluster(pos, rradius, rcount);
                 } else {
                     N -> doCreateNewReceptor(pos);
