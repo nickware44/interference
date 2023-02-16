@@ -1,11 +1,11 @@
 {
-  "entries": ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"],
+  "entries": ["E1", "E2", "E3", "E4", "E5", "E6"],
   "neurons": [
     {
       "name": "N1",
       "size": 1000,
       "dimensions": 3,
-      "input_signals": ["E1", "E2", "E3", "E4", "E5", "E6", "E7", "E8"],
+      "input_signals": ["E1", "E2", "E3", "E4", "E5", "E6"],
       "ensemble": "A1",
 
       "synapses": [

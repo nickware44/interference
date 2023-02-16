@@ -35,4 +35,37 @@ inline BMPImage doReadBMP(const std::string& filename) {
     return dbmp;
 }
 
+inline std::vector<double> RGB2CMYK(double r, double g, double b) {
+    auto rgb = std::vector<double>({r, g, b});
+    auto max = std::max_element(rgb.begin(), rgb.end());
+
+    auto k = 1 - rgb[std::distance(rgb.begin(), max)];
+    auto c = (1-rgb[0]-k) / (1-k);
+    auto m = (1-rgb[1]-k) / (1-k);
+    auto y = (1-rgb[2]-k) / (1-k);
+
+    return {c, m, y, k};
+}
+
+inline std::vector<double> RGB2HSI(double r, double g, double b) {
+    auto rgb = std::vector<double>({r, g, b});
+    auto min = std::min_element(rgb.begin(), rgb.end());
+
+    auto h = 0.;
+    auto s = 0.;
+    auto i = (r + g + b) / 3.;
+
+    double rn = r / (r + g + b);
+    double gn = g / (r + g + b);
+    double bn = b / (r + g + b);
+
+    if (i > 0) s = 1 - (rgb[std::distance(rgb.begin(), min)] / i);
+    if (s < 1e-8) s = 0;
+    if (s > 0) {
+        h = acos((0.5 * ((rn - gn) + (rn - bn))) / (sqrt((rn - gn) * (rn - gn) + (rn - bn) * (gn - bn))));
+        if (b > g) h = 2 * M_PI - h;
+    }
+    return {h, s, i};
+}
+
 #endif //INTERFERENCE_BMP_HPP

@@ -24,17 +24,11 @@ std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &image
         input.emplace_back();
         for (int i = 0; i < images.size(); i++) {
             for (int s = 0; s < 2; s++) {
-                auto rgb = std::vector<double>({images[i][d+s][0]/255., images[i][d+s][1]/255., images[i][d+s][2]/255.});
-                auto max = std::max_element(rgb.begin(), rgb.end());
-                auto k = 1 - rgb[std::distance(rgb.begin(), max)];
-                auto c = (1-rgb[0]-k) / (1-k);
-                auto m = (1-rgb[1]-k) / (1-k);
-                auto y = (1-rgb[2]-k) / (1-k);
-
-                input.back().emplace_back(c);
-                input.back().emplace_back(m);
-                input.back().emplace_back(y);
-                input.back().emplace_back(k);
+                auto rgbn = std::vector<double>({images[i][d+s][0]/255., images[i][d+s][1]/255., images[i][d+s][2]/255.});
+                auto HSI = RGB2HSI(rgbn[0], rgbn[1], rgbn[2]);
+                input.back().emplace_back(HSI[0]/(2*M_PI));
+                input.back().emplace_back(HSI[1]);
+                input.back().emplace_back(HSI[2]);
             }
         }
     }
@@ -118,5 +112,5 @@ int main() {
 
     std::cout << std::endl;
     std::cout << "=================== SUMMARY ===================" << std::endl;
-    std::cout << "Recognition precision: " << rcount/(TEST_COUNT*TEST_ELEMENTS) << std::endl;
+    std::cout << "Recognition accuracy: " << rcount/(TEST_COUNT*TEST_ELEMENTS) << " (" << rcount << "/" << TEST_COUNT*TEST_ELEMENTS << ")" << std::endl;
 }
