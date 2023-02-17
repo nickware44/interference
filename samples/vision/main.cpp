@@ -70,47 +70,47 @@ int main() {
     }
     T = getTimestampMS() - T;
     auto input = doBuildInputVector(images);
-    std::cout << "Images load done [" << T << " ms]" << std::endl;
+    std::cout << "Loading images\t\t\t\tdone [" << T << " ms]" << std::endl;
 
     // teach the neural network
     T = getTimestampMS();
     NN -> doLearn(input);
     T = getTimestampMS() - T;
-    std::cout << "Learning done [" << T << " ms]" << std::endl;
+    std::cout << "Learning neural network\t\tdone [" << T << " ms]" << std::endl;
 
     // recognize the images
     float rcount = 0;
     for (int b = 1; b <= TEST_COUNT; b++) {
         for (int e = 1; e <= TEST_ELEMENTS; e++) {
             std::string name = std::to_string(b)+"-"+std::to_string(e)+".bmp";
-            std::cout << "======================= " << name << " =======================" << std::endl;
             auto image = doReadBMP(IMAGES_TESTING_PATH+name);
             std::vector<BMPImage> rimages;
             for (int i = 1; i <= TEST_COUNT; i++) rimages.push_back(image);
             auto rinput = doBuildInputVector(rimages);
 
+            std::cout << "Recognizing " << b << "-" << e << ".bmp:\t\t";
             T = getTimestampMS();
             NN -> doRecognise(rinput);
             auto patterns = NN -> doComparePatterns();
             T = getTimestampMS() - T;
             // Compute speed
             auto S = (128*128*24./1024/1024)*1000 / T;
+            std::cout << "done [" << T << " ms, " << S << " mbit/s]\t";
 
-            std::cout << "Recognition for " << b << "-" << e << ".bmp done [" << T << " ms, " << S << " mbit/s]" << std::endl;
             auto r = std::max_element(patterns.begin(), patterns.end());
             if (std::distance(patterns.begin(), r) == b-1) {
                 std::cout << "[RECOGNIZED]" << std::endl;
                 rcount++;
             } else {
                 std::cout << "[NOT RECOGNIZED]" << std::endl;
-                std::cout << std::endl;
-                std::cout << "Difference for outputs:" << std::endl;
-                for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
+                // Uncomment to print the response of output neurons to the input data (response - values [0, 1], 0 - minimum response, 1 - maximum response)
+                // std::cout << "Difference for outputs:" << std::endl;
+                // for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
             }
         }
     }
 
     std::cout << std::endl;
-    std::cout << "=================== SUMMARY ===================" << std::endl;
+    std::cout << "================================ SUMMARY ================================" << std::endl;
     std::cout << "Recognition accuracy: " << rcount/(TEST_COUNT*TEST_ELEMENTS) << " (" << rcount << "/" << TEST_COUNT*TEST_ELEMENTS << ")" << std::endl;
 }
