@@ -15,7 +15,6 @@ int main() {
     bool PassedFlag;
     inn::System::setVerbosityLevel(1);
     inn::System::setComputeBackend(inn::System::ComputeBackends::Default);
-//    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 5);
 
     std::ifstream structure("../samples/test/structure.json");
     auto NN = new inn::NeuralNet();
@@ -59,7 +58,7 @@ int main() {
 
     std::cout << std::endl;
     std::cout << "Superstructure multithread test: ";
-    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 5);
+    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 3);
     T = getTimestampMS();
     Y = NN ->doLearn(X);
     T = getTimestampMS() - T;
