@@ -31,13 +31,12 @@ namespace inn {
         std::atomic<int64_t> t;
         int64_t Tlo;
         unsigned int Xm, DimensionsCount;
-        double Y;
+        double *OutputSignal;
+        int64_t OutputSignalSize;
+        int64_t OutputSignalPointer;
         int NID;
         bool Learned;
-        std::vector<double> OutputSignalQ;
         std::vector<double> doCompareCheckpoints();
-        double LastWVSum;
-        int State;
         std::string Name;
     public:
         /**
@@ -50,8 +49,6 @@ namespace inn {
             Pending,
             /// Processing of neuron is done.
             Computed,
-            ///  Output value has been retrieved at least once.
-            Received
         } States;
         typedef std::tuple<double, double> PatternDefinition;
         Neuron();
@@ -61,9 +58,8 @@ namespace inn {
         void doCreateNewSynapseCluster(const std::vector<double>& PosVector, unsigned R, double k1, int64_t Tl, int NT);
         void doCreateNewReceptor(std::vector<double>);
         void doCreateNewReceptorCluster(const std::vector<double>& PosVector, unsigned R, unsigned C);
-        bool doSignalSendEntry(const std::string&, double);
-        std::pair<int64_t, double> doSignalReceive();
-        double doSignalReceive(int64_t);
+        bool doSignalSendEntry(const std::string&, double, int64_t);
+        std::pair<int64_t, double> doSignalReceive(int64_t tT = -1);
         bool doCheckOutputSignalQ(int64_t);
         void doFinalizeInput(double);
         void doPrepare();
@@ -74,6 +70,7 @@ namespace inn {
         void doLinkOutput(const std::string&);
         void doClearOutputLinks();
         void doReplaceEntryName(const std::string&, const std::string&);
+        void doReserveSignalBuffer(int64_t);
         void setTime(int64_t);
         void setk1(double);
         void setk2(double);
@@ -96,16 +93,18 @@ namespace inn {
         int64_t getTlo() const;
         int getNID() const;
         std::string getName();
-        int getState() const;
+        int64_t getSignalBufferSize() const;
+        int getState(int64_t) const;
         ~Neuron();
     };
 
     class Neuron::Entry {
     private:
         std::vector<inn::Neuron::Synapse*> Synapses;
-        double X;
-        int64_t t;
-        //std::vector<double> Signal;
+        int64_t t, tm;
+        double *Signal;
+        int64_t SignalSize;
+        int64_t SignalPointer;
     public:
         Entry();
         Entry(const inn::Neuron::Entry&);
@@ -117,7 +116,7 @@ namespace inn {
         bool doInFromQueue(int64_t);
         void doPrepare();
         void doFinalize();
-        void doClearSignal();
+        void doReserveSignalBuffer(uint64_t);
         void setk1(double);
         void setk2(double);
         inn::Neuron::Synapse* getSynapse(int64_t) const;

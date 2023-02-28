@@ -224,5 +224,5 @@
   "output_signals": ["N6"],
   "name": "self test net",
   "desc": "neural net structure for self testing",
-  "version": "1.0"
+  "version": "1.1"
 }

@@ -16,10 +16,11 @@ inn::Neuron::Neuron() {
     Tlo = 0;
     Xm = 0;
     DimensionsCount = 0;
-    Y = 0;
+    OutputSignal = new double;
+    OutputSignalSize = 1;
+    OutputSignalPointer = 0;
     NID = 0;
     Learned = false;
-    State = NotProcessed;
 //    ReceptorPositionComputer = nullptr;
 }
 
@@ -27,16 +28,16 @@ inn::Neuron::Neuron(const inn::Neuron &N) {
     t = 0;
     Tlo = N.getTlo();
     Xm = N.getXm();
+    OutputSignal = new double;
+    OutputSignalSize = 1;
+    OutputSignalPointer = 0;
     DimensionsCount = N.getDimensionsCount();
-    Y = 0;
     NID = 0;
     Learned = false;
     auto elabels = N.getEntries();
     for (int64_t i = 0; i < N.getEntriesCount(); i++) Entries.insert(std::make_pair(elabels[i], new Entry(*N.getEntry(i))));
     for (int64_t i = 0; i < N.getReceptorsCount(); i++) Receptors.push_back(new Receptor(*N.getReceptor(i)));
     Links = N.getLinkOutput();
-    //ReceptorPositionComputer = nullptr;
-    State = NotProcessed;
 }
 
 inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::vector<std::string>& InputNames) {
@@ -44,14 +45,15 @@ inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::
     Tlo = Tl;
     Xm = XSize;
     DimensionsCount = DC;
-    Y = 0;
+    OutputSignal = new double;
+    OutputSignalSize = 1;
+    OutputSignalPointer = 0;
     NID = 0;
     Learned = false;
     for (auto &i: InputNames) {
         auto *E = new Entry();
         Entries.insert(std::make_pair(i, E));
     }
-    State = NotProcessed;
 }
 
 /**
@@ -125,40 +127,33 @@ void inn::Neuron::doCreateNewReceptorCluster(const std::vector<double>& PosVecto
     }
 }
 
-bool inn::Neuron::doSignalSendEntry(const std::string& From, double X) {
+bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, int64_t tn) {
     auto entry = Entries.find(From);
-    entry -> second -> doIn(X, t);
-    State = NotProcessed;
+    entry -> second -> doIn(X, tn);
     for (auto &e: Entries) {
-        if (!e.second->doCheckState(t)) {
-//            std::cout << "In to entry of " << Name << " from " << From << " (" << t << ") - not ready" << std::endl;
+        if (!e.second->doCheckState(tn)) {
+//            std::cout << "In to entry of " << Name << " from " << e.first << " (" << tn << ") - not ready" << std::endl;
             return false;
         }
     }
-//    std::cout << "In to entry of " << Name << " from " << From << " value " << X <<  " (" << t << ") - ready" << std::endl;
-    State = Pending;
-    inn::System::getComputeBackend() -> doProcessNeuron((void*)this);
+//    std::cout << "In to entry of " << Name << " from " << From << " value " << X <<  " (" << tn << ") - ready" << std::endl;
+    inn::System::getComputeBackend() -> doProcess((void*)this);
     return true;
 }
 
 /**
- * Get signal element for current time.
+ *
+ * @param tT
  * @return
  */
-std::pair<int64_t, double> inn::Neuron::doSignalReceive() {
-    int64_t tr = t;
-    State = Received;
-//    std::cout << "Out of " << Name << " value " << Y <<  " (" << t << ")" << std::endl;
-    return std::make_pair(tr, Y);
-}
-
-double inn::Neuron::doSignalReceive(int64_t tT) {
-//    if (Multithreading) return OutputSignalQ[tT];
-    if (Learned && Tlo) {
-        if (tT < Tlo) return 0;
-        return OutputSignalQ[tT-Tlo];
+std::pair<int64_t, double> inn::Neuron::doSignalReceive(int64_t tT) {
+    auto tlocal = t.load();
+    if (tT == -1) tT = tlocal - 1;
+    auto d = tlocal - tT;
+    if (d > 0 && OutputSignalPointer-d >= 0) {
+        return std::make_pair(tT, OutputSignal[OutputSignalPointer-d]);
     }
-   return Y;
+    else return std::make_pair(tT, 0);
 }
 
 bool inn::Neuron::doCheckOutputSignalQ(int64_t tT) {
@@ -170,9 +165,10 @@ void inn::Neuron::doCreateCheckpoint() {
 }
 
 void inn::Neuron::doFinalizeInput(double P) {
-    Y = P;
-    t++;
-    State = Computed;
+    if (OutputSignalPointer >= OutputSignalSize) OutputSignalPointer = 0;
+    OutputSignal[OutputSignalPointer] = P;
+    OutputSignalPointer++;
+    t.store(t.load()+1);
 //    std::cout << "Object processed " << Name << std::endl;
 }
 
@@ -186,7 +182,6 @@ void inn::Neuron::doPrepare() {
 void inn::Neuron::doFinalize() {
     for (auto E: Entries) E.second -> doFinalize();
     for (auto R: Receptors) R -> doLock();
-    if (NID) std::cout << NID << " ~ " << LastWVSum << std::endl;
     Learned = true;
 }
 
@@ -241,11 +236,8 @@ inn::Neuron::PatternDefinition inn::Neuron::doComparePattern() const {
             ResultL += Lc;
         }
     }
-    //std::cout << "=====" << std::endl;
     Result /= Receptors.size();
     ResultL /= Receptors.size();
-    //std::cout << ResultL << std::endl;
-    //std::cout << "=====" << std::endl;
     return inn::Neuron::PatternDefinition(Result, ResultL);
 }
 
@@ -271,12 +263,22 @@ void inn::Neuron::doReplaceEntryName(const std::string& Original, const std::str
     }
 }
 
+void inn::Neuron::doReserveSignalBuffer(int64_t L) {
+    delete [] OutputSignal;
+    OutputSignal = new double[L];
+    OutputSignalSize = L;
+    OutputSignalPointer = 0;
+    for (auto &E: Entries) {
+        E.second -> doReserveSignalBuffer(L);
+    }
+}
+
 /**
  * Set time.
  * @param ts Time.
  */
 void inn::Neuron::setTime(int64_t ts) {
-    t = ts;
+    t.store(ts);
 }
 
 /**
@@ -327,8 +329,7 @@ bool inn::Neuron::isLearned() const {
 std::vector<std::string> inn::Neuron::getWaitingEntries() {
     std::vector<std::string> waiting;
     for (auto &e: Entries) {
-//        std::cout << e.first << " " << e.second->doCheckState(t) << std::endl;
-        if (!e.second->doCheckState(t)) waiting.push_back(e.first);
+        if (!e.second->doCheckState(t.load())) waiting.push_back(e.first);
     }
     return waiting;
 }
@@ -397,7 +398,7 @@ int64_t inn::Neuron::getReceptorsCount() const {
  * @return Time value.
  */
 int64_t inn::Neuron::getTime() const {
-    return t;
+    return t.load();
 }
 
 /**
@@ -432,12 +433,22 @@ std::string inn::Neuron::getName() {
     return Name;
 }
 
+int64_t inn::Neuron::getSignalBufferSize() const {
+    return OutputSignalSize;
+}
+
 /**
  * Get current state of neuron.
  * @return Neuron state.
  */
-int inn::Neuron::getState() const {
-    return State;
+int inn::Neuron::getState(int64_t tT) const {
+    for (const auto &e: Entries) {
+        if (!e.second->doCheckState(tT)) {
+            return States::NotProcessed;
+        }
+    }
+    if (tT >= t.load()) return States::Pending;
+    return States::Computed;
 }
 
 inn::Neuron::~Neuron() {

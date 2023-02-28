@@ -50,6 +50,12 @@ namespace inn {
         static int getVerbosityLevel();
 
         /**
+         * Get current compute backend parameter. The parameter can be set as an argument to the setComputeBackend method. It is always zero for inn::ComputeBackends::Default backend.
+         * @return Backend parameter.
+         */
+        static int getComputeBackendParameter();
+
+        /**
          * Compute backends enum.
          */
         typedef enum {

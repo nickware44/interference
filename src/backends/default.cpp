@@ -15,7 +15,13 @@ inn::ComputeBackendDefault::ComputeBackendDefault() {
     nRPos = nullptr;
 }
 
-void inn::ComputeBackendDefault::doProcessNeuron(void* Object) {
+void inn::ComputeBackendDefault::doRegisterHost(const std::vector<void*>&) {
+}
+
+void inn::ComputeBackendDefault::doWaitTarget() {
+}
+
+void inn::ComputeBackendDefault::doProcess(void* Object) {
     auto N = (inn::Neuron*)Object;
     double FiSum, D, P = 0;
 
@@ -27,6 +33,11 @@ void inn::ComputeBackendDefault::doProcessNeuron(void* Object) {
     nRPos = new inn::Position(Xm, DimensionsCount);
 
     inn::Position *RPos;
+
+    for (int j = 0; j < N->getEntriesCount(); j++) {
+        auto E = N -> getEntry(j);
+        E -> doProcess();
+    }
 
     for (int i = 0; i < N->getReceptorsCount(); i++) {
         auto R = N->getReceptor(i);
@@ -41,7 +52,6 @@ void inn::ComputeBackendDefault::doProcessNeuron(void* Object) {
         for (int j = 0; j < N->getEntriesCount(); j++) {
             auto E = N -> getEntry(j);
 
-            E -> doProcess();
             for (unsigned int k = 0; k < E->getSynapsesCount(); k++) {
                 auto *S = E -> getSynapse(k);
                 SPos = S -> getPos();
@@ -61,6 +71,7 @@ void inn::ComputeBackendDefault::doProcessNeuron(void* Object) {
         R -> doUpdateSensitivityValue();
     }
     P /= (double)N->getReceptorsCount();
+//    std::cout << " " << P << std::endl;
     delete dRPos;
     delete nRPos;
 

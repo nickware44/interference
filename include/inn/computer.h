@@ -16,7 +16,9 @@ namespace inn {
     class Computer {
     public:
         Computer();
-        virtual void doProcessNeuron(void*) = 0;
+        virtual void doRegisterHost(const std::vector<void*>&) = 0;
+        virtual void doWaitTarget() = 0;
+        virtual void doProcess(void*) = 0;
         static std::vector<double> doCompareCPFunction(std::vector<inn::Position*>, std::vector<inn::Position*>);
         static double doCompareCPFunctionD(std::vector<inn::Position*>, std::vector<inn::Position*>);
         static double doCompareFunction(inn::Position*, inn::Position*);

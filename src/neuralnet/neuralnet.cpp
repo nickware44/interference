@@ -15,6 +15,7 @@
 #include "../../include/inn/error.h"
 
 typedef nlohmann::json json;
+std::queue<std::tuple<std::string, std::string, void*, int64_t>> nqueue;
 
 inn::NeuralNet::NeuralNet() {
     t = 0;
@@ -23,6 +24,14 @@ inn::NeuralNet::NeuralNet() {
     if (inn::System::isSynchronizationNeeded()) {
         DataDoneEvent = new inn::Event();
     }
+}
+
+int64_t inn::NeuralNet::doFindEntry(const std::string& ename) {
+    auto ne = std::find_if(Entries.begin(), Entries.end(), [ename](const std::pair<std::string, std::vector<std::string>>& e){
+        return e.first == ename;
+    });
+    if (ne == Entries.end()) return -1;
+    return std::distance(Entries.begin(), ne);
 }
 
 /**
@@ -47,12 +56,13 @@ std::vector<double> inn::NeuralNet::doComparePatterns() {
 //    std::cout << PDRMin << " " << PDRMax << " " << PDLMin << " " << PDLMax << std::endl;
     for (auto &PDR: PDiffR) {
         //PDR = 1 - (PDR-PDRMin) / PDRMax;
-        PDiff.push_back(1 - (PDR-PDRMin) / PDRMax);
+        if (PDRMax != 0) PDiff.push_back(1 - (PDR-PDRMin) / PDRMax);
+        else PDiff.push_back(1);
     }
-    for (auto &PDL: PDiffL) {
+//    for (auto &PDL: PDiffL) {
 //        PDL = 1 - (PDL-PDLMin) / PDLMax;
 //        std::cout << PDL << std::endl;
-    }
+//    }
 //    for (auto i = 0; i < Outputs.size(); i++) {
 //        PDiff.push_back((PDiffR[i]+PDiffL[i])/2);
 //    }
@@ -69,109 +79,64 @@ void inn::NeuralNet::doReset() {
 }
 
 void inn::NeuralNet::doSignalProcessStart() {
-    int64_t begin = 0, end = 1;
+    while (!nqueue.empty()) {
+        auto i = nqueue.front();
+        nqueue.pop();
 
-    while (begin < ContextCascade.size()) {
+        auto from = std::get<0>(i);
+        auto to = std::get<1>(i);
+        auto object = std::get<2>(i);
+        auto time = std::get<3>(i);
 
-        for (auto i = begin; i < end && i < ContextCascade.size(); i++) {
-            auto &context = ContextCascade[i];
-            auto &queue = context.first;
-            auto &pending = context.second;
+        auto lfrom = Latencies.find(from);
+        auto latencyfrom = lfrom != Latencies.end() ? lfrom->second : 0;
+        auto lto = Latencies.find(to);
+        auto latencyto = lto != Latencies.end() ? lto->second : 0;
 
-            if (inn::System::isSynchronizationNeeded() && !pending.empty()) {
-                std::vector<std::string> pending_n = pending;
-                pending.clear();
-                while (!pending_n.empty()) {
-                    auto p = pending_n.back();
-                    pending_n.pop_back();
-                    auto ne = Neurons.find(p);
-                    if (ne->second->getState() == inn::Neuron::States::Computed) {
-                        if (i == end-1) {
-                            end++;
-                        }
-                        auto nlinks = ne -> second -> getLinkOutput();
-                        for (auto &nl: nlinks) {
-                            auto nr = ne->second->doSignalReceive().second;
-                            auto nt = ne->second->getTime();
-                            queue.push(std::make_tuple(p, nl, nr, nt));
-                            if (inn::System::getVerbosityLevel() > 3) {
-                                std::cout << "(" << ne->second->getTime() << ", " << i << ") " << "Added "
-                                          << p << " -> " << nl << " (" << ne->second->doSignalReceive().second << ")"
-                                          << std::endl;
-                            }
-                        }
-                    } else pending.push_back(p);
-                }
-            }
+        auto n = Neurons.find(to);
 
-            while (!queue.empty()) {
-                auto e = queue.front();
-
-                auto n = Neurons.find(std::get<1>(e));
-                if (n == Neurons.end()) break;
-                auto nf = Neurons.find(std::get<0>(e));
-                auto tt = std::get<3>(e);
-
-                if (n->second->getState() == inn::Neuron::States::Pending || (n->second->getState() == inn::Neuron::States::Computed && !n->second->getLinkOutput().empty()) ||
-                        (nf != Neurons.end() && !(tt == n->second->getTime()+1 || tt == n->second->getTime()))) {
-
-                    if (inn::System::getVerbosityLevel() > 3) {
-                        std::cout << "Queue size " << queue.size() << std::endl;
-                        std::cout << "Waiting " << std::get<0>(e) << " " << std::get<1>(e) <<
-                                  " " << (nf != Neurons.end() ? nf->second->getTime() : 0) << " "
-                                  << n->second->getTime() << " (" << tt << ", " << i << ") " << n->second->getState()
-                                  << std::endl;
-                        std::this_thread::sleep_for(std::chrono::milliseconds(10));
-                    }
-
-                    break;
-                }
-
-                queue.pop();
-
-                if (inn::System::getVerbosityLevel() > 2) {
-                    std::cout << "(" << tt << ", " << i << ") " << std::get<0>(e) << " -> "
-                              << std::get<1>(e) << " (" << (nf != Neurons.end() ? nf->second->getTime() : 0) << "-"
-                              << n->second->getTime()
-                              << " " << std::get<2>(e) << ")" << std::endl;
-                }
-
-                if (tt == 1) {
-                    auto waiting = n -> second -> getWaitingEntries();
-                    auto l = Latencies.find(std::get<1>(e));
-                    auto latency = l == Latencies.end() ? 0 : l->second;
-                    for (auto &we: waiting) {
-                        auto nfrom = Latencies.find(we);
-                        if (nfrom != Latencies.end() && nfrom->second > latency && std::get<0>(e) != we) {
-                            n -> second -> doSignalSendEntry(we, 0);
-                        }
-                    }
-                }
-
-                auto done = n -> second -> doSignalSendEntry(std::get<0>(e), std::get<2>(e));
-
-                if (done) {
-                    if (n->second->getState() == inn::Neuron::States::Pending) {
-                        pending.push_back(std::get<1>(e));
-                        continue;
-                    }
-                    auto nlinks = n -> second -> getLinkOutput();
-                    for (auto &nl: nlinks) {
-                        queue.push(std::make_tuple(std::get<1>(e), nl, n->second->doSignalReceive().second, std::get<3>(e)));
-                    }
-
-                    if (i == end-1) {
-                        end++;
+        if (n != Neurons.end()) {
+            if (time == 0) {
+                auto waiting = n -> second -> getWaitingEntries();
+                for (auto &we: waiting) {
+                    auto nfrom = Latencies.find(we);
+                    if (nfrom != Latencies.end() && nfrom->second > latencyto) {
+                        n -> second -> doSignalSendEntry(we, 0, time);
                     }
                 }
             }
 
-            if (queue.empty() && pending.empty() && i == begin && begin+1 < end) {
-                begin++;
+            double value = 0;
+            auto eid = doFindEntry(from);
+            if (eid >= 0) {
+                value = *(double*)object;
+                delete (double*)object;
+            } else {
+                auto nprev = (inn::Neuron*)object;
+
+                auto shift = latencyfrom > 0;
+                if (nprev->getState(time-shift) != inn::Neuron::States::Computed) {
+                    nqueue.push(i);
+                    continue;
+                }
+                value = nprev -> doSignalReceive(time-shift).second;
+            }
+
+            bool done = n -> second -> doSignalSendEntry(from, value, time);
+
+            if (done) {
+                auto nlinks = n -> second -> getLinkOutput();
+                for (auto &nl: nlinks) {
+                    auto shift = 0;
+                    auto nlatency = 0;
+                    auto lnext = Latencies.find(nl);
+                    if (lnext != Latencies.end()) nlatency = lnext -> second;
+                    if (latencyto > nlatency) shift = 1;
+                    nqueue.emplace(to, nl, n->second, time+shift);
+                }
             }
         }
     }
-    ContextCascade.clear();
 }
 
 /**
@@ -180,23 +145,20 @@ void inn::NeuralNet::doSignalProcessStart() {
  */
 void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
     if (inn::System::getComputeBackendKind() == -1) inn::System::setComputeBackend(inn::System::ComputeBackends::Default);
-    t++;
     int xi = 0;
-    std::queue<std::tuple<std::string, std::string, double, int64_t>> q;
-    std::vector<std::string> p;
 
     for (auto &e: Entries) {
         for (auto &en: e.second) {
-            q.push(std::make_tuple(e.first, en, X[xi], t));
+            nqueue.emplace(e.first, en, new double(X[xi]), t);
         }
         xi++;
     }
 
-    ContextCascade.emplace_back(q, p);
-
     if (!inn::System::isSynchronizationNeeded()) {
         doSignalProcessStart();
     }
+
+    t++;
 }
 
 /**
@@ -205,13 +167,21 @@ void inn::NeuralNet::doSignalSend(const std::vector<double>& X) {
  * @return Output signals.
  */
 std::vector<double> inn::NeuralNet::doSignalTransfer(const std::vector<std::vector<double>>& Xx) {
+    if (!inn::System::isSynchronizationNeeded()) {
+        doReserveSignalBuffer(1);
+    }
 
     for (auto &X: Xx) {
         doSignalSend(X);
     }
 
     if (inn::System::isSynchronizationNeeded()) {
+        if (getSignalBufferSize() != Xx.size()) doReserveSignalBuffer(Xx.size());
+        std::vector<void*> v;
+        for (const auto &n: Neurons) v.push_back((void*)n.second);
+        inn::System::getComputeBackend() -> doRegisterHost(v);
         doSignalProcessStart();
+        inn::System::getComputeBackend() -> doWaitTarget();
     }
 
     return doSignalReceive();
@@ -346,11 +316,9 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
                         nnew -> doReplaceEntryName(e, ename);
                     }
 
-                    auto ne = std::find_if(Entries.begin(), Entries.end(), [ename](const std::pair<std::string, std::vector<std::string>>& e){
-                        return e.first == ename;
-                    });
-                    if (ne != Entries.end()) {
-                        ne->second.push_back(nname);
+                    auto ne = doFindEntry(ename);
+                    if (ne != -1) {
+                        Entries[ne].second.push_back(nname);
                     } else if (CopyEntries && r == newnames.end()) {
                         std::vector<std::string> elinks;
                         elinks.push_back(nname);
@@ -405,6 +373,12 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
             std::cout << o << " ";
         }
         std::cout << std::endl;
+    }
+}
+
+void inn::NeuralNet::doReserveSignalBuffer(int64_t L) {
+    for (auto &n: Neurons) {
+        n.second -> doReserveSignalBuffer(L);
     }
 }
 
@@ -664,13 +638,6 @@ uint64_t inn::NeuralNet::getNeuronCount() {
  * @return JSON string that contains neural network structure.
  */
 std::string inn::NeuralNet::getStructure() {
-//    auto j = json::parse(R"({"entries": [],
-//                                            "neurons": [],
-//                                            "output_signals": [],
-//                                            "name": "",
-//                                            "desc": "",
-//                                            "version": ""})");
-
     json j;
 
     for (const auto& e: Entries) {
@@ -798,6 +765,16 @@ std::vector<inn::Neuron*> inn::NeuralNet::getEnsemble(const std::string& ename) 
         return neurons;
     }
     return {};
+}
+
+int64_t inn::NeuralNet::getSignalBufferSize() {
+    int64_t size = -1;
+    for (auto &n: Neurons) {
+        auto nbsize = n.second -> getSignalBufferSize();
+        if (size != -1 && nbsize >= size) continue;
+        size = nbsize;
+    }
+    return size;
 }
 
 inn::NeuralNet::~NeuralNet() {

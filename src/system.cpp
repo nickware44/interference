@@ -12,6 +12,7 @@
 #include "../include/inn/backends/multithread.h"
 
 int CurrentComputeBackend = -1, VerbosityLevel = 1;
+int ComputeBackendParameter = 0;
 bool SynchronizationNeeded;
 inn::Computer *ComputeBackend;
 
@@ -23,12 +24,14 @@ void inn::System::setComputeBackend(int Backend, int Parameter) {
         case inn::System::ComputeBackends::Default:
             SynchronizationNeeded = false;
             ComputeBackend = new inn::ComputeBackendDefault();
+            Parameter = 0;
             break;
         case inn::System::ComputeBackends::Multithread:
             SynchronizationNeeded = true;
             ComputeBackend = new inn::ComputeBackendMultithread(Parameter?Parameter:INN_MULTITHREAD_DEFAULT_NUM);
             break;
     }
+    ComputeBackendParameter = Parameter;
 }
 
 inn::Computer* inn::System::getComputeBackend() {
@@ -49,6 +52,10 @@ void inn::System::setVerbosityLevel(int VL) {
 
 int inn::System::getVerbosityLevel() {
     return VerbosityLevel;
+}
+
+int inn::System::getComputeBackendParameter() {
+    return ComputeBackendParameter;
 }
 
 template<typename DurationType>

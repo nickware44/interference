@@ -2,7 +2,7 @@
 #include <fstream>
 #include <inn/neuralnet.h>
 
-#define NN_OUTPUT_OK 65.1773
+#define NN_OUTPUT_OK 45.1024
 #define NN_TEST_COUNT 2
 
 uint64_t getTimestampMS() {
@@ -15,6 +15,7 @@ int main() {
     bool PassedFlag;
     inn::System::setVerbosityLevel(1);
     inn::System::setComputeBackend(inn::System::ComputeBackends::Default);
+//    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 5);
 
     std::ifstream structure("../samples/test/structure.json");
     auto NN = new inn::NeuralNet();
@@ -33,7 +34,7 @@ int main() {
     // creating data array
     std::vector<std::vector<double>> X;
     for (int i = 0; i < 50; i++) {
-        X.push_back({1.020938, 1.020938});
+        X.push_back({1.541, 1.541});
     }
 
     std::cout << "Superstructure test: ";
@@ -58,7 +59,7 @@ int main() {
 
     std::cout << std::endl;
     std::cout << "Superstructure multithread test: ";
-    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 6);
+    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 5);
     T = getTimestampMS();
     Y = NN ->doLearn(X);
     T = getTimestampMS() - T;

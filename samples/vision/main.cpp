@@ -9,6 +9,8 @@
 
 #include <cstdint>
 #include <chrono>
+#include <thread>
+#include <synchapi.h>
 #include "inn/system.h"
 #include "inn/neuralnet.h"
 #include "bmp.hpp"
@@ -36,11 +38,12 @@ std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &image
 }
 
 int main() {
-    constexpr uint8_t LEARNING_COUNT = 10;
+    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 4);
+    constexpr uint8_t TEACHING_COUNT = 10;
     constexpr uint8_t TEST_COUNT = 10;
     constexpr uint8_t TEST_ELEMENTS = 10;
     constexpr char STRUCTURE_PATH[128] = "../samples/vision/structure.json";
-    constexpr char IMAGES_LEARNING_PATH[128] = "../samples/vision/images/learn/";
+    constexpr char IMAGES_TEACHING_PATH[128] = "../samples/vision/images/learn/";
     constexpr char IMAGES_TESTING_PATH[128] = "../samples/vision/images/test/";
 
     // load neural network structure from file
@@ -49,7 +52,7 @@ int main() {
     NN -> setStructure(structure);
 
     // replicate neurons for classification
-    for (int i = 2; i <= LEARNING_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
+    for (int i = 2; i <= TEACHING_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
 
     std::cout << "Model name  : " << NN->getName() << std::endl;
     std::cout << "Model desc  : " << NN->getDescription() << std::endl;
@@ -60,8 +63,8 @@ int main() {
     // load the images
     auto T = getTimestampMS();
     std::vector<BMPImage> images;
-    for (int b = 1; b <= LEARNING_COUNT; b++) {
-        auto image = doReadBMP(IMAGES_LEARNING_PATH+std::to_string(b)+".bmp");
+    for (int b = 1; b <= TEACHING_COUNT; b++) {
+        auto image = doReadBMP(IMAGES_TEACHING_PATH+std::to_string(b)+".bmp");
         images.push_back(image);
         if (image.size() != 128*128) {
             std::cout << "Error loading image " << b << ".bmp" << std::endl;
@@ -76,7 +79,7 @@ int main() {
     T = getTimestampMS();
     NN -> doLearn(input);
     T = getTimestampMS() - T;
-    std::cout << "Learning neural network\t\tdone [" << T << " ms]" << std::endl;
+    std::cout << "Teaching neural network\t\tdone [" << T << " ms]" << std::endl;
 
     // recognize the images
     float rcount = 0;
@@ -93,6 +96,7 @@ int main() {
             NN -> doRecognise(rinput);
             auto patterns = NN -> doComparePatterns();
             T = getTimestampMS() - T;
+
             // Compute speed
             auto S = (128*128*24./1024/1024)*1000 / T;
             std::cout << "done [" << T << " ms, " << S << " mbit/s]\t";

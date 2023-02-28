@@ -31,6 +31,7 @@ namespace inn {
         std::map<std::string, std::vector<std::string>> Ensembles;
         std::vector<std::string> Outputs;
 
+        int64_t doFindEntry(const std::string&);
         void doSignalProcessStart();
         std::vector<std::pair<std::queue<std::tuple<std::string, std::string, double, int64_t>>, std::vector<std::string>>> ContextCascade;
         std::map<std::string, inn::Neuron*> Neurons;
@@ -49,6 +50,7 @@ namespace inn {
         void doRecogniseAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
         std::vector<double> doSignalReceive();
         void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);
+        void doReserveSignalBuffer(int64_t L);
         void setStructure(std::ifstream&);
         void setStructure(const std::string &Str);
         void setLearned(bool LearnedFlag);
@@ -60,6 +62,7 @@ namespace inn {
         std::vector<inn::Neuron*> getEnsemble(const std::string&);
         inn::Neuron* getNeuron(const std::string&);
         uint64_t getNeuronCount();
+        int64_t getSignalBufferSize();
         ~NeuralNet();
     };
 }

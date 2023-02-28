@@ -17,7 +17,9 @@ namespace inn {
         inn::Position *dRPos, *nRPos;
     public:
         ComputeBackendDefault();
-        void doProcessNeuron(void*);
+        void doRegisterHost(const std::vector<void*>&) override;
+        void doWaitTarget() override;
+        void doProcess(void*) override;
     };
 }
 
