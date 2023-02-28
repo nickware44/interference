@@ -9,8 +9,6 @@
 
 #include <cstdint>
 #include <chrono>
-#include <thread>
-#include <synchapi.h>
 #include "inn/system.h"
 #include "inn/neuralnet.h"
 #include "bmp.hpp"
@@ -38,7 +36,7 @@ std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &image
 }
 
 int main() {
-    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 4);
+    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 3);
     constexpr uint8_t TEACHING_COUNT = 10;
     constexpr uint8_t TEST_COUNT = 10;
     constexpr uint8_t TEST_ELEMENTS = 10;
