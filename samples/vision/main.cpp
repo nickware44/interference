@@ -61,6 +61,7 @@ int main() {
     // replicate neurons for classification
     for (int i = 2; i <= TEACH_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
 
+    std::cout << "Threads     : " << inn::System::getComputeBackendParameter()+1 << std::endl;
     std::cout << "Model name  : " << NN->getName() << std::endl;
     std::cout << "Model desc  : " << NN->getDescription() << std::endl;
     std::cout << "Model ver   : " << NN->getVersion() << std::endl;
