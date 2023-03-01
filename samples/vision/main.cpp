@@ -1,14 +1,14 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:
 // Purpose:
-// Author: Nickolay Babbysh
-// Created: 30.01.23
-// Copyright: (c) NickWare Group
-// Licence: MIT licence
+// Author:      Nickolay Babbysh
+// Created:     30.01.23
+// Copyright:   (c) NickWare Group
+// Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include <cstdint>
 #include <chrono>
+#include <iomanip>
 #include "inn/system.h"
 #include "inn/neuralnet.h"
 #include "bmp.hpp"
@@ -35,11 +35,20 @@ std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &image
     return input;
 }
 
+void doLog(const std::string& element, uint64_t time, double speed, bool endl = true) {
+    std::stringstream s;
+    s << time << "ms";
+    if (speed > 0) s << ", " << std::setprecision(2) << std::fixed << speed << " mbit/s";
+    std::cout << "[" << std::setw(22) << std::left << std::setfill('.') << s.str() << "] " << std::setw(32) << std::setfill(' ') << element << "done ";
+    if (endl) std::cout << std::endl;
+}
+
 int main() {
-    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 3);
-    constexpr uint8_t TEACHING_COUNT = 10;
+    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 2);
+    constexpr uint8_t TEACH_COUNT = 10;
     constexpr uint8_t TEST_COUNT = 10;
     constexpr uint8_t TEST_ELEMENTS = 10;
+    constexpr uint16_t IMAGE_SIZE = 128*128;
     constexpr char STRUCTURE_PATH[128] = "../samples/vision/structure.json";
     constexpr char IMAGES_TEACHING_PATH[128] = "../samples/vision/images/learn/";
     constexpr char IMAGES_TESTING_PATH[128] = "../samples/vision/images/test/";
@@ -50,7 +59,7 @@ int main() {
     NN -> setStructure(structure);
 
     // replicate neurons for classification
-    for (int i = 2; i <= TEACHING_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
+    for (int i = 2; i <= TEACH_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
 
     std::cout << "Model name  : " << NN->getName() << std::endl;
     std::cout << "Model desc  : " << NN->getDescription() << std::endl;
@@ -61,23 +70,26 @@ int main() {
     // load the images
     auto T = getTimestampMS();
     std::vector<BMPImage> images;
-    for (int b = 1; b <= TEACHING_COUNT; b++) {
+    for (int b = 1; b <= TEACH_COUNT; b++) {
         auto image = doReadBMP(IMAGES_TEACHING_PATH+std::to_string(b)+".bmp");
         images.push_back(image);
-        if (image.size() != 128*128) {
+        if (image.size() != IMAGE_SIZE) {
             std::cout << "Error loading image " << b << ".bmp" << std::endl;
             return 1;
         }
     }
     T = getTimestampMS() - T;
     auto input = doBuildInputVector(images);
-    std::cout << "Loading images\t\t\t\tdone [" << T << " ms]" << std::endl;
+    doLog("Loading images", T, 0);
 
     // teach the neural network
     T = getTimestampMS();
     NN -> doLearn(input);
     T = getTimestampMS() - T;
-    std::cout << "Teaching neural network\t\tdone [" << T << " ms]" << std::endl;
+
+    // Compute speed
+    auto S = (IMAGE_SIZE*TEACH_COUNT*24./1024/1024)*1000 / T;
+    doLog("Teaching neural network", T, S);
 
     // recognize the images
     float rcount = 0;
@@ -89,16 +101,15 @@ int main() {
             for (int i = 1; i <= TEST_COUNT; i++) rimages.push_back(image);
             auto rinput = doBuildInputVector(rimages);
 
-            std::cout << "Recognizing " << b << "-" << e << ".bmp:\t\t";
             T = getTimestampMS();
             NN -> doRecognise(rinput);
-            auto patterns = NN -> doComparePatterns();
             T = getTimestampMS() - T;
 
             // Compute speed
-            auto S = (128*128*24./1024/1024)*1000 / T;
-            std::cout << "done [" << T << " ms, " << S << " mbit/s]\t";
+            S = (IMAGE_SIZE*24./1024/1024)*1000 / T;
+            doLog("Recognizing "+std::to_string(b)+"-"+std::to_string(e)+".bmp", T, S, false);
 
+            auto patterns = NN -> doComparePatterns();
             auto r = std::max_element(patterns.begin(), patterns.end());
             if (std::distance(patterns.begin(), r) == b-1) {
                 std::cout << "[RECOGNIZED]" << std::endl;
@@ -113,6 +124,6 @@ int main() {
     }
 
     std::cout << std::endl;
-    std::cout << "================================ SUMMARY ================================" << std::endl;
+    std::cout << "================================== SUMMARY ==================================" << std::endl;
     std::cout << "Recognition accuracy: " << rcount/(TEST_COUNT*TEST_ELEMENTS) << " (" << rcount << "/" << TEST_COUNT*TEST_ELEMENTS << ")" << std::endl;
 }

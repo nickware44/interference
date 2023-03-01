@@ -22,7 +22,7 @@
         {
           "type": "cluster",
           "position": [500, 500, 0],
-          "count": 10,
+          "count": 5,
           "radius": 5
         }
       ]
