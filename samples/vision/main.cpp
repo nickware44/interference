@@ -127,4 +127,5 @@ int main() {
     std::cout << std::endl;
     std::cout << "================================== SUMMARY ==================================" << std::endl;
     std::cout << "Recognition accuracy: " << rcount/(TEST_COUNT*TEST_ELEMENTS) << " (" << rcount << "/" << TEST_COUNT*TEST_ELEMENTS << ")" << std::endl;
+    return 0;
 }
