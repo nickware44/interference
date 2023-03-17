@@ -18,3 +18,4 @@ install(TARGETS interference ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/lib)
 
 add_subdirectory(samples/test)
 add_subdirectory(samples/vision)
+add_subdirectory(samples/multimodal)
