@@ -36,8 +36,7 @@ double inn::Computer::doCompareFunction(inn::Position *R, inn::Position *Rf) {
 
 double inn::Computer::getGammaFunctionValue(double oG, double k1, double k2, double Xt) {
     double nGamma;
-    //if (WVSum < 13) WVSum = 1;
-    nGamma = oG + (k1*Xt-(1-Xt)*oG*k2);
+    nGamma = oG + (k1*Xt-oG/k2);
     return nGamma;
 }
 

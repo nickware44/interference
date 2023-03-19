@@ -41,7 +41,7 @@ inn::Neuron::Synapse::Synapse(const Synapse &S) {
 inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, int64_t _Tl, int NT) {
     SPos = _SPos;
     ok1 = _k1;
-    ok2 = ok1 * 9e-1;
+    ok2 = ok1 * 1000;
     k1 = ok1;
 	k2 = ok2;
     Lambda = _Lambda;
