@@ -152,12 +152,10 @@ std::pair<int64_t, double> inn::Neuron::doSignalReceive(int64_t tT) {
     auto d = tlocal - tT;
     if (d > 0 && OutputSignalPointer-d >= 0) {
         return std::make_pair(tT, OutputSignal[OutputSignalPointer-d]);
+    } else {
+        std::cerr << "[" << Name << "] Output for time " << tT << " is not ready yet" << std::endl;
+        return std::make_pair(tT, 0);
     }
-    else return std::make_pair(tT, 0);
-}
-
-bool inn::Neuron::doCheckOutputSignalQ(int64_t tT) {
-    return false;
 }
 
 void inn::Neuron::doCreateCheckpoint() {

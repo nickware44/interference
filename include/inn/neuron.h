@@ -60,7 +60,6 @@ namespace inn {
         void doCreateNewReceptorCluster(const std::vector<double>& PosVector, unsigned R, unsigned C);
         bool doSignalSendEntry(const std::string&, double, int64_t);
         std::pair<int64_t, double> doSignalReceive(int64_t tT = -1);
-        bool doCheckOutputSignalQ(int64_t);
         void doFinalizeInput(double);
         void doPrepare();
         void doFinalize();

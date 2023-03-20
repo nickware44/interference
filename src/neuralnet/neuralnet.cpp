@@ -114,7 +114,7 @@ void inn::NeuralNet::doSignalProcessStart() {
             } else {
                 auto nprev = (inn::Neuron*)object;
 
-                auto shift = latencyfrom > 0;
+                auto shift = latencyfrom > latencyto;
                 if (nprev->getState(time-shift) != inn::Neuron::States::Computed) {
                     nqueue.push(i);
                     continue;
