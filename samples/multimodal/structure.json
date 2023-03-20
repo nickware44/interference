@@ -29,33 +29,32 @@
     },
     {
       "name": "N2",
-      "size": 1000,
+      "size": 500,
       "dimensions": 3,
       "input_signals": ["E7"],
       "ensemble": "A1",
 
       "synapses": [
         {
-          "type": "cluster",
-          "position": [500, 500, 0],
-          "radius": 500,
+          "entry": 0,
+          "position": [250, 250, 0],
           "neurotransmitter": "activation",
-          "k1": 2.223
+          "k1": 70
         }
       ],
 
       "receptors": [
         {
           "type": "cluster",
-          "position": [500, 500, 0],
-          "count": 3,
-          "radius": 5
+          "position": [250, 250, 0],
+          "count": 10,
+          "radius": 15
         }
       ]
     },
     {
       "name": "N3",
-      "size": 1001,
+      "size": 1000,
       "dimensions": 3,
       "input_signals": ["N1", "N2"],
       "ensemble": "A1",
@@ -71,14 +70,14 @@
           "entry": 1,
           "position": [500, 510, 0],
           "neurotransmitter": "activation",
-          "k1": 2
+          "k1": 300
         }
       ],
 
       "receptors": [
         {
           "type": "cluster",
-          "position": [500, 500, 10],
+          "position": [500, 500, 0],
           "count": 5,
           "radius": 5
         }

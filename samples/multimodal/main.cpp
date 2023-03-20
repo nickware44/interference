@@ -32,9 +32,7 @@ std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &image
             }
 
             auto words = texts[i];
-            if (t < words.size()) {
-                input.back().emplace_back(double(words[t])/255);
-            }
+            if (t < words.size()) input.back().emplace_back(double(words[t])/255);
             else input.back().emplace_back(0);
         }
     }
@@ -47,8 +45,8 @@ int main() {
     constexpr uint16_t IMAGE_SIZE = 128*128;
     constexpr char STRUCTURE_PATH[128] = "../samples/multimodal/structure.json";
     constexpr char IMAGES_PATH[128] = "../samples/multimodal/images/";
-    std::vector<std::string> names = {"mug with a melon", "mug with an apple", "tomato"};
-    std::vector<std::string> variants = {"mug with a melon", "mug with an apple", "tomato"};
+    std::vector<std::string> names = {"mug with a melons", "mug with a big apple", "tomato"};
+    std::vector<std::string> variants = {"mug with a melons", "mug wth a meln", "mug with a big apple", "mug w th a bi ap ple", "tomato", "tomto"};
 
     // load neural network structure from file
     std::ifstream structure(STRUCTURE_PATH);
@@ -79,6 +77,7 @@ int main() {
     auto input = doBuildInputVector(images, names);
 
     auto T = getTimestampMS();
+
     // teach the neural network
     NN -> doLearn(input);
 
@@ -93,7 +92,7 @@ int main() {
         std::cout << "Image [" << b << ".bmp]" << std::endl;
 
         for (int e = 0; e < variants.size(); e++) {
-            std::cout << std::setw(22) << std::left << std::to_string(e+1)+". "+variants[e];
+            std::cout << std::setw(35) << std::left << std::to_string(e+1)+". "+variants[e];
 
             std::vector<std::string> rvariants;
             for (int i = 1; i <= COUNT; i++) rvariants.push_back(variants[e]);
@@ -115,6 +114,7 @@ int main() {
         }
         std::cout << std::endl;
     }
+
     T = getTimestampMS() - T;
     std::cout << "Done in " << T << " ms" << std::endl;
     return 0;
