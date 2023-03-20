@@ -79,7 +79,7 @@
     },
     {
       "name": "N4",
-      "size": 200,
+      "size": 300,
       "dimensions": 3,
       "input_signals": ["N3", "N5", "N6"],
       "latency": 1,
@@ -88,24 +88,18 @@
       "synapses": [
         {
           "type": "cluster",
-          "position": [100, 100, 0],
-          "radius": 50,
+          "position": [150, 150, 0],
+          "radius": 5,
           "neurotransmitter": "activation",
-          "k1": 25
+          "k1": 1
         }
       ],
       "receptors": [
         {
           "type": "cluster",
-          "position": [100, 100, 0],
+          "position": [150, 150, 0],
           "count": 15,
-          "radius": 10
-        },
-        {
-          "type": "cluster",
-          "position": [100, 100, 0],
-          "count": 10,
-          "radius": 10
+          "radius": 1
         }
       ]
     },
@@ -121,7 +115,7 @@
           "entry": 0,
           "position": [100, 100, 0],
           "neurotransmitter": "activation",
-          "k1": 25
+          "k1": 1
         }
       ],
       "receptors": [

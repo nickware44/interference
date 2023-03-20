@@ -10,7 +10,7 @@
 #include <fstream>
 #include <inn/neuralnet.h>
 
-#define NN_OUTPUT_OK 10.7375
+#define NN_OUTPUT_OK 10.6153
 #define NN_TEST_COUNT 2
 
 uint64_t getTimestampMS() {
