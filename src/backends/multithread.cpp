@@ -38,8 +38,9 @@ void inn::ComputeBackendMultithread::doRegisterHost(const std::vector<void*>& ob
 
 void inn::ComputeBackendMultithread::doWaitTarget() {
     for (const auto &w: Workers) {
-        if (w->done.load()) continue;
-        ((inn::Event*)w->event) -> doWait();
+        while (!w->done.load()) {
+            ((inn::Event*)w->event) -> doWaitTimed(100);
+        }
     }
     for (const auto &w: Workers) {
         w -> objects.clear();
