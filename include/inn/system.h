@@ -72,8 +72,7 @@ namespace inn {
     public:
         Event(): m_bEvent(false) {}
         ~Event() = default;
-        template<typename DurationType>
-        bool TimedWait(DurationType const& rTimeout);
+        bool doWaitTimed(int);
         bool doWait();
         void doNotifyOne();
     private:

@@ -58,13 +58,12 @@ int inn::System::getComputeBackendParameter() {
     return ComputeBackendParameter;
 }
 
-template<typename DurationType>
-bool inn::Event::TimedWait(DurationType const& rTimeout) {
+bool inn::Event::doWaitTimed(int T) {
+    auto rTimeout = std::chrono::milliseconds(T);
     bool bTimeout = false;
     bool bRet;
-    std::unique_lock< std::mutex > oNotifierLock(m_oMutex);
-    while(!m_bEvent && !bTimeout)
-    {
+    std::unique_lock<std::mutex> oNotifierLock(m_oMutex);
+    while (!m_bEvent && !bTimeout) {
         bTimeout = std::cv_status::timeout == m_oConditionVariable.wait_for(oNotifierLock, rTimeout);
     }
     bRet = m_bEvent;
