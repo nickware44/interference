@@ -10,6 +10,7 @@
 #include "../include/inn/system.h"
 #include "../include/inn/backends/default.h"
 #include "../include/inn/backends/multithread.h"
+#include "../include/inn/backends/opencl.h"
 
 int CurrentComputeBackend = -1, VerbosityLevel = 1;
 int ComputeBackendParameter = 0;
@@ -29,6 +30,10 @@ void inn::System::setComputeBackend(int Backend, int Parameter) {
         case inn::System::ComputeBackends::Multithread:
             SynchronizationNeeded = true;
             ComputeBackend = new inn::ComputeBackendMultithread(Parameter?Parameter:INN_MULTITHREAD_DEFAULT_NUM);
+            break;
+        case inn::System::ComputeBackends::OpenCL:
+            SynchronizationNeeded = true;
+            ComputeBackend = new inn::ComputeBackendOpenCL();
             break;
     }
     ComputeBackendParameter = Parameter;

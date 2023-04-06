@@ -22,7 +22,8 @@ int main() {
     int TestDoneCount = 0, TestTotalCount = NN_TEST_COUNT;
     bool PassedFlag;
     inn::System::setVerbosityLevel(1);
-    inn::System::setComputeBackend(inn::System::ComputeBackends::Default);
+    inn::System::setComputeBackend(inn::System::ComputeBackends::OpenCL);
+    //inn::System::setComputeBackend(inn::System::ComputeBackends::Default);
 
     std::ifstream structure("../samples/test/structure.json");
     auto NN = new inn::NeuralNet();
