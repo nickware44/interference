@@ -61,9 +61,7 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
         std::vector<int64_t> times;
         int tdone = 0;
         uint64_t size = worker -> objects.size();
-        int f = 0;
         while (tdone < size) {
-            f++;
             for (uint64_t n = 0; n < size; n++) {
                 if (n >= times.size()) times.push_back(0);
                 auto N = (inn::Neuron*)worker -> objects[n];

@@ -61,23 +61,6 @@ void inn::Neuron::Entry::doProcess() {
     }
 }
 
-void inn::Neuron::Entry::doSendToQueue(double X, int64_t t, double WVSum) {
-    //Signal.push_back(X);
-
-    int64_t STl = 0;
-
-    for (auto S: Synapses) {
-        STl = S -> getTl();
-        if (t >= STl) S -> doSendToQueue(X, WVSum);
-        else S -> doSendToQueue(0, WVSum);
-    }
-}
-
-bool inn::Neuron::Entry::doInFromQueue(int64_t tT) {
-    for (auto S: Synapses) if (!S->doInFromQueue(tT)) return false;
-    return true;
-}
-
 void inn::Neuron::Entry::doPrepare() {
     t = 0;
     tm = -1;
@@ -113,6 +96,14 @@ inn::Neuron::Synapse* inn::Neuron::Entry::getSynapse(int64_t SID) const {
 
 int64_t inn::Neuron::Entry::getSynapsesCount() const {
     return Synapses.size();
+}
+
+double inn::Neuron::Entry::getIn() {
+    auto d = tm - t + 1;
+    if (d > 0 && SignalPointer-d >= 0) {
+        t++;
+        return Signal[SignalPointer-d];
+    }
 }
 
 inn::Neuron::Entry::~Entry() {

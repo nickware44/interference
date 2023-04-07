@@ -111,8 +111,6 @@ namespace inn {
         void doAddSynapse(inn::Position*, unsigned int, double, int64_t, int);
         void doIn(double, int64_t);
         void doProcess();
-        void doSendToQueue(double, int64_t, double);
-        bool doInFromQueue(int64_t);
         void doPrepare();
         void doFinalize();
         void doReserveSignalBuffer(uint64_t);
@@ -120,6 +118,7 @@ namespace inn {
         void setk2(double);
         inn::Neuron::Synapse* getSynapse(int64_t) const;
         int64_t getSynapsesCount() const;
+        double getIn();
         ~Entry();
     };
 
