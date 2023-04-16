@@ -18,13 +18,16 @@ uint64_t getTimestampMS() {
             time_since_epoch()).count();
 }
 
-std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &images, std::vector<std::string> &texts) {
-    std::vector<std::vector<double>> input;
+std::vector<std::vector<float>> doBuildInputVector(std::vector<BMPImage> &images, std::vector<std::string> &texts) {
+    std::vector<std::vector<float>> input;
     for (int d = 0,t = 0; d < images[0].size(); d+=2, t++) {
         input.emplace_back();
         for (int i = 0; i < images.size(); i++) {
             for (int s = 0; s < 2; s++) {
-                auto rgbn = std::vector<double>({images[i][d+s][0]/255., images[i][d+s][1]/255., images[i][d+s][2]/255.});
+                float r = images[i][d+s][0];
+                float g = images[i][d+s][1];
+                float b = images[i][d+s][2];
+                auto rgbn = std::vector<float>({r/255, g/255, b/255});
                 auto HSI = RGB2HSI(rgbn[0], rgbn[1], rgbn[2]);
                 input.back().emplace_back(HSI[0]/(2*M_PI));
                 input.back().emplace_back(HSI[1]);
@@ -32,7 +35,7 @@ std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &image
             }
 
             auto words = texts[i];
-            if (t < words.size()) input.back().emplace_back(double(words[t])/255);
+            if (t < words.size()) input.back().emplace_back(float(words[t])/255);
             else input.back().emplace_back(0);
         }
     }
@@ -55,6 +58,7 @@ int main() {
 
     // replicate neurons
     for (int i = 2; i <= COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
+    NN -> doStructurePrepare();
 
     std::cout << "Threads     : " << inn::System::getComputeBackendParameter()+1 << std::endl;
     std::cout << "Model name  : " << NN->getName() << std::endl;

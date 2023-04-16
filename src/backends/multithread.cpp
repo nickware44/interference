@@ -42,10 +42,6 @@ void inn::ComputeBackendMultithread::doWaitTarget() {
             ((inn::Event*)w->event) -> doWaitTimed(100);
         }
     }
-    for (const auto &w: Workers) {
-        w -> objects.clear();
-        delete (inn::Event*)w->event;
-    }
 }
 
 void inn::ComputeBackendMultithread::doProcess(void* object) {
@@ -74,7 +70,7 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
                     continue;
                 }
 
-                double FiSum, D, P = 0;
+                float FiSum, D, P = 0;
                 auto Xm = N -> getXm();
                 auto DimensionsCount = N -> getDimensionsCount();
                 auto RPr = new inn::Position(Xm, {0, 0, 0});
@@ -95,7 +91,7 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
                     else RPos = R -> getPosf();
                     RPr -> setPosition(RPos);
                     inn::Position *SPos;
-                    std::pair<double, double> FiValues;
+                    std::pair<float, float> FiValues;
                     FiSum = 0;
                     dRPos -> doZeroPosition();
 
@@ -120,7 +116,7 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
                     P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), RPos, RPr);
                     R -> doUpdateSensitivityValue();
                 }
-                P /= (double)N->getReceptorsCount();
+                P /= (float)N->getReceptorsCount();
 
                 N -> doFinalizeInput(P);
                 t++;
@@ -135,5 +131,12 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
         }
         worker -> done.store(true);
         ((inn::Event*)worker->event) -> doNotifyOne();
+    }
+}
+
+void inn::ComputeBackendMultithread::doUnregisterHost() {
+    for (const auto &w: Workers) {
+        w -> objects.clear();
+        delete (inn::Event*)w->event;
     }
 }

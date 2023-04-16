@@ -23,40 +23,40 @@ namespace inn {
     private:
         unsigned int Xm;
         unsigned int DimensionsCount;
-        double *X;
+        float *X;
     public:
         Position();
         Position(const inn::Position&);
         Position(unsigned int, unsigned int);
-        Position(unsigned int, std::vector<double>);
+        Position(unsigned int, std::vector<float>);
         void doAdd(const inn::Position*);
         void doSubtract(const inn::Position*);
-        void doDivide(double);
-        void doMultiply(double);
+        void doDivide(float);
+        void doMultiply(float);
         void doZeroPosition();
         void setPosition(const inn::Position&);
         void setPosition(const inn::Position*);
-        void setPosition(std::vector<double>);
+        void setPosition(std::vector<float>);
         unsigned int getDimensionsCount() const;
         unsigned int getXm() const;
-        double getPositionValue(unsigned int) const;
-        double getDistanceFrom(const inn::Position*);
+        float getPositionValue(unsigned int) const;
+        float getDistanceFrom(const inn::Position*);
         inn::Position& operator= (const inn::Position&);
 
-        static const double getDistance(const inn::Position&, const inn::Position&);
-        static const double getDistance(const inn::Position*, const inn::Position*);
+        static float getDistance(const inn::Position&, const inn::Position&);
+        static float getDistance(const inn::Position*, const inn::Position*);
 
         static inn::Position* getSum(const inn::Position*, const inn::Position*);
         static inn::Position* getDiff(const inn::Position*, const inn::Position*);
-        static inn::Position* getQuotient(const inn::Position*, double);
-        static inn::Position* getProduct(const inn::Position*, double);
+        static inn::Position* getQuotient(const inn::Position*, float);
+        static inn::Position* getProduct(const inn::Position*, float);
         ~Position();
     };
 
-    const inn::Position operator+(const inn::Position&, const inn::Position&);
-    const inn::Position operator-(const inn::Position&, const inn::Position&);
-    const inn::Position operator/(const inn::Position&, double);
-    const inn::Position operator*(const inn::Position&, double);
+    inn::Position operator+(const inn::Position&, const inn::Position&);
+    inn::Position operator-(const inn::Position&, const inn::Position&);
+    inn::Position operator/(const inn::Position&, float);
+    inn::Position operator*(const inn::Position&, float);
 }
 
 #endif //INTERFERENCE_POSITION_H

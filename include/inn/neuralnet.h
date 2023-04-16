@@ -19,6 +19,11 @@
 #include "../../include/inn/system.h"
 
 namespace inn {
+    typedef std::queue<std::tuple<std::string, std::string, void*, int64_t>> NQueue;
+
+    typedef std::tuple<std::string, std::string, void*, void*, int> LinkDefinition;
+    typedef std::vector<LinkDefinition> NList;
+
     /**
      * Main neural net class.
      */
@@ -32,23 +37,27 @@ namespace inn {
         std::vector<std::string> Outputs;
 
         int64_t doFindEntry(const std::string&);
-        void doSignalProcessStart();
-        std::vector<std::pair<std::queue<std::tuple<std::string, std::string, double, int64_t>>, std::vector<std::string>>> ContextCascade;
+        void doSignalProcessStart(const inn::NList&, const std::vector<std::vector<float>>&);
+        std::vector<std::pair<std::queue<std::tuple<std::string, std::string, float, int64_t>>, std::vector<std::string>>> ContextCascade;
         std::map<std::string, inn::Neuron*> Neurons;
         std::map<std::string, int> Latencies;
-        inn::Event *DataDoneEvent;
+
+        NList Links;
+        bool Prepared;
+
+        int LastUsedComputeBackend;
     public:
         NeuralNet();
-        std::vector<double> doComparePatterns();
+        std::vector<float> doComparePatterns();
         void doReset();
-        void doSignalSend(const std::vector<double>&);
-        std::vector<double> doSignalTransfer(const std::vector<std::vector<double>>&);
-        void doSignalTransferAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
-        std::vector<double> doLearn(const std::vector<std::vector<double>>&);
-        std::vector<double> doRecognise(const std::vector<std::vector<double>>&);
-        void doLearnAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
-        void doRecogniseAsync(const std::vector<std::vector<double>>&, const std::function<void(std::vector<double>)>& Callback = nullptr);
-        std::vector<double> doSignalReceive();
+        void doStructurePrepare();
+        std::vector<float> doSignalTransfer(const std::vector<std::vector<float>>&);
+        void doSignalTransferAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr);
+        std::vector<float> doLearn(const std::vector<std::vector<float>>&);
+        std::vector<float> doRecognise(const std::vector<std::vector<float>>&);
+        void doLearnAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr);
+        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr);
+        std::vector<float> doSignalReceive();
         void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);
         void doReserveSignalBuffer(int64_t L);
         void setStructure(std::ifstream&);

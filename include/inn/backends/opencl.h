@@ -1,10 +1,10 @@
 /////////////////////////////////////////////////////////////////////////////
 // Name:
 // Purpose:
-// Author: Nickolay Babbysh
-// Created: 06.04.23
-// Copyright: (c) NickWare Group
-// Licence: MIT licence
+// Author:      Nickolay Babbysh
+// Created:     06.04.23
+// Copyright:   (c) NickWare Group
+// Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 #ifndef INTERFERENCE_OPENCL_H
 #define INTERFERENCE_OPENCL_H
@@ -15,20 +15,10 @@
 #include <atomic>
 
 #ifdef INN_OPENCL_SUPPORT
-    #include <CL/cl2.hpp>
+    #include <CL/cl.hpp>
 #endif
 
 namespace inn {
-    typedef struct winfo {
-        std::vector<void*> objects;
-        uint64_t poolsize;
-        std::thread thread;
-        std::mutex m;
-        std::condition_variable cv;
-        void *event;
-        std::atomic<bool> done;
-    } WorkerInfo;
-
     class ComputeBackendOpenCL : public Computer {
     private:
 #ifdef INN_OPENCL_SUPPORT
@@ -37,14 +27,18 @@ namespace inn {
         cl::CommandQueue Queue;
         cl::Buffer InputBuffer;
         cl::Buffer OutputBuffer;
+
+        cl_float16 *input;
+        cl_float4 *output;
+        cl::Buffer ibuffer;
+        cl::Buffer obuffer;
 #endif
-
-        inn::WorkerInfo *Worker;
-
-        [[noreturn]] static void tWorker(inn::WorkerInfo*, cl::Context, cl::Kernel, cl::CommandQueue);
+        uint64_t PoolSize;
+        std::vector<void*> Objects;
     public:
         ComputeBackendOpenCL();
         void doRegisterHost(const std::vector<void*>&) override;
+        void doUnregisterHost() override;
         void doWaitTarget() override;
         void doProcess(void*) override;
     };

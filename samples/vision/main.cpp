@@ -18,13 +18,16 @@ uint64_t getTimestampMS() {
             time_since_epoch()).count();
 }
 
-std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &images) {
-    std::vector<std::vector<double>> input;
+std::vector<std::vector<float>> doBuildInputVector(std::vector<BMPImage> &images) {
+    std::vector<std::vector<float>> input;
     for (int d = 0; d < images[0].size(); d+=2) {
         input.emplace_back();
         for (int i = 0; i < images.size(); i++) {
             for (int s = 0; s < 2; s++) {
-                auto rgbn = std::vector<double>({images[i][d+s][0]/255., images[i][d+s][1]/255., images[i][d+s][2]/255.});
+                float r = images[i][d+s][0];
+                float g = images[i][d+s][1];
+                float b = images[i][d+s][2];
+                auto rgbn = std::vector<float>({r/255, g/255, b/255});
                 auto HSI = RGB2HSI(rgbn[0], rgbn[1], rgbn[2]);
                 input.back().emplace_back(HSI[0]/(2*M_PI));
                 input.back().emplace_back(HSI[1]);
@@ -35,7 +38,7 @@ std::vector<std::vector<double>> doBuildInputVector(std::vector<BMPImage> &image
     return input;
 }
 
-void doLog(const std::string& element, uint64_t time, double speed, bool endl = true) {
+void doLog(const std::string& element, uint64_t time, float speed, bool endl = true) {
     std::stringstream s;
     s << time << "ms";
     if (speed > 0) s << ", " << std::setprecision(2) << std::fixed << speed << " mbit/s";

@@ -19,7 +19,11 @@ IF (UNIX)
     add_compile_definitions(INN_OPENCL_SUPPORT)
     target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libOpenCL.so")
     include_directories(/usr/include/CL/)
-ENDIF ()
+ELSE()
+    add_compile_definitions(INN_OPENCL_SUPPORT)
+    target_link_libraries(${PROJECT_NAME} "D:/Workspace/CUDA/lib/x64/OpenCL.lib")
+    include_directories(D:/Workspace/CUDA/include)
+ENDIF()
 
 install(TARGETS interference ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/lib)
 

@@ -38,7 +38,7 @@ inn::Neuron::Synapse::Synapse(const Synapse &S) {
     QSize = 0;
 }
 
-inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, int64_t _Tl, int NT) {
+inn::Neuron::Synapse::Synapse(inn::Position *_SPos, float _k1, float _Lambda, int64_t _Tl, int NT) {
     SPos = _SPos;
     ok1 = _k1;
     ok2 = ok1 * 1000;
@@ -53,15 +53,15 @@ inn::Neuron::Synapse::Synapse(inn::Position *_SPos, double _k1, double _Lambda, 
     NeurotransmitterType = NT;
 }
 
-void inn::Neuron::Synapse::doIn(double X) {
-    double nGamma = inn::Computer::getGammaFunctionValue(Gamma, k1, k2, X);
+void inn::Neuron::Synapse::doIn(float X) {
+    float nGamma = inn::Computer::getGammaFunctionValue(Gamma, k1, k2, X);
     dGamma = nGamma - Gamma;
     Gamma = nGamma;
 }
 
-void inn::Neuron::Synapse::doSendToQueue(double X, double WVSum) {
-//    double GammaLast = !QSize ? 0 : GammaQ[QSize-1];
-//    double nGamma = ComputeBackend->getGammaFunctionValue(GammaLast, k1, k2, X);
+void inn::Neuron::Synapse::doSendToQueue(float X, float WVSum) {
+//    float GammaLast = !QSize ? 0 : GammaQ[QSize-1];
+//    float nGamma = ComputeBackend->getGammaFunctionValue(GammaLast, k1, k2, X);
 //    GammaQ[QSize] = nGamma;
 //    QSize++;
 }
@@ -69,7 +69,7 @@ void inn::Neuron::Synapse::doSendToQueue(double X, double WVSum) {
 bool inn::Neuron::Synapse::doInFromQueue(int64_t tT) {
     if (tT >= QSize) return false;
     if (tT == QCounter) return true;
-    double nGamma = GammaQ[tT];
+    float nGamma = GammaQ[tT];
     dGamma = nGamma - Gamma;
     Gamma = nGamma;
     QCounter = tT;
@@ -91,15 +91,20 @@ void inn::Neuron::Synapse::doReset() {
     k2 = ok2;
 }
 
-void inn::Neuron::Synapse::setk1(double _k1) {
+void inn::Neuron::Synapse::setGamma(float gamma) {
+    dGamma = gamma - Gamma;
+    Gamma = gamma;
+}
+
+void inn::Neuron::Synapse::setk1(float _k1) {
     k1 = _k1;
 }
 
-void inn::Neuron::Synapse::setk2(double _k2) {
+void inn::Neuron::Synapse::setk2(float _k2) {
     k2 = _k2;
 }
 
-void inn::Neuron::Synapse::setLambda(double L) {
+void inn::Neuron::Synapse::setLambda(float L) {
     Lambda = L;
 }
 
@@ -107,15 +112,15 @@ inn::Position* inn::Neuron::Synapse::getPos() const {
     return SPos;
 }
 
-double inn::Neuron::Synapse::getk1() const {
+float inn::Neuron::Synapse::getk1() const {
     return k1;
 }
 
-double inn::Neuron::Synapse::getk2() const {
+float inn::Neuron::Synapse::getk2() const {
     return k2;
 }
 
-double inn::Neuron::Synapse::getLambda() const {
+float inn::Neuron::Synapse::getLambda() const {
     return Lambda;
 }
 
@@ -123,11 +128,11 @@ int64_t inn::Neuron::Synapse::getTl() const {
     return Tl;
 }
 
-double inn::Neuron::Synapse::getGamma() const {
+float inn::Neuron::Synapse::getGamma() const {
     return Gamma;
 }
 
-double inn::Neuron::Synapse::getdGamma() const {
+float inn::Neuron::Synapse::getdGamma() const {
     return dGamma;
 }
 

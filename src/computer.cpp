@@ -7,14 +7,16 @@
 // Licence: MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
+
 #include "../include/inn/computer.h"
 
 inn::Computer::Computer() {
 
 }
 
-std::vector<double> inn::Computer::doCompareCPFunction(std::vector<inn::Position*> CP, std::vector<inn::Position*> CPf) {
-    std::vector<double> R;
+std::vector<float> inn::Computer::doCompareCPFunction(std::vector<inn::Position*> CP, std::vector<inn::Position*> CPf) {
+    std::vector<float> R;
     int64_t L = CP.size();
     if (CPf.size() < L) L = CPf.size();
     R.reserve(L);
@@ -22,57 +24,57 @@ std::vector<double> inn::Computer::doCompareCPFunction(std::vector<inn::Position
     return R;
 }
 
-double inn::Computer::doCompareCPFunctionD(std::vector<inn::Position*> CP, std::vector<inn::Position*> CPf) {
-    double R = 0;
+float inn::Computer::doCompareCPFunctionD(std::vector<inn::Position*> CP, std::vector<inn::Position*> CPf) {
+    float R = 0;
     int64_t L = CP.size();
     if (CPf.size() < L) L = CPf.size();
     for (int i = 0; i < L; i++) R += inn::Position::getDistance(CP[i], CPf[i]);
     return R;
 }
 
-double inn::Computer::doCompareFunction(inn::Position *R, inn::Position *Rf) {
+float inn::Computer::doCompareFunction(inn::Position *R, inn::Position *Rf) {
     return inn::Position::getDistance(R, Rf);
 }
 
-double inn::Computer::getGammaFunctionValue(double oG, double k1, double k2, double Xt) {
-    double nGamma;
+float inn::Computer::getGammaFunctionValue(float oG, float k1, float k2, float Xt) {
+    float nGamma;
     nGamma = oG + (k1*Xt-oG/k2);
     return nGamma;
 }
 
-std::pair<double, double> inn::Computer::getFiFunctionValue(double Lambda, double Gamma, double dGamma, double D) {
-    double E = Lambda * exp(-Lambda*D);
+std::pair<float, float> inn::Computer::getFiFunctionValue(float Lambda, float Gamma, float dGamma, float D) {
+    float E = Lambda * std::exp(-Lambda*D);
     return std::make_pair(Gamma*E, dGamma*E);
 }
 
-double inn::Computer::getReceptorInfluenceValue(bool Active, double dFi, inn::Position *RPos, inn::Position *RPr) {
-    double Yn = 0;
+float inn::Computer::getReceptorInfluenceValue(bool Active, float dFi, inn::Position *RPos, inn::Position *RPr) {
+    float Yn = 0;
     if (RPos->getDistanceFrom(RPr) != 0) Yn = Active * dFi * (RPos->getPositionValue(1)-RPr->getPositionValue(1)) / RPos->getDistanceFrom(RPr);
     return Yn;
 }
 
-double inn::Computer::getRcValue(double k3, double Rs, double Fi, double dFi) {
+float inn::Computer::getRcValue(float k3, float Rs, float Fi, float dFi) {
     if (Fi >= Rs && dFi > 0) Rs += dFi;
     else Rs = Rs / (k3*Rs+1);
     return Rs;
 }
 
-void inn::Computer::getNewPosition(inn::Position *nRPos, inn::Position *R, inn::Position *S, double FiL, double D) {
+void inn::Computer::getNewPosition(inn::Position *nRPos, inn::Position *R, inn::Position *S, float FiL, float D) {
     nRPos -> setPosition(R);
     nRPos -> doSubtract(S);
     nRPos -> doDivide(D);
     nRPos -> doMultiply(FiL);
 }
 
-double inn::Computer::getLambdaValue(unsigned int Xm) {
+float inn::Computer::getLambdaValue(unsigned int Xm) {
     return pow(10, -(log(Xm)/log(2)-6));
 }
 
-double inn::Computer::getFiVectorLength(double dFi) {
+float inn::Computer::getFiVectorLength(float dFi) {
     return sqrt(dFi);
 }
 
-double inn::Computer::getSynapticSensitivityValue(unsigned int W, unsigned int OW) {
-    double S = double(W) / OW;
+float inn::Computer::getSynapticSensitivityValue(unsigned int W, unsigned int OW) {
+    float S = float(W) / OW;
     return 39.682*S*S*S*S - 170.22*S*S*S + 267.81*S*S - 178.8*S + 43.072;
 }
