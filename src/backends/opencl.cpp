@@ -103,7 +103,7 @@ void inn::ComputeBackendOpenCL::doRegisterHost(const std::vector<void*> &objects
         auto n = (inn::Neuron*)o;
         PoolSize += n->getReceptorsCount() * n->getSynapsesCount();
     }
-
+#ifdef INN_OPENCL_SUPPORT
     input = new cl_float16[PoolSize];
     output = new cl_float4[PoolSize];
     ibuffer = cl::Buffer(Context, CL_MEM_READ_WRITE, sizeof(cl_float16)*PoolSize);
@@ -147,6 +147,7 @@ void inn::ComputeBackendOpenCL::doRegisterHost(const std::vector<void*> &objects
         }
     }
     Objects = objects;
+#endif
 }
 
 void inn::ComputeBackendOpenCL::doWaitTarget() {
@@ -263,6 +264,8 @@ void inn::ComputeBackendOpenCL::doProcess(void *object) {
 }
 
 void inn::ComputeBackendOpenCL::doUnregisterHost() {
-    delete input;
-    delete output;
+#ifdef INN_OPENCL_SUPPORT
+    delete [] input;
+    delete [] output;
+#endif
 }
