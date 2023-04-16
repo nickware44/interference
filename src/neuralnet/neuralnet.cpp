@@ -258,6 +258,7 @@ std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vecto
                 doSignalProcessStart(Links, {X});
             }
             doSignalProcessStart(Links, {});
+            inn::System::getComputeBackend() -> doUnregisterHost();
             break;
     }
 
