@@ -7,6 +7,7 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
+#include <cmath>
 #include <fstream>
 #include <inn/neuralnet.h>
 
@@ -53,7 +54,7 @@ int main() {
 
     PassedFlag = true;
     for (auto &y: Y) {
-        if (fabs(y-REFERENCE_OUTPUT) > 1e-4) {
+        if (std::fabs(y-REFERENCE_OUTPUT) > 1e-4) {
             std::cout << "Output value " << y << " is not " << REFERENCE_OUTPUT << std::endl;
             std::cout << "[FAILED]" << std::endl;
             PassedFlag = false;
@@ -97,7 +98,7 @@ int main() {
 
     PassedFlag = true;
     for (auto &y: Y) {
-        if (fabs(y-REFERENCE_OUTPUT) > 1e-3) {
+        if (std::fabs(y-REFERENCE_OUTPUT) > 1e-3) {
             std::cout << "Output value " << y << " is not " << REFERENCE_OUTPUT << std::endl;
             std::cout << "[FAILED]" << std::endl;
             PassedFlag = false;
