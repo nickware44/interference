@@ -228,7 +228,12 @@ void inn::NeuralNet::doStructurePrepare() {
  * @return Output signals.
  */
 std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vector<float>>& Xx) {
-    if (inn::System::getComputeBackendKind() == -1) inn::System::setComputeBackend(inn::System::ComputeBackends::Default);
+    if (inn::System::getComputeBackendKind() == -1) {
+        if (inn::System::getVerbosityLevel() > 0)
+            std::cerr << "Switching to default compute backend." << std::endl;
+
+        inn::System::setComputeBackend(inn::System::ComputeBackends::Default);
+    }
     std::vector<void*> v;
 
     doStructurePrepare();

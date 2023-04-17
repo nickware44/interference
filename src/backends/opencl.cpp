@@ -92,8 +92,6 @@ inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
 
     Kernel = cl::Kernel(program,"inn_kernel");
     Queue = cl::CommandQueue(Context,default_device);
-#else
-    std::cerr << "The OpenCL compute backend is not supported by the current build. Rebuild interfernce library with the INDK_OPENCL_SUPPORT flag." << std::endl;
 #endif
 }
 

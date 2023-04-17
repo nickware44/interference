@@ -18,8 +18,8 @@ bool SynchronizationNeeded;
 inn::Computer *ComputeBackend;
 
 void inn::System::setComputeBackend(int Backend, int Parameter) {
+    if (CurrentComputeBackend != -1) delete ComputeBackend;
     CurrentComputeBackend = Backend;
-    delete ComputeBackend;
 
     switch (CurrentComputeBackend) {
         case inn::System::ComputeBackends::Default:
@@ -32,9 +32,16 @@ void inn::System::setComputeBackend(int Backend, int Parameter) {
             ComputeBackend = new inn::ComputeBackendMultithread(Parameter?Parameter:INN_MULTITHREAD_DEFAULT_NUM);
             break;
         case inn::System::ComputeBackends::OpenCL:
+#ifdef INDK_OPENCL_SUPPORT
             SynchronizationNeeded = true;
             ComputeBackend = new inn::ComputeBackendOpenCL();
             break;
+#else
+            std::cerr << std::endl;
+            std::cerr << "The OpenCL compute backend is not supported by the current build. Rebuild interfernce library with the INDK_OPENCL_SUPPORT=1 flag." << std::endl;
+            CurrentComputeBackend = -1;
+            return;
+#endif
     }
     ComputeBackendParameter = Parameter;
 }
