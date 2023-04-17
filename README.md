@@ -1,5 +1,5 @@
 <p align="center">
-  <img width="750" height="200" src="https://nickware.group/repository/products/inn/logo.png"><br><br>
+  <img width="750" height="200" src="https://nickware.group/repository/products/indk/logo.png"><br><br>
 Cross-platform C++ library - universal neurobiology-based machine learning framework.<br>
 Version 2.0.0
 </p>
