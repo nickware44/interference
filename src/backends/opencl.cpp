@@ -14,7 +14,7 @@
 #define KERNEL(name, ...) std::string name = #__VA_ARGS__
 
 inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
-#ifdef INN_OPENCL_SUPPORT
+#ifdef INDK_OPENCL_SUPPORT
     std::vector<cl::Platform> all_platforms;
     std::vector<cl::Device> all_devices;
 
@@ -93,7 +93,7 @@ inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
     Kernel = cl::Kernel(program,"inn_kernel");
     Queue = cl::CommandQueue(Context,default_device);
 #else
-    std::cerr << "The OpenCL compute backend is not supported by the current build. Rebuild interfernce library with the INN_OPENCL_SUPPORT flag." << std::endl;
+    std::cerr << "The OpenCL compute backend is not supported by the current build. Rebuild interfernce library with the INDK_OPENCL_SUPPORT flag." << std::endl;
 #endif
 }
 
@@ -103,7 +103,7 @@ void inn::ComputeBackendOpenCL::doRegisterHost(const std::vector<void*> &objects
         auto n = (inn::Neuron*)o;
         PoolSize += n->getReceptorsCount() * n->getSynapsesCount();
     }
-#ifdef INN_OPENCL_SUPPORT
+#ifdef INDK_OPENCL_SUPPORT
     input = new cl_float16[PoolSize];
     output = new cl_float4[PoolSize];
     ibuffer = cl::Buffer(Context, CL_MEM_READ_WRITE, sizeof(cl_float16)*PoolSize);
@@ -151,7 +151,7 @@ void inn::ComputeBackendOpenCL::doRegisterHost(const std::vector<void*> &objects
 }
 
 void inn::ComputeBackendOpenCL::doWaitTarget() {
-#ifdef INN_OPENCL_SUPPORT
+#ifdef INDK_OPENCL_SUPPORT
     inn::Position *rpos, *spos;
     uint64_t x = 0;
 
@@ -264,7 +264,7 @@ void inn::ComputeBackendOpenCL::doProcess(void *object) {
 }
 
 void inn::ComputeBackendOpenCL::doUnregisterHost() {
-#ifdef INN_OPENCL_SUPPORT
+#ifdef INDK_OPENCL_SUPPORT
     delete [] input;
     delete [] output;
 #endif

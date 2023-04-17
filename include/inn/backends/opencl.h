@@ -14,14 +14,14 @@
 #include <condition_variable>
 #include <atomic>
 
-#ifdef INN_OPENCL_SUPPORT
+#ifdef INDK_OPENCL_SUPPORT
     #include <CL/cl.hpp>
 #endif
 
 namespace inn {
     class ComputeBackendOpenCL : public Computer {
     private:
-#ifdef INN_OPENCL_SUPPORT
+#ifdef INDK_OPENCL_SUPPORT
         cl::Context Context;
         cl::Kernel Kernel;
         cl::CommandQueue Queue;

@@ -15,14 +15,15 @@ add_library(interference
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} Threads::Threads -latomic)
 
-IF (UNIX)
-    add_compile_definitions(INN_OPENCL_SUPPORT)
-    target_link_libraries(${PROJECT_NAME} "/usr/lib/x86_64-linux-gnu/libOpenCL.so")
-    include_directories(/usr/include/CL/)
-ELSE()
-    add_compile_definitions(INN_OPENCL_SUPPORT)
-    target_link_libraries(${PROJECT_NAME} "D:/Workspace/CUDA/lib/x64/OpenCL.lib")
-    include_directories(D:/Workspace/CUDA/include)
+OPTION(INDK_OPENCL_SUPPORT "Interference OpenCL compute backend support" 0)
+
+if(INDK_OPENCL_SUPPORT)
+    find_package(OpenCL REQUIRED)
+    target_link_libraries(${PROJECT_NAME} ${OpenCL_LIBRARIES})
+    include_directories(${OpenCL_INCLUDE_DIRS})
+    add_compile_definitions(CL_TARGET_OPENCL_VERSION=120)
+    add_compile_definitions(INDK_OPENCL_SUPPORT)
+    message(STATUS "OpenCL compute backend support is enabled")
 ENDIF()
 
 install(TARGETS interference ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/lib)
