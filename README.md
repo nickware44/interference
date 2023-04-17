@@ -18,6 +18,7 @@ Version 2.0.0
 ### COMPUTING
 - Native CPU (single thread)
 - Native CPU (multithread)
+- OpenCL
 
 ----------------------------------------------------------------
 ### REQUIREMENTS
