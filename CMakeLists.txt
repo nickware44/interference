@@ -21,9 +21,13 @@ if(INDK_OPENCL_SUPPORT)
     find_package(OpenCL REQUIRED)
     target_link_libraries(${PROJECT_NAME} ${OpenCL_LIBRARIES})
     include_directories(${OpenCL_INCLUDE_DIRS})
-    add_compile_definitions(CL_TARGET_OPENCL_VERSION=120)
+
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CL_HPP_TARGET_OPENCL_VERSION=120)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CL_HPP_MINIMUM_OPENCL_VERSION=120)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CL_TARGET_OPENCL_VERSION=120)
+
     add_compile_definitions(INDK_OPENCL_SUPPORT)
-    message(STATUS "OpenCL compute backend support is enabled")
+    message(STATUS "Interference OpenCL compute backend support is enabled")
 ENDIF()
 
 install(TARGETS interference ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/lib)

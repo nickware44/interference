@@ -15,7 +15,7 @@
 #include <atomic>
 
 #ifdef INDK_OPENCL_SUPPORT
-    #include <CL/cl.hpp>
+    #include <CL/cl2.hpp>
 #endif
 
 namespace inn {
