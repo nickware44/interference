@@ -40,6 +40,7 @@ namespace inn {
     public:
         explicit ComputeBackendMultithread(int);
         void doRegisterHost(const std::vector<void*>&) override;
+        void doUnregisterHost() override;
         void doWaitTarget() override;
         void doProcess(void*) override;
     };

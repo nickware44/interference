@@ -3,16 +3,32 @@ project(interference)
 
 set(CMAKE_CXX_STANDARD 14)
 
-add_library(interference src/neuron/neuron.cpp include/inn/neuron.h
-        src/neuron/entry.cpp src/neuron/synapse.cpp src/neuron/receptor.cpp src/position.cpp include/inn/position.h
-        src/error.cpp include/inn/error.h src/neuralnet/neuralnet.cpp include/inn/neuralnet.h
-        include/inn/system.h src/system.cpp
+add_library(interference
+        src/neuron/neuron.cpp include/inn/neuron.h src/neuron/entry.cpp src/neuron/synapse.cpp src/neuron/receptor.cpp
+        src/neuralnet/neuralnet.cpp include/inn/neuralnet.h
+        src/error.cpp include/inn/error.h src/system.cpp include/inn/system.h src/position.cpp include/inn/position.h
         src/computer.cpp include/inn/computer.h
         src/backends/default.cpp include/inn/backends/default.h
-        src/backends/multithread.cpp include/inn/backends/multithread.h)
+        src/backends/multithread.cpp include/inn/backends/multithread.h
+        src/backends/opencl.cpp include/inn/backends/opencl.h)
 
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} Threads::Threads -latomic)
+
+OPTION(INDK_OPENCL_SUPPORT "Interference OpenCL compute backend support" 0)
+
+if(INDK_OPENCL_SUPPORT)
+    find_package(OpenCL REQUIRED)
+    target_link_libraries(${PROJECT_NAME} ${OpenCL_LIBRARIES})
+    include_directories(${OpenCL_INCLUDE_DIRS})
+
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CL_HPP_TARGET_OPENCL_VERSION=120)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CL_HPP_MINIMUM_OPENCL_VERSION=120)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE CL_TARGET_OPENCL_VERSION=120)
+
+    add_compile_definitions(INDK_OPENCL_SUPPORT)
+    message(STATUS "Interference OpenCL compute backend support is enabled")
+ENDIF()
 
 install(TARGETS interference ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/lib)
 

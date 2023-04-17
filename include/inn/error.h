@@ -49,11 +49,11 @@ namespace inn {
 
         Error();
         explicit Error(ExceptionType);
-        explicit Error(ExceptionType, std::vector<double>);
+        explicit Error(ExceptionType, std::vector<float>);
         const char* what() const noexcept override;
     private:
         ExceptionType ET;
-        std::vector<double> ED;
+        std::vector<float> ED;
     };
 }
 

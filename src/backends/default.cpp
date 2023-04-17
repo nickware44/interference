@@ -23,7 +23,7 @@ void inn::ComputeBackendDefault::doWaitTarget() {
 
 void inn::ComputeBackendDefault::doProcess(void* Object) {
     auto N = (inn::Neuron*)Object;
-    double FiSum, D, P = 0;
+    float FiSum, D, P = 0;
 
     auto Xm = N -> getXm();
     auto DimensionsCount = N -> getDimensionsCount();
@@ -45,7 +45,7 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
         else RPos = R -> getPosf();
         RPr -> setPosition(RPos);
         inn::Position *SPos;
-        std::pair<double, double> FiValues;
+        std::pair<float, float> FiValues;
         FiSum = 0;
         dRPos -> doZeroPosition();
 
@@ -70,10 +70,12 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
         P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), RPos, RPr);
         R -> doUpdateSensitivityValue();
     }
-    P /= (double)N->getReceptorsCount();
-//    std::cout << " " << P << std::endl;
+    P /= (float)N->getReceptorsCount();
     delete dRPos;
     delete nRPos;
 
     N -> doFinalizeInput(P);
+}
+
+void inn::ComputeBackendDefault::doUnregisterHost() {
 }

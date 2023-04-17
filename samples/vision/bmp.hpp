@@ -5,6 +5,7 @@
 #ifndef INTERFERENCE_BMP_HPP
 #define INTERFERENCE_BMP_HPP
 
+#include <cmath>
 #include <iostream>
 #include <vector>
 #include <fstream>
@@ -35,8 +36,8 @@ inline BMPImage doReadBMP(const std::string& filename) {
     return dbmp;
 }
 
-inline std::vector<double> RGB2CMYK(double r, double g, double b) {
-    auto rgb = std::vector<double>({r, g, b});
+inline std::vector<float> RGB2CMYK(float r, float g, float b) {
+    auto rgb = std::vector<float>({r, g, b});
     auto max = std::max_element(rgb.begin(), rgb.end());
 
     auto k = 1 - rgb[std::distance(rgb.begin(), max)];
@@ -47,22 +48,22 @@ inline std::vector<double> RGB2CMYK(double r, double g, double b) {
     return {c, m, y, k};
 }
 
-inline std::vector<double> RGB2HSI(double r, double g, double b) {
-    auto rgb = std::vector<double>({r, g, b});
+inline std::vector<float> RGB2HSI(float r, float g, float b) {
+    auto rgb = std::vector<float>({r, g, b});
     auto min = std::min_element(rgb.begin(), rgb.end());
 
-    auto h = 0.;
-    auto s = 0.;
-    auto i = (r + g + b) / 3.;
+    float h = 0;
+    float s = 0;
+    float i = (r + g + b) / 3;
 
-    double rn = r / (r + g + b);
-    double gn = g / (r + g + b);
-    double bn = b / (r + g + b);
+    float rn = r / (r + g + b);
+    float gn = g / (r + g + b);
+    float bn = b / (r + g + b);
 
     if (i > 0) s = 1 - (rgb[std::distance(rgb.begin(), min)] / i);
     if (s < 1e-8) s = 0;
     if (s > 0) {
-        h = acos((0.5 * ((rn - gn) + (rn - bn))) / (sqrt((rn - gn) * (rn - gn) + (rn - bn) * (gn - bn))));
+        h = acos((0.5 * ((rn - gn) + (rn - bn))) / (std::sqrt((rn - gn) * (rn - gn) + (rn - bn) * (gn - bn))));
         if (b > g) h = 2 * M_PI - h;
     }
     return {h, s, i};

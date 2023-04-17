@@ -38,7 +38,7 @@ inn::Neuron::Receptor::Receptor(const Receptor &R) {
     dFi = 0;
 }
 
-inn::Neuron::Receptor::Receptor(inn::Position *_RPos, double _k3) {
+inn::Neuron::Receptor::Receptor(inn::Position *_RPos, float _k3) {
 	RPos = _RPos;
 	RPos0 = new inn::Position(*_RPos);
 	RPosf = new inn::Position(*_RPos);
@@ -98,11 +98,11 @@ void inn::Neuron::Receptor::setPos(inn::Position *_RPos) {
     }
 }
 
-void inn::Neuron::Receptor::setk3(double _k3) {
+void inn::Neuron::Receptor::setk3(float _k3) {
     k3 = _k3;
 }
 
-void inn::Neuron::Receptor::setFi(double _Fi) {
+void inn::Neuron::Receptor::setFi(float _Fi) {
     dFi = _Fi - Fi;
     Fi = _Fi;
 }
@@ -127,15 +127,15 @@ inn::Position* inn::Neuron::Receptor::getPosf() const {
     return RPosf;
 }
 
-double inn::Neuron::Receptor::getk3() const {
+float inn::Neuron::Receptor::getk3() const {
     return k3;
 }
 
-double inn::Neuron::Receptor::getdFi() {
+float inn::Neuron::Receptor::getdFi() {
     return dFi;
 }
 
-double inn::Neuron::Receptor::getSensitivityValue() const {
+float inn::Neuron::Receptor::getSensitivityValue() const {
     return Rs;
 }
 
@@ -143,11 +143,11 @@ bool inn::Neuron::Receptor::isLocked() const {
     return Locked;
 }
 
-double inn::Neuron::Receptor::getL() const {
+float inn::Neuron::Receptor::getL() const {
     return L;
 }
 
-double inn::Neuron::Receptor::getLf() const {
+float inn::Neuron::Receptor::getLf() const {
     return Lf;
 }
 

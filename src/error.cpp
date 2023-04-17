@@ -17,7 +17,7 @@ inn::Error::Error(ExceptionType _ET) {
     ET = _ET;
 }
 
-inn::Error::Error(ExceptionType _ET, std::vector<double> _ED) {
+inn::Error::Error(ExceptionType _ET, std::vector<float> _ED) {
     ET = _ET;
 	ED = std::move(_ED);
 }

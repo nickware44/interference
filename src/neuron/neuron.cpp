@@ -16,7 +16,7 @@ inn::Neuron::Neuron() {
     Tlo = 0;
     Xm = 0;
     DimensionsCount = 0;
-    OutputSignal = new double;
+    OutputSignal = new float;
     OutputSignalSize = 1;
     OutputSignalPointer = 0;
     NID = 0;
@@ -28,7 +28,7 @@ inn::Neuron::Neuron(const inn::Neuron &N) {
     t = 0;
     Tlo = N.getTlo();
     Xm = N.getXm();
-    OutputSignal = new double;
+    OutputSignal = new float;
     OutputSignalSize = 1;
     OutputSignalPointer = 0;
     DimensionsCount = N.getDimensionsCount();
@@ -45,7 +45,7 @@ inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::
     Tlo = Tl;
     Xm = XSize;
     DimensionsCount = DC;
-    OutputSignal = new double;
+    OutputSignal = new float;
     OutputSignalSize = 1;
     OutputSignalPointer = 0;
     NID = 0;
@@ -64,7 +64,7 @@ inn::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std::
  * @param Tl Reserved. Must be 0.
  * @param NT Neurotransmitter type.
  */
-void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<double> PosVector, double k1, int64_t Tl, int NT) {
+void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<float> PosVector, float k1, int64_t Tl, int NT) {
 	if (PosVector.size() != DimensionsCount) {
         throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
 	}
@@ -79,13 +79,13 @@ void inn::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<doubl
  * @param PosVector Position of center of synapse cluster,
  * @param R Cluster radius.
  */
-void inn::Neuron::doCreateNewSynapseCluster(const std::vector<double>& PosVector, unsigned R, double k1, int64_t Tl, int NT) {
-    double x = PosVector[0];
-    double y = PosVector[1];
+void inn::Neuron::doCreateNewSynapseCluster(const std::vector<float>& PosVector, unsigned R, float k1, int64_t Tl, int NT) {
+    float x = PosVector[0];
+    float y = PosVector[1];
 
-    double dfi = 360. / Entries.size();
-    double fi = 0;
-    double xr, yr;
+    float dfi = 360. / Entries.size();
+    float fi = 0;
+    float xr, yr;
     for (auto &ne: Entries) {
         xr = x + R * cos(fi/180*M_PI);
         yr = y + R * sin(fi/180*M_PI);
@@ -98,7 +98,7 @@ void inn::Neuron::doCreateNewSynapseCluster(const std::vector<double>& PosVector
  * Create new receptor.
  * @param PosVector Start position of receptor.
  */
-void inn::Neuron::doCreateNewReceptor(std::vector<double> PosVector) {
+void inn::Neuron::doCreateNewReceptor(std::vector<float> PosVector) {
 //    std::cout << PosVector.size() << " " << DimensionsCount << std::endl;
     if (PosVector.size() != DimensionsCount) {
         throw inn::Error(inn::Error::EX_POSITION_DIMENSIONS);
@@ -113,12 +113,12 @@ void inn::Neuron::doCreateNewReceptor(std::vector<double> PosVector) {
  * @param R Cluster radius.
  * @param C Count of receptors in cluster.
  */
-void inn::Neuron::doCreateNewReceptorCluster(const std::vector<double>& PosVector, unsigned R, unsigned C) {
-    double x = PosVector[0];
-    double y = PosVector[1];
-    double dfi = 360. / C;
-    double fi = 0;
-    double xr, yr;
+void inn::Neuron::doCreateNewReceptorCluster(const std::vector<float>& PosVector, unsigned R, unsigned C) {
+    float x = PosVector[0];
+    float y = PosVector[1];
+    float dfi = 360. / C;
+    float fi = 0;
+    float xr, yr;
     for (int i = 0; i < C; i++) {
         xr = x + R * cos(fi/180*M_PI);
         yr = y + R * sin(fi/180*M_PI);
@@ -127,7 +127,7 @@ void inn::Neuron::doCreateNewReceptorCluster(const std::vector<double>& PosVecto
     }
 }
 
-bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, int64_t tn) {
+bool inn::Neuron::doSignalSendEntry(const std::string& From, float X, int64_t tn) {
     auto entry = Entries.find(From);
     entry -> second -> doIn(X, tn);
     for (auto &e: Entries) {
@@ -146,7 +146,7 @@ bool inn::Neuron::doSignalSendEntry(const std::string& From, double X, int64_t t
  * @param tT
  * @return
  */
-std::pair<int64_t, double> inn::Neuron::doSignalReceive(int64_t tT) {
+std::pair<int64_t, float> inn::Neuron::doSignalReceive(int64_t tT) {
     auto tlocal = t.load();
     if (tT == -1) tT = tlocal - 1;
     auto d = tlocal - tT;
@@ -162,7 +162,7 @@ void inn::Neuron::doCreateCheckpoint() {
     for (auto R: Receptors) R -> doSavePos();
 }
 
-void inn::Neuron::doFinalizeInput(double P) {
+void inn::Neuron::doFinalizeInput(float P) {
     if (OutputSignalPointer >= OutputSignalSize) OutputSignalPointer = 0;
     OutputSignal[OutputSignalPointer] = P;
     OutputSignalPointer++;
@@ -194,8 +194,8 @@ void inn::Neuron::doReset() {
     doPrepare();
 }
 
-std::vector<double> inn::Neuron::doCompareCheckpoints() {
-    std::vector<double> Result, CPR;
+std::vector<float> inn::Neuron::doCompareCheckpoints() {
+    std::vector<float> Result, CPR;
     std::vector<inn::Position*> CP, CPf;
     for (auto R: Receptors) {
         if (R->isLocked()) {
@@ -218,16 +218,16 @@ std::vector<double> inn::Neuron::doCompareCheckpoints() {
  */
 inn::Neuron::PatternDefinition inn::Neuron::doComparePattern() const {
     inn::Position *RPos, *RPosf;
-    double Result = 0;
-    double ResultL = 0;
+    float Result = 0;
+    float ResultL = 0;
     for (auto R: Receptors) {
         if (R->isLocked()) {
             RPos = R -> getPos();
             RPosf = R -> getPosf();
 //            std::cout << Name << " " << RPos->getPositionValue(0) << ", " <<  RPos->getPositionValue(1) << ", " <<  RPos->getPositionValue(2) << std::endl;
 //            std::cout << RPosf->getPositionValue(0) << ", " <<  RPosf->getPositionValue(1) << ", " <<  RPosf->getPositionValue(2) << std::endl;
-            double Rc = inn::Computer::doCompareFunction(RPos, RPosf);
-            double Lc = fabs(R->getL()-R->getLf());
+            float Rc = inn::Computer::doCompareFunction(RPos, RPosf);
+            float Lc = fabs(R->getL()-R->getLf());
 //            std::cout << R->getL() << std::endl;
 //            std::cout << R->getLf() << std::endl;
             Result += Rc;
@@ -263,7 +263,7 @@ void inn::Neuron::doReplaceEntryName(const std::string& Original, const std::str
 
 void inn::Neuron::doReserveSignalBuffer(int64_t L) {
     delete [] OutputSignal;
-    OutputSignal = new double[L];
+    OutputSignal = new float[L];
     OutputSignalSize = L;
     OutputSignalPointer = 0;
     for (auto &E: Entries) {
@@ -283,15 +283,15 @@ void inn::Neuron::setTime(int64_t ts) {
  * Set neurotransmitter intensity for all synapses.
  * @param _k1
  */
-void inn::Neuron::setk1(double _k1) {
+void inn::Neuron::setk1(float _k1) {
     for (auto E: Entries) E.second -> setk1(_k1);
 }
 
-void inn::Neuron::setk2(double _k2) {
+void inn::Neuron::setk2(float _k2) {
     for (auto E: Entries) E.second -> setk2(_k2);
 }
 
-void inn::Neuron::setk3(double _k3) {
+void inn::Neuron::setk3(float _k3) {
     for (auto R: Receptors) R -> setk3(_k3);
 }
 
