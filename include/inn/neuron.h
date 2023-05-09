@@ -179,6 +179,7 @@ namespace inn {
         void doSavePos();
         void doUpdateSensitivityValue();
         void setPos(inn::Position*);
+        void setRs(float);
         void setk3(float);
         void setFi(float);
         std::vector<inn::Position*> getCP() const;
@@ -186,7 +187,9 @@ namespace inn {
         inn::Position* getPos() const;
         inn::Position* getPos0() const;
         inn::Position* getPosf() const;
+        float getRs() const;
         float getk3() const;
+        float getFi();
         float getdFi();
         float getSensitivityValue() const;
         bool isLocked() const;

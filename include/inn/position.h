@@ -37,6 +37,8 @@ namespace inn {
         void setPosition(const inn::Position&);
         void setPosition(const inn::Position*);
         void setPosition(std::vector<float>);
+        void setDimensionsCount(unsigned int);
+        void setXm(unsigned int);
         unsigned int getDimensionsCount() const;
         unsigned int getXm() const;
         float getPositionValue(unsigned int) const;

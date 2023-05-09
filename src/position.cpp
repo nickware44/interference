@@ -119,6 +119,14 @@ void inn::Position::setPosition(std::vector<float> _X) {
     }
 }
 
+void inn::Position::setXm(unsigned int _Xm) {
+    Xm = _Xm;
+}
+
+void inn::Position::setDimensionsCount(unsigned int _DimensionsCount) {
+    DimensionsCount = _DimensionsCount;
+}
+
 unsigned int inn::Position::getDimensionsCount() const {
     return DimensionsCount;
 }

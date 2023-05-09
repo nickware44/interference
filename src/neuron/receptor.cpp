@@ -98,6 +98,10 @@ void inn::Neuron::Receptor::setPos(inn::Position *_RPos) {
     }
 }
 
+void inn::Neuron::Receptor::setRs(float _Rs) {
+    Rs = _Rs;
+}
+
 void inn::Neuron::Receptor::setk3(float _k3) {
     k3 = _k3;
 }
@@ -127,8 +131,16 @@ inn::Position* inn::Neuron::Receptor::getPosf() const {
     return RPosf;
 }
 
+float inn::Neuron::Receptor::getRs() const {
+    return Rs;
+}
+
 float inn::Neuron::Receptor::getk3() const {
     return k3;
+}
+
+float inn::Neuron::Receptor::getFi() {
+    return Fi;
 }
 
 float inn::Neuron::Receptor::getdFi() {
