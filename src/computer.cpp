@@ -47,9 +47,10 @@ std::pair<float, float> inn::Computer::getFiFunctionValue(float Lambda, float Ga
     return std::make_pair(Gamma*E, dGamma*E);
 }
 
-float inn::Computer::getReceptorInfluenceValue(bool Active, float dFi, inn::Position *RPos, inn::Position *RPr) {
+float inn::Computer::getReceptorInfluenceValue(bool Active, float dFi, inn::Position *dPos, inn::Position *RPr) {
     float Yn = 0;
-    if (RPos->getDistanceFrom(RPr) != 0) Yn = Active * dFi * (RPos->getPositionValue(1)-RPr->getPositionValue(1)) / RPos->getDistanceFrom(RPr);
+    auto d = dPos->getDistanceFrom(RPr);
+    if (d > 0 && Active) Yn = dFi * dPos->getPositionValue(1) / d;
     return Yn;
 }
 

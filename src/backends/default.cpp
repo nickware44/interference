@@ -27,7 +27,7 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
 
     auto Xm = N -> getXm();
     auto DimensionsCount = N -> getDimensionsCount();
-    auto RPr = new inn::Position(Xm, {0, 0, 0});
+    auto RPr = new inn::Position(Xm, DimensionsCount);
 
     dRPos = new inn::Position(Xm, DimensionsCount);
     nRPos = new inn::Position(Xm, DimensionsCount);
@@ -43,7 +43,6 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
         auto R = N->getReceptor(i);
         if (!R->isLocked()) RPos = R -> getPos();
         else RPos = R -> getPosf();
-        RPr -> setPosition(RPos);
         inn::Position *SPos;
         std::pair<float, float> FiValues;
         FiSum = 0;
@@ -67,7 +66,7 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
 
         R -> setFi(FiSum);
         R -> setPos(dRPos);
-        P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), RPos, RPr);
+        P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, RPr);
         R -> doUpdateSensitivityValue();
     }
     P /= (float)N->getReceptorsCount();
