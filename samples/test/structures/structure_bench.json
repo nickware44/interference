@@ -1,0 +1,35 @@
+{
+  "entries": ["E1", "E2"],
+  "neurons": [
+    {
+      "name": "N1",
+      "size": 1200,
+      "dimensions": 3,
+      "input_signals": ["E1", "E2"],
+      "ensemble": "A1",
+
+      "synapses": [
+        {
+          "type": "cluster",
+          "position": [600, 600, 0],
+          "radius": 500,
+          "neurotransmitter": "activation",
+          "k1": 1050
+        }
+      ],
+
+      "receptors": [
+        {
+          "type": "cluster",
+          "position": [600, 600, 0],
+          "count": 10,
+          "radius": 5
+        }
+      ]
+    }
+  ],
+  "output_signals": ["N1"],
+  "name": "benchmark net",
+  "desc": "neural net structure for benchmark",
+  "version": "1.0"
+}

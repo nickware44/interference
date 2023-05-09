@@ -167,7 +167,7 @@
     }
   ],
   "output_signals": ["N6"],
-  "name": "self test net",
-  "desc": "neural net structure for self testing",
+  "name": "superstructure test net",
+  "desc": "neural net structure for general testing",
   "version": "1.2"
 }
