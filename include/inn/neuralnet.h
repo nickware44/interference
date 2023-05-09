@@ -21,9 +21,6 @@
 namespace inn {
     typedef std::queue<std::tuple<std::string, std::string, void*, int64_t>> NQueue;
 
-    typedef std::tuple<std::string, std::string, void*, void*, int> LinkDefinition;
-    typedef std::vector<LinkDefinition> NList;
-
     /**
      * Main neural net class.
      */
@@ -37,12 +34,12 @@ namespace inn {
         std::vector<std::string> Outputs;
 
         int64_t doFindEntry(const std::string&);
-        void doSignalProcessStart(const inn::NList&, const std::vector<std::vector<float>>&);
+        void doSignalProcessStart(const std::vector<std::vector<float>>&);
         std::vector<std::pair<std::queue<std::tuple<std::string, std::string, float, int64_t>>, std::vector<std::string>>> ContextCascade;
         std::map<std::string, inn::Neuron*> Neurons;
         std::map<std::string, int> Latencies;
 
-        NList Links;
+        inn::LinkList Links;
         bool Prepared;
 
         int LastUsedComputeBackend;

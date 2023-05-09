@@ -75,7 +75,7 @@ void inn::NeuralNet::doReset() {
     for (const auto& N: Neurons) N.second -> doReset();
 }
 
-void inn::NeuralNet::doSignalProcessStart(const inn::NList& nlist, const std::vector<std::vector<float>>& Xx) {
+void inn::NeuralNet::doSignalProcessStart(const std::vector<std::vector<float>>& Xx) {
     float value;
     int d = 0;
 
@@ -115,7 +115,7 @@ void inn::NeuralNet::doSignalProcessStart(const inn::NList& nlist, const std::ve
     while (lt != dt) {
         d = 0;
 
-        for (auto l: nlist) {
+        for (auto l: Links) {
             auto from = std::get<0>(l);
             auto to = std::get<1>(l);
 
@@ -153,7 +153,7 @@ void inn::NeuralNet::doSignalProcessStart(const inn::NList& nlist, const std::ve
             }
         }
 
-        if (d == nlist.size()) {
+        if (d == Links.size()) {
             lt++;
         } else if (Xx.empty()) inn::System::getComputeBackend() -> doWaitTarget();
     }
@@ -209,7 +209,7 @@ void inn::NeuralNet::doStructurePrepare() {
         }
     }
 
-    std::sort(Links.begin(), Links.end(), [] (const LinkDefinition& l1, const LinkDefinition& l2) {
+    std::sort(Links.begin(), Links.end(), [] (const inn::LinkDefinition& l1, const inn::LinkDefinition& l2) {
         if (std::get<4>(l1) < std::get<4>(l2)) return true;
         return false;
     });
@@ -242,7 +242,7 @@ std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vecto
         case inn::System::ComputeBackends::Default:
             doReserveSignalBuffer(1);
             for (auto &X: Xx) {
-                doSignalProcessStart(Links, {X});
+                doSignalProcessStart({X});
             }
             break;
 
@@ -250,7 +250,7 @@ std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vecto
             if (getSignalBufferSize() != Xx.size()) doReserveSignalBuffer(Xx.size());
             for (const auto &n: Neurons) v.push_back((void*)n.second);
             inn::System::getComputeBackend() -> doRegisterHost(v);
-            doSignalProcessStart(Links, Xx);
+            doSignalProcessStart(Xx);
             inn::System::getComputeBackend() -> doWaitTarget();
             inn::System::getComputeBackend() -> doUnregisterHost();
             break;
@@ -260,9 +260,9 @@ std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vecto
             for (const auto &n: Neurons) v.push_back((void*)n.second);
             inn::System::getComputeBackend() -> doRegisterHost(v);
             for (auto &X: Xx) {
-                doSignalProcessStart(Links, {X});
+                doSignalProcessStart({X});
             }
-            doSignalProcessStart(Links, {});
+            doSignalProcessStart({});
             inn::System::getComputeBackend() -> doUnregisterHost();
             break;
     }
@@ -523,6 +523,7 @@ void inn::NeuralNet::setStructure(std::ifstream &Stream) {
  *
  */
 void inn::NeuralNet::setStructure(const std::string &Str) {
+    for (const auto& N: Neurons) delete N.second;
     Prepared = false;
     Entries.clear();
     Outputs.clear();
