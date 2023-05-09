@@ -34,92 +34,218 @@ inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
     }
 
     cl::Device default_device = all_devices[0];
+    int status;
 
 //    std::cout << std::endl;
 //    std::cout << "Using platform: " << default_platform.getInfo<CL_PLATFORM_NAME>() << std::endl;
 //    std::cout << "Using device  : " << default_device.getInfo<CL_DEVICE_NAME>() << " (CU: " << default_device.getInfo<CL_DEVICE_MAX_COMPUTE_UNITS>() << ")" << std::endl;
 //    std::cout << "Driver version: " << default_device.getInfo<CL_DRIVER_VERSION>() << std::endl;
 
-    KERNEL(kernel_code,
-           __kernel void inn_kernel(__global float4 *output,  __global float16 *input) {
+    KERNEL(kernel_code_pairs,
+           __kernel void inn_kernel_pairs(__global float16 *pairs, __global float2 *inputs) {
                    int id = get_global_id(0);
-                   // input.s0 - receptor x
-                   // input.s1 - receptor y
-                   // input.s2 - synapse x
-                   // input.s3 - synapse y
+                   // pairs.s0 - receptor x
+                   // pairs.s1 - receptor y
+                   // pairs.s2 - synapse x              (const)
+                   // pairs.s3 - synapse y              (const)
 
-                   // input.s4 - synapse gamma value
-                   // input.s5 - neuron input value
+                   // pairs.s4 - synapse gamma value
+                   // pairs.s5 - input index            (const)
 
-                   // input.s6 - lambda
-                   // input.s7 - k1
-                   // input.s8 - k2
+                   // pairs.s6 - lambda                 (const)
+                   // pairs.s7 - k1                     (const)
+                   // pairs.s8 - k2                     (const)
+
+                   // pairs.s9 - reserved
+                   // pairs.sA - reserved
+                   // pairs.sB - reserved
 
                    // check if we need to compute this pair by flag
-                   if (input[id].s9 == 0) output[id] = (float4)(0, 0, 0, -1);
-                   else {
+                   bool run = inputs[(int)pairs[id].s5].s0;
+                   if (run) {
+                       float in = inputs[(int)pairs[id].s5].s1;
+
                        // vector length
                        float d = 0;
-                       d += (input[id].s0-input[id].s2)*(input[id].s0-input[id].s2);
-                       d += (input[id].s1-input[id].s3)*(input[id].s1-input[id].s3);
+                       d += (pairs[id].s0-pairs[id].s2)*(pairs[id].s0-pairs[id].s2);
+                       d += (pairs[id].s1-pairs[id].s3)*(pairs[id].s1-pairs[id].s3);
                        d = sqrt(d);
 
-                       float ngamma = input[id].s4 + (input[id].s7*input[id].s5-input[id].s4/input[id].s8);
+                       float ngamma = pairs[id].s4 + (pairs[id].s7*in-pairs[id].s4/pairs[id].s8);
 
-                       float e = input[id].s6 * exp(-input[id].s6*d);
+                       float e = pairs[id].s6 * exp(-pairs[id].s6*d);
                        float fi = ngamma * e;
-                       float dfi = (ngamma-input[id].s4) * e;
+                       float dfi = (ngamma-pairs[id].s4) * e;
                        float nx = 0, ny = 0;
                        if (dfi > 0) {
                            float nposd = sqrt(dfi) / d;
-                           nx = fabs(input[id].s0-input[id].s2) * nposd;
-                           ny = fabs(input[id].s1-input[id].s3) * nposd;
+                           nx = fabs(pairs[id].s0-pairs[id].s2) * nposd;
+                           ny = fabs(pairs[id].s1-pairs[id].s3) * nposd;
                        }
 
-                       output[id] = (float4)(nx, ny, fi, ngamma);
-                   }
+                       // update gamma value
+                       pairs[id].s4 = ngamma;
+
+                       pairs[id].s9 = nx;
+                       pairs[id].sA = ny;
+                       pairs[id].sB = fi;
+                   };
+           }
+    );
+
+    KERNEL(kernel_code_receptors,
+           __kernel void inn_kernel_receptors(__global float8 *receptors,  __global float16 *pairs, __global float2 *inputs) {
+                   int id = get_global_id(0);
+                   // receptors.s0 - left pairs range edge           (const)
+                   // receptors.s1 - right pairs range edge          (const)
+                   // receptors.s2 - input index                     (const)
+
+                   // receptors.s3 - receptor sensitivity
+                   // receptors.s4 - neurotransmitter level value
+
+                   // receptors.s5 - k3                              (const)
+
+                   // receptors.s6 - reserved
+
+                   bool run = inputs[(int)receptors[id].s2].s0;
+                   if (run) {
+                       float drx = 0, dry = 0, fisum = 0;
+
+                       for (int i = receptors[id].s0; i < receptors[id].s1; i++) {
+                           drx += pairs[i].s9;
+                           dry += pairs[i].sA;
+                           fisum += pairs[i].sB;
+                       }
+
+                       for (int i = receptors[id].s0; i < receptors[id].s1; i++) {
+                           pairs[i].s0 += drx;
+                           pairs[i].s1 += dry;
+                       }
+
+                       float dfisum = fisum - receptors[id].s4;
+                       receptors[id].s4 = fisum;
+
+                       float d = drx*drx + dry*dry;
+                       d = sqrt(d);
+
+                       float p = 0;
+                       if (d > 0 && fisum > receptors[id].s3) p = dfisum * dry / d;
+
+                       if (dfisum > 0 && fisum >= receptors[id].s3) receptors[id].s3 += dfisum;
+                       else receptors[id].s3 = receptors[id].s3 / (receptors[id].s5*receptors[id].s3+1);
+
+                       receptors[id].s6 = p;
+                   };
+           }
+    );
+
+    KERNEL(kernel_code_neurons,
+           __kernel void inn_kernel_neurons(__global float3 *neurons,  __global float8 *receptors, __global float2 *inputs, __global float *outputs) {
+                   int id = get_global_id(0);
+                   // neurons.s0 - left receptors range edge           (const)
+                   // neurons.s1 - right receptors range edge          (const)
+                   // neurons.s2 - input index                         (const)
+
+                   bool run = inputs[(int)neurons[id].s2].s0;
+                   if (run) {
+                       float p = 0;
+                       int rcount = neurons[id].s1 - neurons[id].s0;
+
+                       for (int i = neurons[id].s0; i < neurons[id].s1; i++) {
+                           p += receptors[i].s6;
+                       }
+                       p /= (float)rcount;
+
+                       outputs[id] = p;
+                   };
            }
     );
 
     Context = cl::Context(CL_DEVICE_TYPE_ALL);
 
-    cl::Program program(Context, {kernel_code.c_str(),kernel_code.length()+1});
-    int status;
-    if ((status = program.build({default_device})) != CL_SUCCESS) {
-        std::cerr << "Error building: status " << status << " " << program.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << std::endl;
+    cl::Program pairs(Context, {kernel_code_pairs.c_str(),kernel_code_pairs.length()+1});
+    if ((status = pairs.build({default_device})) != CL_SUCCESS) {
+        std::cerr << "Error building: status " << status << " " << pairs.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << std::endl;
         return;
     }
 
-    Kernel = cl::Kernel(program,"inn_kernel");
+    cl::Program receptors(Context, {kernel_code_receptors.c_str(),kernel_code_receptors.length()+1});
+    if ((status = receptors.build({default_device})) != CL_SUCCESS) {
+        std::cerr << "Error building: status " << status << " " << receptors.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << std::endl;
+        return;
+    }
+
+    cl::Program neurons(Context, {kernel_code_neurons.c_str(),kernel_code_neurons.length()+1});
+    if ((status = neurons.build({default_device})) != CL_SUCCESS) {
+        std::cerr << "Error building: status " << status << " " << neurons.getBuildInfo<CL_PROGRAM_BUILD_LOG>(default_device) << std::endl;
+        return;
+    }
+
+    KernelPairs = cl::Kernel(pairs, "inn_kernel_pairs");
+    KernelReceptors = cl::Kernel(receptors, "inn_kernel_receptors");
+    KernelNeurons = cl::Kernel(neurons, "inn_kernel_neurons");
     Queue = cl::CommandQueue(Context,default_device);
 #endif
 }
 
 void inn::ComputeBackendOpenCL::doRegisterHost(const std::vector<void*> &objects) {
-    PoolSize = 0;
+    PairPoolSize = 0;
+    ReceptorPoolSize = 0;
+    InputPoolSize = 0;
+    NeuronPoolSize = objects.size();
     for (const auto &o: objects) {
         auto n = (inn::Neuron*)o;
-        PoolSize += n->getReceptorsCount() * n->getSynapsesCount();
+        PairPoolSize += n->getReceptorsCount() * n->getSynapsesCount();
+        ReceptorPoolSize += n->getReceptorsCount();
+        InputPoolSize += n->getEntriesCount();
     }
 #ifdef INDK_OPENCL_SUPPORT
-    input = new cl_float16[PoolSize];
-    output = new cl_float4[PoolSize];
-    ibuffer = cl::Buffer(Context, CL_MEM_READ_WRITE, sizeof(cl_float16)*PoolSize);
-    obuffer = cl::Buffer(Context, CL_MEM_READ_WRITE, sizeof(cl_float4)*PoolSize);
-    Kernel.setArg(0, obuffer);
-    Kernel.setArg(1, ibuffer);
+    PairsInfo = new cl_float16[PairPoolSize];
+    ReceptorsInfo = new cl_float8[ReceptorPoolSize];
+    NeuronsInfo = new cl_float3[NeuronPoolSize];
+    Inputs = new cl_float2[InputPoolSize];
+    Outputs = new cl_float[NeuronPoolSize];
+
+    PairsBuffer = cl::Buffer(Context, CL_MEM_READ_WRITE, sizeof(cl_float16)*PairPoolSize);
+    ReceptorsBuffer = cl::Buffer(Context, CL_MEM_READ_WRITE, sizeof(cl_float8)*ReceptorPoolSize);
+    NeuronsBuffer = cl::Buffer(Context, CL_MEM_READ_WRITE, sizeof(cl_float3)*NeuronPoolSize);
+    InputsBuffer = cl::Buffer(Context, CL_MEM_READ_WRITE, sizeof(cl_float2)*InputPoolSize);
+    OutputsBuffer = cl::Buffer(Context, CL_MEM_READ_WRITE, sizeof(cl_float)*NeuronPoolSize);
+
+    KernelPairs.setArg(0, PairsBuffer);
+    KernelPairs.setArg(1, InputsBuffer);
+
+    KernelReceptors.setArg(0, ReceptorsBuffer);
+    KernelReceptors.setArg(1, PairsBuffer);
+    KernelReceptors.setArg(2, InputsBuffer);
+
+    KernelNeurons.setArg(0, NeuronsBuffer);
+    KernelNeurons.setArg(1, ReceptorsBuffer);
+    KernelNeurons.setArg(2, InputsBuffer);
+    KernelNeurons.setArg(3, OutputsBuffer);
 
     inn::Position *rpos, *spos;
-    uint64_t x = 0;
+    uint64_t px = 0, pxstart;
+    uint64_t rx = 0, rxstart;
+    uint64_t ex = 0, exstart;
 
-    for (const auto &o: objects) {
-        auto n = (inn::Neuron*)o;
+    for (uint64_t ni = 0; ni < objects.size(); ni++) {
+        auto n = (inn::Neuron*)objects[ni];
+
+        std::vector<std::pair<std::string, uint64_t>> emap;
+        auto we = n -> getWaitingEntries();
+
+        rxstart = rx;
+        exstart = ex;
 
         for (int i = 0; i < n->getReceptorsCount(); i++) {
+            pxstart = px;
+
             auto r = n -> getReceptor(i);
             if (!r->isLocked()) rpos = r -> getPos();
             else rpos = r -> getPosf();
 
+            ex = exstart;
             for (int j = 0; j < n->getEntriesCount(); j++) {
                 auto e = n -> getEntry(j);
 
@@ -127,133 +253,98 @@ void inn::ComputeBackendOpenCL::doRegisterHost(const std::vector<void*> &objects
                     auto s = e -> getSynapse(k);
                     spos = s -> getPos();
 
-                    input[x] = {static_cast<cl_float>(rpos->getPositionValue(0)),
-                                static_cast<cl_float>(rpos->getPositionValue(1)),
-                                static_cast<cl_float>(spos->getPositionValue(0)),
-                                static_cast<cl_float>(spos->getPositionValue(1)),
-                                static_cast<cl_float>(s->getGamma()),
-                                0,
+                    PairsInfo[px] = {
+                            static_cast<cl_float>(rpos->getPositionValue(0)),
+                            static_cast<cl_float>(rpos->getPositionValue(1)),
+                            static_cast<cl_float>(spos->getPositionValue(0)),
+                            static_cast<cl_float>(spos->getPositionValue(1)),
+                            static_cast<cl_float>(s->getGamma()),
+                            static_cast<cl_float>(ex),
 
-                                static_cast<cl_float>(s->getLambda()),
-                                static_cast<cl_float>(s->getk1()),
-                                static_cast<cl_float>(s->getk2()),
-                                0,
+                            static_cast<cl_float>(s->getLambda()),
+                            static_cast<cl_float>(s->getk1()),
+                            static_cast<cl_float>(s->getk2()),
                     };
-                    x++;
+                    px++;
                 }
+                //emap.emplace_back(we[j], px);
+                if (!i) {
+                    Inputs[ex] = {
+                            static_cast<cl_float>(0),
+                            static_cast<cl_float>(0),
+                    };
+                }
+                ex++;
             }
+            ReceptorsInfo[rx] = {
+                    static_cast<cl_float>(pxstart),
+                    static_cast<cl_float>(px),
+                    static_cast<cl_float>(exstart),
+                    static_cast<cl_float>(r->getRs()),
+                    static_cast<cl_float>(r->getFi()),
+                    static_cast<cl_float>(r->getk3()),
+            };
+            rx++;
         }
+        NeuronsInfo[ni] = {
+                static_cast<cl_float>(rxstart),
+                static_cast<cl_float>(rx),
+                static_cast<cl_float>(exstart),
+        };
     }
+
     Objects = objects;
+
+    Queue.enqueueWriteBuffer(PairsBuffer, CL_TRUE, 0, sizeof(cl_float16)*PairPoolSize, PairsInfo);
+    Queue.enqueueWriteBuffer(ReceptorsBuffer, CL_TRUE, 0, sizeof(cl_float8)*ReceptorPoolSize, ReceptorsInfo);
+    Queue.enqueueWriteBuffer(NeuronsBuffer, CL_TRUE, 0, sizeof(cl_float3)*NeuronPoolSize, NeuronsInfo);
+    Queue.enqueueWriteBuffer(OutputsBuffer, CL_TRUE, 0, sizeof(cl_float)*NeuronPoolSize, Outputs);
+
 #endif
 }
 
 void inn::ComputeBackendOpenCL::doWaitTarget() {
 #ifdef INDK_OPENCL_SUPPORT
-    inn::Position *rpos, *spos;
     uint64_t x = 0;
-
-    std::vector<float> eins;
     for (const auto &o: Objects) {
         auto n = (inn::Neuron*)o;
         auto state = n->getState(n->getTime());
-        auto rc = n -> getReceptorsCount();
         auto ec = n -> getEntriesCount();
 
-        eins.clear();
-        if (state == inn::Neuron::States::Pending) {
-            for (int j = 0; j < ec; j++) {
-                auto e = n -> getEntry(j);
-                eins.push_back(e->getIn());
+        for (int j = 0; j < ec; j++) {
+            auto e = n -> getEntry(j);
+            if (state == inn::Neuron::States::Pending) {
+                Inputs[x] = {
+                        static_cast<cl_float>(1),
+                        static_cast<cl_float>(e->getIn()),
+                };
+            } else {
+                Inputs[x] = {
+                        static_cast<cl_float>(0),
+                        static_cast<cl_float>(0),
+                };
             }
-        }
-
-        for (int i = 0; i < rc; i++) {
-            for (int j = 0; j < ec; j++) {
-                auto e = n -> getEntry(j);
-                auto esc = e -> getSynapsesCount();
-
-                for (unsigned int k = 0; k < esc; k++) {
-                    if (state != inn::Neuron::States::Pending)
-                        input[x].s9 = 0;
-                    else {
-                        input[x].s5 = static_cast<cl_float>(eins[j]);
-                        input[x].s9 = 1;
-                    }
-                    x++;
-                }
-            }
+            x++;
         }
     }
 
-    Queue.enqueueWriteBuffer(ibuffer, CL_TRUE, 0, sizeof(cl_float16)*PoolSize, input);
-    Queue.enqueueNDRangeKernel(Kernel, cl::NullRange, cl::NDRange(PoolSize), cl::NullRange);
+    Queue.enqueueWriteBuffer(InputsBuffer, CL_TRUE, 0, sizeof(cl_float2)*InputPoolSize, Inputs);
+
+    Queue.enqueueNDRangeKernel(KernelPairs, cl::NullRange, cl::NDRange(PairPoolSize), cl::NullRange);
     Queue.finish();
-    Queue.enqueueReadBuffer(obuffer, CL_TRUE, 0, sizeof(cl_float4)*PoolSize, output);
+    Queue.enqueueNDRangeKernel(KernelReceptors, cl::NullRange, cl::NDRange(ReceptorPoolSize), cl::NullRange);
+    Queue.finish();
+    Queue.enqueueNDRangeKernel(KernelNeurons, cl::NullRange, cl::NDRange(NeuronPoolSize), cl::NullRange);
+    Queue.finish();
 
-    x = 0;
-    std::vector<float> nr;
+    Queue.enqueueReadBuffer(OutputsBuffer, CL_TRUE, 0, sizeof(cl_float)*NeuronPoolSize, Outputs);
 
-    for (const auto &o: Objects) {
-        auto n = (inn::Neuron*)o;
-        auto rc = n -> getReceptorsCount();
-        auto sc = n -> getSynapsesCount();
-        auto ec = n -> getEntriesCount();
-        if (output[x].s3 == -1) {
-            x += rc * sc;
+    for (int ni = 0; ni < Objects.size(); ni++) {
+        if (Inputs[(int)NeuronsInfo[ni].s2].s0 == 0) {
             continue;
         }
-
-        auto xm = n -> getXm();
-        auto dcount = n -> getDimensionsCount();
-        auto rpr = new inn::Position(xm, {0, 0, 0});
-        auto drpos = new inn::Position(xm, dcount);
-        float p = 0;
-
-        for (int i = 0; i < rc; i++) {
-            auto r = n -> getReceptor(i);
-            if (!r->isLocked()) rpos = r -> getPos();
-            else rpos = r -> getPosf();
-
-            rpr -> setPosition(rpos);
-
-            float nrx = 0, nry = 0;
-            float fisum = 0;
-
-            auto xstart = x;
-            for (int j = 0; j < ec; j++) {
-                auto e = n -> getEntry(j);
-                auto esc = e -> getSynapsesCount();
-
-                for (int k = 0; k < esc; k++) {
-                    nrx += output[x].s0;
-                    nry += output[x].s1;
-                    fisum += output[x].s2;
-                    input[x].s4 = output[x].s3;
-                    if (!i) {
-                        e -> getSynapse(k) -> setGamma(output[x].s3);
-                    }
-                    x++;
-                }
-            }
-
-            x = xstart;
-            for (int j = 0; j < sc; j++) {
-                input[x].s0 = input[x].s0+nrx;
-                input[x].s1 = input[x].s1+nry;
-                x++;
-            }
-
-            nr = {nrx, nry, 0};
-            drpos -> setPosition(nr);
-            r -> setFi(fisum);
-            r -> setPos(drpos);
-            p += inn::Computer::getReceptorInfluenceValue(r->doCheckActive(), r->getdFi(), rpos, rpr);
-            r -> doUpdateSensitivityValue();
-        }
-
-        p /= (float)n->getReceptorsCount();
-        n -> doFinalizeInput(p);
+        auto n = (inn::Neuron*)Objects[ni];
+        n -> doFinalizeInput(Outputs[ni]);
     }
 #endif
 }
@@ -263,7 +354,8 @@ void inn::ComputeBackendOpenCL::doProcess(void *object) {
 
 void inn::ComputeBackendOpenCL::doUnregisterHost() {
 #ifdef INDK_OPENCL_SUPPORT
-    delete [] input;
-    delete [] output;
+    delete [] PairsInfo;
+    delete [] ReceptorsInfo;
+    delete [] NeuronsInfo;
 #endif
 }
