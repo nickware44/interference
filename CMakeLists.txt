@@ -27,10 +27,11 @@ if(INDK_OPENCL_SUPPORT)
     target_compile_definitions(${PROJECT_NAME} PRIVATE CL_TARGET_OPENCL_VERSION=120)
 
     add_compile_definitions(INDK_OPENCL_SUPPORT)
-    message(STATUS "Interference OpenCL compute backend support is enabled")
+    message(STATUS "Interference NDK OpenCL compute backend support is enabled")
 ENDIF()
 
 install(TARGETS interference ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/dist/lib)
+install(DIRECTORY include DESTINATION ${CMAKE_SOURCE_DIR}/dist/)
 
 add_subdirectory(samples/test)
 add_subdirectory(samples/vision)
