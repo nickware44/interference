@@ -81,10 +81,10 @@ int doTests(const std::string& name, float ref) {
 
 
 int main() {
-    constexpr uint8_t STRUCTURE_COUNT                       = 2;
+    constexpr unsigned STRUCTURE_COUNT                      = 2;
     constexpr float SUPERSTRUCTURE_TEST_REFERENCE_OUTPUT    = 10.614;
     constexpr float BENCHMARK_TEST_REFERENCE_OUTPUT         = 1.233;
-    const int TOTAL_TEST_COUNT                              = STRUCTURE_COUNT*backends.size();
+    const unsigned TOTAL_TEST_COUNT                         = STRUCTURE_COUNT*backends.size();
 
     int count = 0;
     inn::System::setVerbosityLevel(1);
