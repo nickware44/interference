@@ -25,16 +25,17 @@ void inn::System::setComputeBackend(int Backend, int Parameter) {
         case inn::System::ComputeBackends::Default:
             SynchronizationNeeded = false;
             ComputeBackend = new inn::ComputeBackendDefault();
-            Parameter = 0;
+            Parameter = 1;
             break;
         case inn::System::ComputeBackends::Multithread:
             SynchronizationNeeded = true;
-            ComputeBackend = new inn::ComputeBackendMultithread(Parameter?Parameter:INN_MULTITHREAD_DEFAULT_NUM);
+            ComputeBackend = new inn::ComputeBackendMultithread(Parameter>1?Parameter:INN_MULTITHREAD_DEFAULT_NUM);
             break;
         case inn::System::ComputeBackends::OpenCL:
 #ifdef INDK_OPENCL_SUPPORT
             SynchronizationNeeded = true;
             ComputeBackend = new inn::ComputeBackendOpenCL();
+            Parameter = 1;
             break;
 #else
             std::cerr << std::endl;
