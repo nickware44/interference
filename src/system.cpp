@@ -39,7 +39,7 @@ void inn::System::setComputeBackend(int Backend, int Parameter) {
             break;
 #else
             std::cerr << std::endl;
-            std::cerr << "The OpenCL compute backend is not supported by the current build. Rebuild interfernce library with the INDK_OPENCL_SUPPORT=1 flag." << std::endl;
+            std::cerr << "The OpenCL compute backend is not supported by the current build. Rebuild interfernce library with the INDK_OPENCL_SUPPORT=ON flag." << std::endl;
             CurrentComputeBackend = -1;
             return;
 #endif
