@@ -97,11 +97,11 @@ int main() {
 
     // running tests
     std::cout << "=== SUPERSTRUCTURE TEST ===" << std::endl;
-    doLoadModel("../samples/test/structures/structure_general.json", 101);
+    doLoadModel("structures/structure_general.json", 101);
     count += doTests("Superstructure test", SUPERSTRUCTURE_TEST_REFERENCE_OUTPUT);
 
     std::cout << "=== BENCHMARK ===" << std::endl;
-    doLoadModel("../samples/test/structures/structure_bench.json", 10001);
+    doLoadModel("structures/structure_bench.json", 10001);
     count += doTests("Benchmark", BENCHMARK_TEST_REFERENCE_OUTPUT);
 
     std::cout << std::endl;

@@ -15,7 +15,7 @@ add_library(interference
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} Threads::Threads -latomic)
 
-OPTION(INDK_OPENCL_SUPPORT "Interference OpenCL compute backend support" 0)
+OPTION(INDK_OPENCL_SUPPORT "Interference NDK OpenCL compute backend support" OFF)
 
 if(INDK_OPENCL_SUPPORT)
     find_package(OpenCL REQUIRED)
@@ -30,7 +30,7 @@ if(INDK_OPENCL_SUPPORT)
     message(STATUS "Interference OpenCL compute backend support is enabled")
 ENDIF()
 
-install(TARGETS interference ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/lib)
+install(TARGETS interference ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/dist/lib)
 
 add_subdirectory(samples/test)
 add_subdirectory(samples/vision)

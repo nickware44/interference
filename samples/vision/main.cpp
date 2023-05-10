@@ -52,9 +52,9 @@ int main() {
     constexpr uint8_t TEST_COUNT = 10;
     constexpr uint8_t TEST_ELEMENTS = 10;
     constexpr uint16_t IMAGE_SIZE = 128*128;
-    constexpr char STRUCTURE_PATH[128] = "../samples/vision/structures/structure.json";
-    constexpr char IMAGES_TEACHING_PATH[128] = "../samples/vision/images/learn/";
-    constexpr char IMAGES_TESTING_PATH[128] = "../samples/vision/images/test/";
+    constexpr char STRUCTURE_PATH[128] = "structures/structure.json";
+    constexpr char IMAGES_TEACHING_PATH[128] = "images/learn/";
+    constexpr char IMAGES_TESTING_PATH[128] = "images/test/";
 
     // load neural network structure from file
     std::ifstream structure(STRUCTURE_PATH);

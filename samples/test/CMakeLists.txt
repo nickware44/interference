@@ -8,4 +8,6 @@ add_executable(interference_test main.cpp)
 include_directories(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/include)
 target_link_libraries(${PROJECT_NAME} interference)
 
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/bin)
+set(SAMPLE_INSTALL_DIR ${CMAKE_SOURCE_DIR}/dist/bin/test)
+install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${SAMPLE_INSTALL_DIR})
+install(DIRECTORY structures DESTINATION ${SAMPLE_INSTALL_DIR})

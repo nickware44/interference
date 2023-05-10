@@ -46,8 +46,8 @@ int main() {
     inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 2);
     constexpr uint8_t COUNT = 3;
     constexpr uint16_t IMAGE_SIZE = 128*128;
-    constexpr char STRUCTURE_PATH[128] = "../samples/multimodal/structures/structure.json";
-    constexpr char IMAGES_PATH[128] = "../samples/multimodal/images/";
+    constexpr char STRUCTURE_PATH[128] = "structures/structure.json";
+    constexpr char IMAGES_PATH[128] = "images/";
     std::vector<std::string> names = {"mug with a melons", "mug with a big apple", "tomato"};
     std::vector<std::string> variants = {"mug with a melons", "mug wth a meln", "mug with a big apple", "mug w th a bi ap ple", "tomato", "tomto"};
 
