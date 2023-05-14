@@ -34,7 +34,7 @@ namespace inn {
     private:
         std::vector<inn::Worker*> Workers;
         std::map<void*, unsigned int> ObjectTable;
-        unsigned int WorkerCount, LastWorker;
+        unsigned int WorkerCount;
 
         [[noreturn]] static void tWorker(void*);
     public:

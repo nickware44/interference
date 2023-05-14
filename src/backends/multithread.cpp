@@ -13,7 +13,6 @@
 
 inn::ComputeBackendMultithread::ComputeBackendMultithread(int WC) {
     WorkerCount = WC;
-    LastWorker = 0;
     while (Workers.size() < WorkerCount) {
         auto w = new inn::Worker;
         w -> thread = std::thread(tWorker, (void*)w);
@@ -54,6 +53,10 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
         std::unique_lock<std::mutex> lk(worker->m);
         worker -> cv.wait(lk);
 
+        auto zPos = new inn::Position(0, 3);
+        auto dRPos = new inn::Position(0, 3);
+        auto nRPos = new inn::Position(0, 3);
+
         std::vector<int64_t> times;
         int tdone = 0;
         uint64_t size = worker -> objects.size();
@@ -73,10 +76,13 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
                 float FiSum, D, P = 0;
                 auto Xm = N -> getXm();
                 auto DimensionsCount = N -> getDimensionsCount();
-                auto RPr = new inn::Position(Xm, DimensionsCount);
 
-                auto dRPos = new inn::Position(Xm, DimensionsCount);
-                auto nRPos = new inn::Position(Xm, DimensionsCount);
+                zPos -> setXm(Xm);
+                zPos -> setDimensionsCount(DimensionsCount);
+                dRPos -> setXm(Xm);
+                dRPos -> setDimensionsCount(DimensionsCount);
+                nRPos -> setXm(Xm);
+                nRPos -> setDimensionsCount(DimensionsCount);
 
                 inn::Position *RPos;
 
@@ -112,7 +118,7 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
 
                     R -> setFi(FiSum);
                     R -> setPos(dRPos);
-                    P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, RPr);
+                    P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, zPos);
                     R -> doUpdateSensitivityValue();
                 }
                 P /= (float)N->getReceptorsCount();
@@ -123,11 +129,14 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
                 if (t >= ComputeSize) {
                     tdone++;
                 }
-                delete nRPos;
-                delete dRPos;
             }
             size = worker -> objects.size();
         }
+
+        delete zPos;
+        delete nRPos;
+        delete dRPos;
+
         worker -> done.store(true);
         ((inn::Event*)worker->event) -> doNotifyOne();
     }

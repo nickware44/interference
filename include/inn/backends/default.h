@@ -14,7 +14,7 @@
 namespace inn {
     class ComputeBackendDefault : public Computer {
     private:
-        inn::Position *dRPos, *nRPos;
+        inn::Position *dRPos, *nRPos, *zPos;
     public:
         ComputeBackendDefault();
         void doRegisterHost(const std::vector<void*>&) override;

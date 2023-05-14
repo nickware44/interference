@@ -11,8 +11,9 @@
 #include "../../include/inn/backends/default.h"
 
 inn::ComputeBackendDefault::ComputeBackendDefault() {
-    dRPos = nullptr;
-    nRPos = nullptr;
+    zPos = new inn::Position(0, 3);
+    dRPos = new inn::Position(0, 3);
+    nRPos = new inn::Position(0, 3);
 }
 
 void inn::ComputeBackendDefault::doRegisterHost(const std::vector<void*>&) {
@@ -27,10 +28,13 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
 
     auto Xm = N -> getXm();
     auto DimensionsCount = N -> getDimensionsCount();
-    auto RPr = new inn::Position(Xm, DimensionsCount);
 
-    dRPos = new inn::Position(Xm, DimensionsCount);
-    nRPos = new inn::Position(Xm, DimensionsCount);
+    zPos -> setXm(Xm);
+    zPos -> setDimensionsCount(DimensionsCount);
+    dRPos -> setXm(Xm);
+    dRPos -> setDimensionsCount(DimensionsCount);
+    nRPos -> setXm(Xm);
+    nRPos -> setDimensionsCount(DimensionsCount);
 
     inn::Position *RPos;
 
@@ -66,12 +70,10 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
 
         R -> setFi(FiSum);
         R -> setPos(dRPos);
-        P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, RPr);
+        P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, zPos);
         R -> doUpdateSensitivityValue();
     }
     P /= (float)N->getReceptorsCount();
-    delete dRPos;
-    delete nRPos;
 
     N -> doFinalizeInput(P);
 }
