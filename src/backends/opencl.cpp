@@ -354,6 +354,36 @@ void inn::ComputeBackendOpenCL::doProcess(void *object) {
 
 void inn::ComputeBackendOpenCL::doUnregisterHost() {
 #ifdef INDK_OPENCL_SUPPORT
+    Queue.enqueueReadBuffer(PairsBuffer, CL_TRUE, 0, sizeof(cl_float16)*PairPoolSize, PairsInfo);
+    Queue.enqueueReadBuffer(ReceptorsBuffer, CL_TRUE, 0, sizeof(cl_float8)*ReceptorPoolSize, ReceptorsInfo);
+
+    uint64_t rx = 0;
+    inn::Position *rpos;
+    inn::Position npos(0, 3);
+
+    for (auto &o : Objects) {
+        auto n = (inn::Neuron*)o;
+        auto rc = n -> getReceptorsCount();
+
+        npos.setXm(n->getXm());
+        npos.setDimensionsCount(n->getDimensionsCount());
+
+        for (int i = 0; i < rc; i++) {
+            auto r = n -> getReceptor(i);
+            if (!r->isLocked()) rpos = r -> getPos();
+            else rpos = r -> getPosf();
+
+            float nrx = PairsInfo[(int)ReceptorsInfo[rx].s0].s0;
+            float nry = PairsInfo[(int)ReceptorsInfo[rx].s0].s1;
+
+            npos.setPosition({nrx-rpos->getPositionValue(0), nry-rpos->getPositionValue(1), 0});
+            r -> setPos(&npos);
+            r -> setRs(ReceptorsInfo[rx].s3);
+            r -> setFi(ReceptorsInfo[rx].s4);
+            rx++;
+        }
+    }
+
     delete [] PairsInfo;
     delete [] ReceptorsInfo;
     delete [] NeuronsInfo;
