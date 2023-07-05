@@ -46,7 +46,10 @@ namespace inn {
     public:
         NeuralNet();
         std::vector<float> doComparePatterns();
+        void doCreateNewScope();
+        void doChangeScope(uint64_t);
         void doReset();
+        void doPrepare();
         void doStructurePrepare();
         std::vector<float> doSignalTransfer(const std::vector<std::vector<float>>&);
         void doSignalTransferAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr);
@@ -61,7 +64,7 @@ namespace inn {
         void setStructure(const std::string &Str);
         void setLearned(bool LearnedFlag);
         bool isLearned();
-        std::string getStructure();
+        std::string getStructure(bool minimized = true);
         std::string getName();
         std::string getDescription();
         std::string getVersion();

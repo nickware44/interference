@@ -10,9 +10,8 @@
 #include <fstream>
 #include <queue>
 #include <thread>
-#include "../3rdparty/json.hpp"
+#include "../../3rdparty/json.hpp"
 #include "../../include/inn/neuralnet.h"
-#include "../../include/inn/error.h"
 
 typedef nlohmann::json json;
 
@@ -66,6 +65,14 @@ std::vector<float> inn::NeuralNet::doComparePatterns() {
     return PDiff;
 }
 
+void inn::NeuralNet::doCreateNewScope() {
+    for (const auto& N: Neurons) N.second -> doCreateNewScope();
+}
+
+void inn::NeuralNet::doChangeScope(uint64_t scope) {
+    for (const auto& N: Neurons) N.second -> doChangeScope(scope);
+}
+
 /**
  * Resets all neurons in the network.
  * See inn::Neuron::doReset() method for details.
@@ -73,6 +80,12 @@ std::vector<float> inn::NeuralNet::doComparePatterns() {
 void inn::NeuralNet::doReset() {
     t = 0;
     for (const auto& N: Neurons) N.second -> doReset();
+}
+
+
+void inn::NeuralNet::doPrepare() {
+    t = 0;
+    for (const auto& N: Neurons) N.second -> doPrepare();
 }
 
 void inn::NeuralNet::doSignalProcessStart(const std::vector<std::vector<float>>& Xx) {
@@ -296,7 +309,8 @@ void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<float>>
  */
 std::vector<float> inn::NeuralNet::doLearn(const std::vector<std::vector<float>>& Xx) {
     setLearned(false);
-    doReset();
+    doCreateNewScope();
+    doPrepare();
     return doSignalTransfer(Xx);
 }
 
@@ -307,7 +321,7 @@ std::vector<float> inn::NeuralNet::doLearn(const std::vector<std::vector<float>>
  */
 std::vector<float> inn::NeuralNet::doRecognise(const std::vector<std::vector<float>>& Xx) {
     setLearned(true);
-    doReset();
+    doPrepare();
     return doSignalTransfer(Xx);
 }
 
@@ -318,6 +332,7 @@ std::vector<float> inn::NeuralNet::doRecognise(const std::vector<std::vector<flo
  */
 void inn::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<float>)>& Callback) {
     setLearned(false);
+    doCreateNewScope();
     doReset();
     doSignalTransferAsync(Xx, Callback);
 }
@@ -354,6 +369,8 @@ std::vector<float> inn::NeuralNet::doSignalReceive() {
  * and you replicating to ensemble `A2`, a new entry `A2E1` will be added.
  */
 void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries) {
+    json j;
+
     Prepared = false;
     std::vector<std::string> enew;
     auto efrom = Ensembles.find(From);
@@ -373,6 +390,8 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
         }
 
         for (auto &en: efrom->second) {
+            json ji;
+
             auto n = Neurons.find(en);
             if (n != Neurons.end()) {
                 auto nnew = new inn::Neuron(*n->second);
@@ -399,6 +418,7 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
                     } else if (CopyEntries && r == newnames.end()) {
                         std::vector<std::string> elinks;
                         elinks.push_back(nname);
+                        j["entries"].push_back( ename);
                         Entries.emplace_back(ename, elinks);
                     }
                 }
@@ -415,12 +435,23 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
                 }
 
                 auto no = std::find(Outputs.begin(), Outputs.end(), en);
-                if (no != Outputs.end()) Outputs.push_back(nname);
+                if (no != Outputs.end()) {
+                    Outputs.push_back(nname);
+                    j["outputs"].push_back(nname);
+                }
 
                 auto nl = Latencies.find(en);
                 if (nl != Latencies.end()) Latencies.insert(std::make_pair(nname, nl->second));
 
                 Neurons.insert(std::make_pair(nname, nnew));
+
+                entries = nnew -> getEntries();
+                for (auto &e: entries) {
+                    ji["input_signals"].push_back(e);
+                }
+                ji["old_name"] = en;
+                ji["new_name"] = nname;
+                j["neurons"].push_back(ji);
 
                 if (eto == Ensembles.end()) {
                     enew.push_back(nname);
@@ -643,8 +674,29 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                     auto rcount = jreceptor.value()["count"].get<unsigned int>();
                     auto rradius = jreceptor.value()["radius"].get<unsigned int>();
                     N -> doCreateNewReceptorCluster(pos, rradius, rcount);
+
+                    for (auto i = N->getReceptorsCount()-rcount; i < N ->getReceptorsCount(); i++) {
+                        auto r = N -> getReceptor(i);
+                        for (auto &jscope: jreceptor.value()["scopes"].items()) {
+                            pos.clear();
+                            for (auto &jposition: jscope.value().items()) {
+                                pos.push_back(jposition.value().get<float>());
+                            }
+                            N -> doCreateNewScope();
+                            r -> setPos(new inn::Position(nsize, pos));
+                        }
+                    }
                 } else {
                     N -> doCreateNewReceptor(pos);
+                    for (auto &jscope: jreceptor.value()["scopes"].items()) {
+                        pos.clear();
+                        for (auto &jposition: jscope.value().items()) {
+                            pos.push_back(jposition.value().get<float>());
+                        }
+                        auto r = N -> getReceptor(N->getReceptorsCount()-1);
+                        r -> doCreateNewScope();
+                        r -> setPos(new inn::Position(nsize, pos));
+                    }
                 }
             }
 
@@ -716,7 +768,7 @@ uint64_t inn::NeuralNet::getNeuronCount() {
  * Get neural network structure in JSON format.
  * @return JSON string that contains neural network structure.
  */
-std::string inn::NeuralNet::getStructure() {
+std::string inn::NeuralNet::getStructure(bool minimized) {
     json j;
 
     for (const auto& e: Entries) {
@@ -773,11 +825,18 @@ std::string inn::NeuralNet::getStructure() {
             for (int p = 0; p < n.second -> getDimensionsCount(); p++) {
                 jr["position"].push_back(nr->getPos0()->getPositionValue(p));
             }
-            if (nr->isLocked()) {
-                for (int p = 0; p < n.second -> getDimensionsCount(); p++) {
-                    jr["learned_position"].push_back(nr->getPos()->getPositionValue(p));
+
+            json jscopes;
+            auto scopes = nr -> getReferencePosScopes();
+            for (const auto &s: scopes) {
+                json jscope;
+                for (int p = 0; p < s->getDimensionsCount(); p++) {
+                    jscope.push_back(s->getPositionValue(p));
                 }
+                jscopes.push_back(jscope);
             }
+            if (!scopes.empty())
+                jr["scopes"] = jscopes;
 
             jn["receptors"].push_back(jr);
         }
@@ -802,7 +861,7 @@ std::string inn::NeuralNet::getStructure() {
         std::cout << j.dump(4) << std::endl;
     }
 
-    return j.dump();
+    return minimized ? j.dump() : j.dump(4);
 }
 
 /**

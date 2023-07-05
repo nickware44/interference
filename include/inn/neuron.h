@@ -63,6 +63,8 @@ namespace inn {
         void doFinalizeInput(float);
         void doPrepare();
         void doFinalize();
+        void doCreateNewScope();
+        void doChangeScope(uint64_t);
         void doReset();
         void doCreateCheckpoint();
         inn::Neuron::PatternDefinition doComparePattern() const;
@@ -161,19 +163,25 @@ namespace inn {
     class Neuron::Receptor {
     private:
         std::vector<inn::Position*> CP, CPf;
-        inn::Position *RPos, *RPos0, *RPosf;
+        //inn::Position *RPos, *RPos0, *RPosf;
+        std::vector<inn::Position*> ReferencePos;
+        inn::Position* DefaultPos;
+        inn::Position* PhantomPos;
         float k3;
         float Rs;
         bool Locked;
         float L, Lf;
         float Fi, dFi;
+        uint64_t Scope;
     public:
         Receptor();
         Receptor(const inn::Neuron::Receptor&);
         Receptor(inn::Position*, float);
-        bool doCheckActive();
+        bool doCheckActive() const;
         void doLock();
         void doUnlock();
+        void doCreateNewScope();
+        void doChangeScope(uint64_t);
         void doReset();
         void doPrepare();
         void doSavePos();
@@ -187,6 +195,7 @@ namespace inn {
         inn::Position* getPos() const;
         inn::Position* getPos0() const;
         inn::Position* getPosf() const;
+        std::vector<inn::Position*> getReferencePosScopes();
         float getRs() const;
         float getk3() const;
         float getFi();

@@ -11,9 +11,8 @@
 #include "../../include/inn/system.h"
 
 inn::Neuron::Receptor::Receptor() {
-	RPos = new inn::Position();
-	RPos0 = new inn::Position();
-	RPosf = new inn::Position();
+	DefaultPos = new inn::Position();
+	PhantomPos = new inn::Position();
     k3 = 0;
     Rs = 0.01;
     Locked = false;
@@ -26,9 +25,8 @@ inn::Neuron::Receptor::Receptor() {
 inn::Neuron::Receptor::Receptor(const Receptor &R) {
     CP = R.getCP();
     CPf = R.getCPf();
-	RPos = new inn::Position(*R.getPos());
-	RPos0 = new inn::Position(*R.getPos0());
-	RPosf = new inn::Position(*R.getPosf());
+	DefaultPos = new inn::Position(*R.getPos0());
+	PhantomPos = new inn::Position(*R.getPosf());
     k3 = R.getk3();
     Rs = R.getSensitivityValue();
     Locked = R.isLocked();
@@ -39,9 +37,8 @@ inn::Neuron::Receptor::Receptor(const Receptor &R) {
 }
 
 inn::Neuron::Receptor::Receptor(inn::Position *_RPos, float _k3) {
-	RPos = _RPos;
-	RPos0 = new inn::Position(*_RPos);
-	RPosf = new inn::Position(*_RPos);
+	DefaultPos = new inn::Position(*_RPos);
+	PhantomPos = new inn::Position(*_RPos);
     k3 = _k3;
     Rs = 0.01;
     Locked = false;
@@ -51,8 +48,7 @@ inn::Neuron::Receptor::Receptor(inn::Position *_RPos, float _k3) {
     dFi = 0;
 }
 
-bool inn::Neuron::Receptor::doCheckActive() {
-//    std::cout << Fi << std::endl;
+bool inn::Neuron::Receptor::doCheckActive() const {
     return Fi >= Rs;
 }
 
@@ -64,24 +60,44 @@ void inn::Neuron::Receptor::doUnlock() {
     Locked = false;
 }
 
+void inn::Neuron::Receptor::doCreateNewScope() {
+    auto pos = new inn::Position(DefaultPos->getXm(), DefaultPos->getDimensionsCount());
+    Scope = ReferencePos.size();
+    ReferencePos.push_back(pos);
+}
+
+void inn::Neuron::Receptor::doChangeScope(uint64_t scope) {
+    if (scope > ReferencePos.size()) {
+        Scope = ReferencePos.size() - 1;
+        return;
+    }
+    Scope = scope;
+}
+
 void inn::Neuron::Receptor::doReset() {
     CPf.clear();
     Rs = 0.01;
     Lf = 0;
     Fi = 0;
     dFi = 0;
-    if (Locked) RPosf -> setPosition(RPos0);
-    else RPos -> setPosition(RPos0);
-
+    ReferencePos.clear();
+    PhantomPos -> setPosition(DefaultPos);
+    Locked = false;
 }
 
 void inn::Neuron::Receptor::doPrepare() {
-    RPosf -> setPosition(RPos0);
+    CPf.clear();
+    Rs = 0.01;
+    Lf = 0;
+    Fi = 0;
+    dFi = 0;
+    if (Locked) PhantomPos -> setPosition(DefaultPos);
+    else ReferencePos[Scope] -> setPosition(DefaultPos);
 }
 
 void inn::Neuron::Receptor::doSavePos() {
-    if (Locked) CPf.push_back(new inn::Position(*RPosf));
-    else CP.push_back(new inn::Position(*RPos));
+    if (Locked) CPf.push_back(new inn::Position(*PhantomPos));
+    else CP.push_back(new inn::Position(*ReferencePos[Scope]));
 }
 
 void inn::Neuron::Receptor::doUpdateSensitivityValue() {
@@ -90,11 +106,11 @@ void inn::Neuron::Receptor::doUpdateSensitivityValue() {
 
 void inn::Neuron::Receptor::setPos(inn::Position *_RPos) {
     if (Locked) {
-        Lf += inn::Position::getDistance(RPosf, _RPos);
-        RPosf -> doAdd(_RPos);
+        Lf += inn::Position::getDistance(PhantomPos, _RPos);
+        PhantomPos -> doAdd(_RPos);
     } else {
-        L += inn::Position::getDistance(RPos, _RPos);
-        RPos -> doAdd(_RPos);
+        L += inn::Position::getDistance(ReferencePos[Scope], _RPos);
+        ReferencePos[Scope] -> doAdd(_RPos);
     }
 }
 
@@ -120,15 +136,19 @@ std::vector<inn::Position*> inn::Neuron::Receptor::getCPf() const {
 }
 
 inn::Position* inn::Neuron::Receptor::getPos() const {
-    return RPos;
+    return ReferencePos[Scope];
 }
 
 inn::Position* inn::Neuron::Receptor::getPos0() const {
-    return RPos0;
+    return DefaultPos;
 }
 
 inn::Position* inn::Neuron::Receptor::getPosf() const {
-    return RPosf;
+    return PhantomPos;
+}
+
+std::vector<inn::Position*> inn::Neuron::Receptor::getReferencePosScopes() {
+    return ReferencePos;
 }
 
 float inn::Neuron::Receptor::getRs() const {
@@ -162,5 +182,3 @@ float inn::Neuron::Receptor::getL() const {
 float inn::Neuron::Receptor::getLf() const {
     return Lf;
 }
-
-

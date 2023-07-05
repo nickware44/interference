@@ -174,7 +174,9 @@ void inn::Neuron::doFinalizeInput(float P) {
  * Prepare synapses for new signal.
  */
 void inn::Neuron::doPrepare() {
+    t = 0;
     for (auto E: Entries) E.second -> doPrepare();
+    for (auto R: Receptors) R -> doPrepare();
 }
 
 void inn::Neuron::doFinalize() {
@@ -183,15 +185,20 @@ void inn::Neuron::doFinalize() {
     Learned = true;
 }
 
+void inn::Neuron::doCreateNewScope() {
+    for (auto R: Receptors) R -> doCreateNewScope();
+}
+
+void inn::Neuron::doChangeScope(uint64_t scope) {
+    for (auto R: Receptors) R -> doChangeScope(scope);
+}
+
 /**
  * Reset neuron state. During the reset, the neuron parameters (time, receptors, synapses) will be reset to the default state.
  */
 void inn::Neuron::doReset() {
-    t = 0;
-    for (auto R: Receptors) {
-        R -> doReset();
-    }
-    doPrepare();
+    Learned = false;
+    for (auto R: Receptors) R -> doReset();
 }
 
 std::vector<float> inn::Neuron::doCompareCheckpoints() {
@@ -345,7 +352,7 @@ std::vector<std::string> inn::Neuron::getEntries() const {
 }
 
 inn::Neuron::Entry* inn::Neuron::getEntry(int64_t EID) const {
-    if (EID >= Entries.size()) {
+    if (EID < 0 || EID >= Entries.size()) {
         throw inn::Error(inn::Error::EX_NEURON_ENTRIES);
     }
     auto it = Entries.begin();
@@ -359,7 +366,7 @@ inn::Neuron::Entry* inn::Neuron::getEntry(int64_t EID) const {
  * @return inn::Neuron::Receptor object pointer.
  */
 inn::Neuron::Receptor* inn::Neuron::getReceptor(int64_t RID) const {
-    if (RID >= Receptors.size()) {
+    if (RID < 0 || RID >= Receptors.size()) {
         throw inn::Error(inn::Error::EX_NEURON_RECEPTORS);
     }
     return Receptors[RID];

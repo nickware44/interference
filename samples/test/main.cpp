@@ -70,6 +70,7 @@ int doTests(const std::string& name, float ref) {
     int count = 0;
 
     for (auto &b: backends) {
+        NN -> doReset();
         std::cout << std::setw(50) << std::left << name+" ("+std::get<2>(b)+"): ";
         inn::System::setComputeBackend(std::get<0>(b), std::get<1>(b));
         count += doTest(ref);
@@ -89,6 +90,7 @@ int main() {
     int count = 0;
     inn::System::setVerbosityLevel(1);
     NN = new inn::NeuralNet();
+    //NN -> doInitInterlink(4408);
 
     // creating data array
     for (int i = 0; i < 170; i++) {
@@ -99,7 +101,12 @@ int main() {
     std::cout << "=== SUPERSTRUCTURE TEST ===" << std::endl;
     doLoadModel("structures/structure_general.json", 101);
     count += doTests("Superstructure test", SUPERSTRUCTURE_TEST_REFERENCE_OUTPUT);
+    auto s = NN -> getStructure(false);
+    std::ofstream out("test.json");
+    out.write(s.c_str(), s.size());
+    out.close();
 
+    return 0;
     std::cout << "=== BENCHMARK ===" << std::endl;
     doLoadModel("structures/structure_bench.json", 10001);
     count += doTests("Benchmark", BENCHMARK_TEST_REFERENCE_OUTPUT);
