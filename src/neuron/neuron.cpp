@@ -224,26 +224,29 @@ std::vector<float> inn::Neuron::doCompareCheckpoints() {
  * @return Pattern difference value.
  */
 inn::Neuron::PatternDefinition inn::Neuron::doComparePattern() const {
-    inn::Position *RPos, *RPosf;
+    inn::Position *RPosf;
     float Result = 0;
-    float ResultL = 0;
+
     for (auto R: Receptors) {
         if (R->isLocked()) {
-            RPos = R -> getPos();
+            auto scopes = R -> getReferencePosScopes();
+            float rmin = -1, rc;
             RPosf = R -> getPosf();
 //            std::cout << Name << " " << RPos->getPositionValue(0) << ", " <<  RPos->getPositionValue(1) << ", " <<  RPos->getPositionValue(2) << std::endl;
 //            std::cout << RPosf->getPositionValue(0) << ", " <<  RPosf->getPositionValue(1) << ", " <<  RPosf->getPositionValue(2) << std::endl;
-            float Rc = inn::Computer::doCompareFunction(RPos, RPosf);
-            float Lc = fabs(R->getL()-R->getLf());
-//            std::cout << R->getL() << std::endl;
-//            std::cout << R->getLf() << std::endl;
-            Result += Rc;
-            ResultL += Lc;
+            for (auto s: scopes) {
+                rc = inn::Computer::doCompareFunction(s, RPosf);
+                if (rmin == -1 || rc < rmin) rmin = rc;
+            }
+
+            //float Lc = fabs(R->getL()-R->getLf());
+            Result += rmin;
+            //ResultL += Lc;
         }
     }
     Result /= Receptors.size();
-    ResultL /= Receptors.size();
-    return inn::Neuron::PatternDefinition(Result, ResultL);
+    //ResultL /= Receptors.size();
+    return {Result, 0};
 }
 
 void inn::Neuron::doLinkOutput(const std::string& NName) {

@@ -41,14 +41,14 @@ std::vector<float> inn::NeuralNet::doComparePatterns() {
         if (n == Neurons.end()) break;
         auto P = n -> second -> doComparePattern();
         PDiffR.push_back(std::get<0>(P));
-        PDiffL.push_back(std::get<1>(P));
+//        PDiffL.push_back(std::get<1>(P));
 //        std::cout << O << " " << std::get<0>(P) << " " << std::get<1>(P) << std::endl;
     }
     float PDRMin = PDiffR[std::distance(PDiffR.begin(), std::min_element(PDiffR.begin(), PDiffR.end()))];
     float PDRMax = PDiffR[std::distance(PDiffR.begin(), std::max_element(PDiffR.begin(), PDiffR.end()))] - PDRMin;
 
-    float PDLMin = PDiffL[std::distance(PDiffL.begin(), std::min_element(PDiffL.begin(), PDiffL.end()))];
-    float PDLMax = PDiffL[std::distance(PDiffL.begin(), std::max_element(PDiffL.begin(), PDiffL.end()))] - PDLMin;
+//    float PDLMin = PDiffL[std::distance(PDiffL.begin(), std::min_element(PDiffL.begin(), PDiffL.end()))];
+//    float PDLMax = PDiffL[std::distance(PDiffL.begin(), std::max_element(PDiffL.begin(), PDiffL.end()))] - PDLMin;
 //    std::cout << PDRMin << " " << PDRMax << " " << PDLMin << " " << PDLMax << std::endl;
     for (auto &PDR: PDiffR) {
         //PDR = 1 - (PDR-PDRMin) / PDRMax;
