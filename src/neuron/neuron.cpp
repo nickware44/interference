@@ -223,29 +223,38 @@ std::vector<float> inn::Neuron::doCompareCheckpoints() {
  * Compare neuron patterns (learning and recognition patterns).
  * @return Pattern difference value.
  */
-inn::Neuron::PatternDefinition inn::Neuron::doComparePattern() const {
+inn::Neuron::PatternDefinition inn::Neuron::doComparePattern(int ProcessingMethod) const {
     inn::Position *RPosf;
     float Result = 0;
 
     for (auto R: Receptors) {
         if (R->isLocked()) {
             auto scopes = R -> getReferencePosScopes();
-            float rmin = -1, rc;
+            float rmin = -1, rc = 0;
             RPosf = R -> getPosf();
-//            std::cout << Name << " " << RPos->getPositionValue(0) << ", " <<  RPos->getPositionValue(1) << ", " <<  RPos->getPositionValue(2) << std::endl;
-//            std::cout << RPosf->getPositionValue(0) << ", " <<  RPosf->getPositionValue(1) << ", " <<  RPosf->getPositionValue(2) << std::endl;
-            for (auto s: scopes) {
-                rc = inn::Computer::doCompareFunction(s, RPosf);
-                if (rmin == -1 || rc < rmin) rmin = rc;
-            }
 
-            //float Lc = fabs(R->getL()-R->getLf());
-            Result += rmin;
-            //ResultL += Lc;
+            switch (ProcessingMethod) {
+                default:
+                case inn::ScopeProcessingMethods::ProcessMin:
+                    for (auto s: scopes) {
+                        rc = inn::Computer::doCompareFunction(s, RPosf);
+                        if (rmin == -1 || rc < rmin) rmin = rc;
+                    }
+                    Result += rmin;
+                    break;
+
+                case inn::ScopeProcessingMethods::ProcessAverage:
+                    for (auto s: scopes) {
+                        rc += inn::Computer::doCompareFunction(s, RPosf);
+                    }
+                    rc /= scopes.size();
+                    Result += rc;
+                    break;
+            }
         }
     }
+
     Result /= Receptors.size();
-    //ResultL /= Receptors.size();
     return {Result, 0};
 }
 

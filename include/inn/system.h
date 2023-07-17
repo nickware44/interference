@@ -14,6 +14,9 @@
 #include "computer.h"
 
 namespace inn {
+    typedef std::tuple<std::string, std::string, void*, void*, int> LinkDefinition;
+    typedef std::vector<LinkDefinition> LinkList;
+
     class System {
     public:
         static bool isSynchronizationNeeded();

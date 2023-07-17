@@ -18,6 +18,11 @@
 #include "position.h"
 
 namespace inn {
+    typedef enum {
+        ProcessMin,
+        ProcessAverage,
+    } ScopeProcessingMethods;
+
     typedef unsigned int TopologyID;
 
     class Neuron {
@@ -67,7 +72,7 @@ namespace inn {
         void doChangeScope(uint64_t);
         void doReset();
         void doCreateCheckpoint();
-        inn::Neuron::PatternDefinition doComparePattern() const;
+        inn::Neuron::PatternDefinition doComparePattern(int ProcessingMethod = inn::ScopeProcessingMethods::ProcessMin) const;
         void doLinkOutput(const std::string&);
         void doClearOutputLinks();
         void doReplaceEntryName(const std::string&, const std::string&);

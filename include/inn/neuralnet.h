@@ -16,9 +16,14 @@
 #include <functional>
 #include <unordered_map>
 #include "neuron.h"
-#include "../../include/inn/system.h"
+#include "system.h"
 
 namespace inn {
+    typedef enum {
+        CompareDefault,
+        CompareNormalized
+    } PatternCompareFlags;
+
     typedef std::queue<std::tuple<std::string, std::string, void*, int64_t>> NQueue;
 
     /**
@@ -28,16 +33,15 @@ namespace inn {
     private:
         std::string Name, Description, Version;
         int64_t t;
-        bool Learned;
+
         std::vector<std::pair<std::string, std::vector<std::string>>> Entries;
         std::map<std::string, std::vector<std::string>> Ensembles;
+        std::map<std::string, inn::Neuron*> Neurons;
+        std::map<std::string, int> Latencies;
         std::vector<std::string> Outputs;
 
         int64_t doFindEntry(const std::string&);
         void doSignalProcessStart(const std::vector<std::vector<float>>&);
-        std::vector<std::pair<std::queue<std::tuple<std::string, std::string, float, int64_t>>, std::vector<std::string>>> ContextCascade;
-        std::map<std::string, inn::Neuron*> Neurons;
-        std::map<std::string, int> Latencies;
 
         inn::LinkList Links;
         bool Prepared;
@@ -45,7 +49,8 @@ namespace inn {
         int LastUsedComputeBackend;
     public:
         NeuralNet();
-        std::vector<float> doComparePatterns();
+        std::vector<float> doComparePatterns(int CompareFlag = inn::PatternCompareFlags::CompareDefault,
+                                             int ProcessingMethod = inn::ScopeProcessingMethods::ProcessMin);
         void doCreateNewScope();
         void doChangeScope(uint64_t);
         void doReset();

@@ -17,7 +17,6 @@ typedef nlohmann::json json;
 
 inn::NeuralNet::NeuralNet() {
     t = 0;
-    Learned = false;
     Prepared = false;
     LastUsedComputeBackend = -1;
 }
@@ -34,35 +33,29 @@ int64_t inn::NeuralNet::doFindEntry(const std::string& ename) {
  * Compare neuron patterns (learning and recognition patterns) for all output neurons.
  * @return Vector of pattern difference values for each output neuron.
  */
-std::vector<float> inn::NeuralNet::doComparePatterns() {
-    std::vector<float> PDiffR, PDiffL, PDiff;
+std::vector<float> inn::NeuralNet::doComparePatterns(int CompareFlag, int ProcessingMethod) {
+    std::vector<float> PDiffR, PDiff;
     for (const auto& O: Outputs) {
         auto n = Neurons.find(O);
         if (n == Neurons.end()) break;
-        auto P = n -> second -> doComparePattern();
+        auto P = n -> second -> doComparePattern(ProcessingMethod);
         PDiffR.push_back(std::get<0>(P));
-//        PDiffL.push_back(std::get<1>(P));
-//        std::cout << O << " " << std::get<0>(P) << " " << std::get<1>(P) << std::endl;
     }
-    float PDRMin = PDiffR[std::distance(PDiffR.begin(), std::min_element(PDiffR.begin(), PDiffR.end()))];
-    float PDRMax = PDiffR[std::distance(PDiffR.begin(), std::max_element(PDiffR.begin(), PDiffR.end()))] - PDRMin;
 
-//    float PDLMin = PDiffL[std::distance(PDiffL.begin(), std::min_element(PDiffL.begin(), PDiffL.end()))];
-//    float PDLMax = PDiffL[std::distance(PDiffL.begin(), std::max_element(PDiffL.begin(), PDiffL.end()))] - PDLMin;
-//    std::cout << PDRMin << " " << PDRMax << " " << PDLMin << " " << PDLMax << std::endl;
-    for (auto &PDR: PDiffR) {
-        //PDR = 1 - (PDR-PDRMin) / PDRMax;
-        if (PDRMax != 0) PDiff.push_back(1 - (PDR-PDRMin) / PDRMax);
-        else PDiff.push_back(1);
+    switch (CompareFlag) {
+        default:
+        case inn::PatternCompareFlags::CompareDefault:
+            return PDiffR;
+
+        case inn::PatternCompareFlags::CompareNormalized:
+            float PDRMin = PDiffR[std::distance(PDiffR.begin(), std::min_element(PDiffR.begin(), PDiffR.end()))];
+            float PDRMax = PDiffR[std::distance(PDiffR.begin(), std::max_element(PDiffR.begin(), PDiffR.end()))] - PDRMin;
+            for (auto &PDR: PDiffR) {
+                if (PDRMax != 0) PDiff.push_back(1 - (PDR-PDRMin) / PDRMax);
+                else PDiff.push_back(1);
+            }
+            return PDiff;
     }
-//    for (auto &PDL: PDiffL) {
-//        PDL = 1 - (PDL-PDLMin) / PDLMax;
-//        std::cout << PDL << std::endl;
-//    }
-//    for (auto i = 0; i < Outputs.size(); i++) {
-//        PDiff.push_back((PDiffR[i]+PDiffL[i])/2);
-//    }
-    return PDiff;
 }
 
 void inn::NeuralNet::doCreateNewScope() {
@@ -333,7 +326,7 @@ std::vector<float> inn::NeuralNet::doRecognise(const std::vector<std::vector<flo
 void inn::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<float>)>& Callback) {
     setLearned(false);
     doCreateNewScope();
-    doReset();
+    doPrepare();
     doSignalTransferAsync(Xx, Callback);
 }
 
@@ -344,7 +337,7 @@ void inn::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, con
  */
 void inn::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<float>)>& Callback) {
     setLearned(true);
-    doReset();
+    doPrepare();
     doSignalTransferAsync(Xx, Callback);
 }
 

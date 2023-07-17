@@ -105,7 +105,7 @@ int main() {
 
             NN -> doRecognise(rinput);
 
-            auto patterns = NN -> doComparePatterns();
+            auto patterns = NN -> doComparePatterns(inn::PatternCompareFlags::CompareNormalized);
             auto r = std::max_element(patterns.begin(), patterns.end());
             if (std::distance(patterns.begin(), r) == b-1) {
                 std::cout << "[CORRECT ANSWER]" << std::endl;

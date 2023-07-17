@@ -113,7 +113,7 @@ int main() {
             S = (IMAGE_SIZE*24./1024/1024)*1000 / T;
             doLog("Recognizing "+std::to_string(b)+"-"+std::to_string(e)+".bmp", T, S, false);
 
-            auto patterns = NN -> doComparePatterns();
+            auto patterns = NN -> doComparePatterns(inn::PatternCompareFlags::CompareNormalized);
             auto r = std::max_element(patterns.begin(), patterns.end());
             if (std::distance(patterns.begin(), r) == b-1) {
                 std::cout << "[RECOGNIZED]" << std::endl;

@@ -13,9 +13,6 @@
 #include "position.h"
 
 namespace inn {
-    typedef std::tuple<std::string, std::string, void*, void*, int> LinkDefinition;
-    typedef std::vector<LinkDefinition> LinkList;
-
     class Computer {
     public:
         Computer();
