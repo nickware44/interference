@@ -21,6 +21,15 @@ inn::NeuralNet::NeuralNet() {
     LastUsedComputeBackend = -1;
 }
 
+inn::NeuralNet::NeuralNet(const std::string &path) {
+    t = 0;
+    Prepared = false;
+    LastUsedComputeBackend = -1;
+    InterlinkService = nullptr;
+    std::ifstream filestream(path);
+    setStructure(filestream);
+}
+
 int64_t inn::NeuralNet::doFindEntry(const std::string& ename) {
     auto ne = std::find_if(Entries.begin(), Entries.end(), [ename](const std::pair<std::string, std::vector<std::string>>& e){
         return e.first == ename;

@@ -58,8 +58,7 @@ int main() {
 
     // load neural network structure from file
     std::ifstream structure(STRUCTURE_PATH);
-    auto NN = new inn::NeuralNet();
-    NN -> setStructure(structure);
+    auto NN = new inn::NeuralNet(STRUCTURE_PATH);
 
     // replicate neurons for classification
     for (int i = 2; i <= TEACH_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);

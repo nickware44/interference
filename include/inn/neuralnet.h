@@ -49,6 +49,7 @@ namespace inn {
         int LastUsedComputeBackend;
     public:
         NeuralNet();
+        explicit NeuralNet(const std::string &path);
         std::vector<float> doComparePatterns(int CompareFlag = inn::PatternCompareFlags::CompareDefault,
                                              int ProcessingMethod = inn::ScopeProcessingMethods::ProcessMin);
         void doCreateNewScope();

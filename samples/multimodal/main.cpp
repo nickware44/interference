@@ -52,9 +52,7 @@ int main() {
     std::vector<std::string> variants = {"mug with a melons", "mug wth a meln", "mug with a big apple", "mug w th a bi ap ple", "tomato", "tomto"};
 
     // load neural network structure from file
-    std::ifstream structure(STRUCTURE_PATH);
-    auto NN = new inn::NeuralNet();
-    NN -> setStructure(structure);
+    auto NN = new inn::NeuralNet(STRUCTURE_PATH);
 
     // replicate neurons
     for (int i = 2; i <= COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
