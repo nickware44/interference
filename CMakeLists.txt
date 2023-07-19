@@ -10,10 +10,14 @@ add_library(interference
         src/computer.cpp include/inn/computer.h
         src/backends/default.cpp include/inn/backends/default.h
         src/backends/multithread.cpp include/inn/backends/multithread.h
-        src/backends/opencl.cpp include/inn/backends/opencl.h)
+        src/backends/opencl.cpp include/inn/backends/opencl.h src/interlink.cpp include/inn/interlink.h)
 
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} Threads::Threads -latomic)
+
+if (WIN32)
+    target_link_libraries(${PROJECT_NAME} -lws2_32)
+ENDIF()
 
 OPTION(INDK_OPENCL_SUPPORT "Interference NDK OpenCL compute backend support" OFF)
 

@@ -17,6 +17,7 @@
 #include <unordered_map>
 #include "neuron.h"
 #include "system.h"
+#include "interlink.h"
 
 namespace inn {
     typedef enum {
@@ -45,11 +46,14 @@ namespace inn {
 
         inn::LinkList Links;
         bool Prepared;
-
         int LastUsedComputeBackend;
+
+        inn::Interlink *InterlinkService;
+        void doInterlinkAppUpdateData();
     public:
         NeuralNet();
         explicit NeuralNet(const std::string &path);
+        void doInterlinkInit(int);
         std::vector<float> doComparePatterns(int CompareFlag = inn::PatternCompareFlags::CompareDefault,
                                              int ProcessingMethod = inn::ScopeProcessingMethods::ProcessMin);
         void doCreateNewScope();

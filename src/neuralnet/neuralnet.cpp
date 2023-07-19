@@ -19,6 +19,7 @@ inn::NeuralNet::NeuralNet() {
     t = 0;
     Prepared = false;
     LastUsedComputeBackend = -1;
+    InterlinkService = nullptr;
 }
 
 inn::NeuralNet::NeuralNet(const std::string &path) {
@@ -28,6 +29,32 @@ inn::NeuralNet::NeuralNet(const std::string &path) {
     InterlinkService = nullptr;
     std::ifstream filestream(path);
     setStructure(filestream);
+}
+
+void inn::NeuralNet::doInterlinkInit(int port) {
+    InterlinkService = new inn::Interlink(port);
+}
+
+void inn::NeuralNet::doInterlinkAppUpdateData() {
+    if (!InterlinkService || InterlinkService && !InterlinkService->isInterlinked()) return;
+    json j;
+
+    for (const auto &n: Neurons) {
+        json jn;
+        jn["name"] = n.second->getName();
+        jn["time"] = n.second->getTime();
+
+        for (int i = 0; i < n.second->getReceptorsCount(); i++) {
+            json jr;
+            auto r = n.second->getReceptor(i);
+            jr["sensitivity"] = r -> getSensitivityValue();
+            jn["receptors"].push_back(jr);
+        }
+
+        j["neurons"].push_back(jn);
+    }
+
+    InterlinkService -> doUpdateData(j.dump());
 }
 
 int64_t inn::NeuralNet::doFindEntry(const std::string& ename) {
@@ -283,6 +310,7 @@ std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vecto
     }
 
     LastUsedComputeBackend = inn::System::getComputeBackendKind();
+    doInterlinkAppUpdateData();
 
     return doSignalReceive();
 }
@@ -310,6 +338,9 @@ void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<float>>
  * @return Output signals.
  */
 std::vector<float> inn::NeuralNet::doLearn(const std::vector<std::vector<float>>& Xx) {
+    if (InterlinkService && InterlinkService->isInterlinked()) {
+        InterlinkService -> doUpdateStructure(getStructure());
+    }
     setLearned(false);
     doCreateNewScope();
     doPrepare();
@@ -720,6 +751,10 @@ void inn::NeuralNet::setStructure(const std::string &Str) {
                 }
                 std::cout << std::endl;
             }
+        }
+
+        if (InterlinkService && InterlinkService->isInterlinked()) {
+            InterlinkService -> setStructure(Str);
         }
     } catch (std::exception &e) {
         if (inn::System::getVerbosityLevel() > 0) std::cerr << "Error parsing structure: " << e.what() << std::endl;
