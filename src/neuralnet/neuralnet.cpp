@@ -46,8 +46,22 @@ void inn::NeuralNet::doInterlinkAppUpdateData() {
 
         for (int i = 0; i < n.second->getReceptorsCount(); i++) {
             json jr;
-            auto r = n.second->getReceptor(i);
+            auto r = n.second -> getReceptor(i);
             jr["sensitivity"] = r -> getSensitivityValue();
+
+            auto scopes = r -> getReferencePosScopes();
+            for (const auto &s: scopes) {
+                json js;
+                for (int p = 0; p < n.second->getDimensionsCount(); p++) {
+                    js.push_back(s->getPositionValue(p));
+                }
+                jr["scopes"].push_back(js);
+            }
+
+            for (int p = 0; p < n.second->getDimensionsCount(); p++) {
+                jr["phantom"].push_back(r->getPosf()->getPositionValue(p));
+            }
+
             jn["receptors"].push_back(jr);
         }
 
