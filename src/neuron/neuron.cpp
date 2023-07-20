@@ -225,37 +225,40 @@ std::vector<float> inn::Neuron::doCompareCheckpoints() {
  */
 inn::Neuron::PatternDefinition inn::Neuron::doComparePattern(int ProcessingMethod) const {
     inn::Position *RPosf;
-    float Result = 0;
+    auto ssize = Receptors[0]->getReferencePosScopes().size();
+    std::vector<float> results;
+    float value = 0;
+    float rmin = -1;
+
+    for (uint64_t i = 0; i < ssize; i++) results.push_back(0);
 
     for (auto R: Receptors) {
-        if (R->isLocked()) {
-            auto scopes = R -> getReferencePosScopes();
-            float rmin = -1, rc = 0;
-            RPosf = R -> getPosf();
+        auto scopes = R -> getReferencePosScopes();
+        RPosf = R -> getPosf();
 
-            switch (ProcessingMethod) {
-                default:
-                case inn::ScopeProcessingMethods::ProcessMin:
-                    for (auto s: scopes) {
-                        rc = inn::Computer::doCompareFunction(s, RPosf);
-                        if (rmin == -1 || rc < rmin) rmin = rc;
-                    }
-                    Result += rmin;
-                    break;
-
-                case inn::ScopeProcessingMethods::ProcessAverage:
-                    for (auto s: scopes) {
-                        rc += inn::Computer::doCompareFunction(s, RPosf);
-                    }
-                    rc /= scopes.size();
-                    Result += rc;
-                    break;
-            }
+        for (uint64_t i = 0; i < scopes.size(); i++) {
+            results[i] += inn::Computer::doCompareFunction(scopes[i], RPosf) / Receptors.size();
         }
     }
 
-    Result /= Receptors.size();
-    return {Result, 0};
+    switch (ProcessingMethod) {
+        default:
+        case inn::ScopeProcessingMethods::ProcessMin:
+            for (auto r: results) {
+                if (rmin == -1 || r < rmin) rmin = r;
+            }
+            value = rmin;
+            break;
+
+        case inn::ScopeProcessingMethods::ProcessAverage:
+            for (auto r: results) {
+                value += r;
+            }
+            value /= ssize;
+            break;
+    }
+
+    return {value, 0};
 }
 
 void inn::Neuron::doLinkOutput(const std::string& NName) {
