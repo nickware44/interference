@@ -26,6 +26,7 @@ namespace inn {
     } PatternCompareFlags;
 
     typedef std::queue<std::tuple<std::string, std::string, void*, int64_t>> NQueue;
+    typedef std::vector<std::pair<std::string, std::vector<std::string>>> EntryList;
 
     /**
      * Main neural net class.
@@ -35,17 +36,22 @@ namespace inn {
         std::string Name, Description, Version;
         int64_t t;
 
-        std::vector<std::pair<std::string, std::vector<std::string>>> Entries;
+        EntryList Entries;
         std::map<std::string, std::vector<std::string>> Ensembles;
         std::map<std::string, inn::Neuron*> Neurons;
         std::map<std::string, int> Latencies;
         std::vector<std::string> Outputs;
 
+        std::map<std::string, std::vector<std::string>> StateSyncList;
+
         int64_t doFindEntry(const std::string&);
-        void doSignalProcessStart(const std::vector<std::vector<float>>&);
+        void doParseLinks(const EntryList&, const std::string&);
+        void doSignalProcessStart(const std::vector<std::vector<float>>&, const EntryList&);
+        void doSyncNeuronStates(const std::string&);
 
         inn::LinkList Links;
-        bool Prepared;
+        std::string PrepareID;
+        bool StateSyncEnabled;
         int LastUsedComputeBackend;
 
         inn::Interlink *InterlinkService;
@@ -61,12 +67,12 @@ namespace inn {
         void doReset();
         void doPrepare();
         void doStructurePrepare();
-        std::vector<float> doSignalTransfer(const std::vector<std::vector<float>>&);
-        void doSignalTransferAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr);
+        std::vector<float> doSignalTransfer(const std::vector<std::vector<float>>&, const std::string& ensemble = "");
+        void doSignalTransferAsync(const std::vector<std::vector<float>>&, const std::string& ensemble = "", const std::function<void(std::vector<float>)>& Callback = nullptr);
         std::vector<float> doLearn(const std::vector<std::vector<float>>&);
-        std::vector<float> doRecognise(const std::vector<std::vector<float>>&);
+        std::vector<float> doRecognise(const std::vector<std::vector<float>>&, const std::string& ensemble = "");
         void doLearnAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr);
-        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr);
+        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::string& ensemble, const std::function<void(std::vector<float>)>& Callback = nullptr);
         std::vector<float> doSignalReceive();
         void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);
         void doReserveSignalBuffer(int64_t L);

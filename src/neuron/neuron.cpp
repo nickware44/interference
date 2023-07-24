@@ -153,7 +153,8 @@ std::pair<int64_t, float> inn::Neuron::doSignalReceive(int64_t tT) {
     if (d > 0 && OutputSignalPointer-d >= 0) {
         return std::make_pair(tT, OutputSignal[OutputSignalPointer-d]);
     } else {
-        std::cerr << "[" << Name << "] Output for time " << tT << " is not ready yet" << std::endl;
+        if (inn::System::getVerbosityLevel() > 1)
+            std::cerr << "[" << Name << "] Output for time " << tT << " is not ready yet" << std::endl;
         return std::make_pair(tT, 0);
     }
 }

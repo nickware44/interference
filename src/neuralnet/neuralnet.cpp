@@ -17,14 +17,13 @@ typedef nlohmann::json json;
 
 inn::NeuralNet::NeuralNet() {
     t = 0;
-    Prepared = false;
     LastUsedComputeBackend = -1;
     InterlinkService = nullptr;
 }
 
 inn::NeuralNet::NeuralNet(const std::string &path) {
     t = 0;
-    Prepared = false;
+    StateSyncEnabled = true;
     LastUsedComputeBackend = -1;
     InterlinkService = nullptr;
     std::ifstream filestream(path);
@@ -125,13 +124,12 @@ void inn::NeuralNet::doReset() {
     for (const auto& N: Neurons) N.second -> doReset();
 }
 
-
 void inn::NeuralNet::doPrepare() {
     t = 0;
     for (const auto& N: Neurons) N.second -> doPrepare();
 }
 
-void inn::NeuralNet::doSignalProcessStart(const std::vector<std::vector<float>>& Xx) {
+void inn::NeuralNet::doSignalProcessStart(const std::vector<std::vector<float>>& Xx, const EntryList& entries) {
     float value;
     int d = 0;
 
@@ -139,7 +137,7 @@ void inn::NeuralNet::doSignalProcessStart(const std::vector<std::vector<float>>&
 
     for (auto X: Xx) {
         int xi = 0;
-        for (auto &e: Entries) {
+        for (auto &e: entries) {
             for (auto &en: e.second) {
                 auto n = Neurons.find(en);
 
@@ -215,14 +213,14 @@ void inn::NeuralNet::doSignalProcessStart(const std::vector<std::vector<float>>&
     }
 }
 
-void inn::NeuralNet::doStructurePrepare() {
-    if (Prepared) return;
+void inn::NeuralNet::doParseLinks(const EntryList& entries, const std::string& id) {
+    if (id == PrepareID) return;
 
     Links.clear();
 
     NQueue nqueue;
 
-    for (auto &e: Entries) {
+    for (auto &e: entries) {
         for (auto &en: e.second) {
             nqueue.emplace(e.first, en, nullptr, 0);
         }
@@ -272,10 +270,33 @@ void inn::NeuralNet::doStructurePrepare() {
 
 //    std::cout << std::endl;
 //    for (auto l: Links) {
-//        std::cout << std::get<0>(l) << " -> " << std::get<1>(l) << " " << std::get<4>(l) << " " << std::get<5>(l) << std::endl;
+//        std::cerr << std::get<0>(l) << " -> " << std::get<1>(l) << " " << std::get<4>(l) << std::endl;
 //    }
 
-    Prepared = true;
+    PrepareID = id;
+}
+
+void inn::NeuralNet::doSyncNeuronStates(const std::string &name) {
+    auto s = StateSyncList.find(name);
+    if (s != StateSyncList.end()) {
+        auto n1 = Neurons.find(s->first);
+        if (n1 != Neurons.end()) {
+            for (const auto& v: s->second) {
+                auto n2 = Neurons.find(v);
+                if (n2 != Neurons.end()) {
+                    for (int i = 0; i < n1->second->getReceptorsCount(); i++) {
+                        auto pos = n1 -> second -> getReceptor(i) -> getPosf();
+                        n2 -> second -> getReceptor(i) -> getPosf() -> setPosition(pos);
+                    }
+                    n2 -> second -> setTime(n1->second->getTime());
+                }
+            }
+        }
+    }
+}
+
+void inn::NeuralNet::doStructurePrepare() {
+    doParseLinks(Entries, "all");
 }
 
 /**
@@ -283,7 +304,7 @@ void inn::NeuralNet::doStructurePrepare() {
  * @param Xx Input data vector that contain signals.
  * @return Output signals.
  */
-std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vector<float>>& Xx) {
+std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vector<float>>& Xx, const std::string& ensemble) {
     if (inn::System::getComputeBackendKind() == -1) {
         if (inn::System::getVerbosityLevel() > 0)
             std::cerr << "Switching to default compute backend." << std::endl;
@@ -291,14 +312,35 @@ std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vecto
         inn::System::setComputeBackend(inn::System::ComputeBackends::Default);
     }
     std::vector<void*> v;
+    std::vector<std::string> nsync;
+    EntryList eentries;
 
-    doStructurePrepare();
+    if (ensemble.empty()) {
+        doParseLinks(Entries, "all");
+        eentries = Entries;
+    } else {
+        auto ens = Ensembles.find(ensemble);
+        if (ens != Ensembles.end()) {
+            for (const auto &name: ens->second) {
+                auto n = Neurons.find(name);
+                nsync.push_back(name);
+                auto nentries = n->second->getEntries();
+                for (const auto &e: nentries) {
+                    auto ne = doFindEntry(e);
+                    if (ne != -1) {
+                        eentries.emplace_back(Entries[ne]);
+                    }
+                }
+            }
+        }
+        doParseLinks(eentries, ensemble);
+    }
 
     switch (inn::System::getComputeBackendKind()) {
         case inn::System::ComputeBackends::Default:
             doReserveSignalBuffer(1);
             for (auto &X: Xx) {
-                doSignalProcessStart({X});
+                doSignalProcessStart({X}, eentries);
             }
             break;
 
@@ -306,7 +348,7 @@ std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vecto
             if (getSignalBufferSize() != Xx.size()) doReserveSignalBuffer(Xx.size());
             for (const auto &n: Neurons) v.push_back((void*)n.second);
             inn::System::getComputeBackend() -> doRegisterHost(v);
-            doSignalProcessStart(Xx);
+            doSignalProcessStart(Xx, eentries);
             inn::System::getComputeBackend() -> doWaitTarget();
             inn::System::getComputeBackend() -> doUnregisterHost();
             break;
@@ -316,15 +358,21 @@ std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vecto
             for (const auto &n: Neurons) v.push_back((void*)n.second);
             inn::System::getComputeBackend() -> doRegisterHost(v);
             for (auto &X: Xx) {
-                doSignalProcessStart({X});
+                doSignalProcessStart({X}, eentries);
             }
-            doSignalProcessStart({});
+            doSignalProcessStart({}, eentries);
             inn::System::getComputeBackend() -> doUnregisterHost();
             break;
     }
 
     LastUsedComputeBackend = inn::System::getComputeBackendKind();
     doInterlinkAppUpdateData();
+
+    if (!ensemble.empty() && StateSyncEnabled) {
+        for (const auto &name: nsync) {
+            doSyncNeuronStates(name);
+        }
+    }
 
     return doSignalReceive();
 }
@@ -334,9 +382,9 @@ std::vector<float> inn::NeuralNet::doSignalTransfer(const std::vector<std::vecto
  * @param Xx Input data vector that contain signals.
  * @param Callback Callback function for output signals.
  */
-void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<float>)>& Callback) {
-    std::function<void()> tCallback([this, Xx, Callback] () {
-        auto Y = doSignalTransfer(Xx);
+void inn::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, const std::function<void(std::vector<float>)>& Callback) {
+    std::function<void()> tCallback([this, Xx, ensemble, Callback] () {
+        auto Y = doSignalTransfer(Xx, ensemble);
 
         if (Callback) {
             Callback(Y);
@@ -366,10 +414,10 @@ std::vector<float> inn::NeuralNet::doLearn(const std::vector<std::vector<float>>
  * @param Xx Input data vector that contain signals for recognizing.
  * @return Output signals.
  */
-std::vector<float> inn::NeuralNet::doRecognise(const std::vector<std::vector<float>>& Xx) {
+std::vector<float> inn::NeuralNet::doRecognise(const std::vector<std::vector<float>>& Xx, const std::string& ensemble) {
     setLearned(true);
     doPrepare();
-    return doSignalTransfer(Xx);
+    return doSignalTransfer(Xx, ensemble);
 }
 
 /**
@@ -381,7 +429,7 @@ void inn::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, con
     setLearned(false);
     doCreateNewScope();
     doPrepare();
-    doSignalTransferAsync(Xx, Callback);
+    doSignalTransferAsync(Xx, "", Callback);
 }
 
 /**
@@ -389,10 +437,10 @@ void inn::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, con
  * @param Xx Input data vector that contain signals for recognizing.
  * @param Callback Callback function for output signals.
  */
-void inn::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<float>)>& Callback) {
+void inn::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, const std::function<void(std::vector<float>)>& Callback) {
     setLearned(true);
     doPrepare();
-    doSignalTransferAsync(Xx, Callback);
+    doSignalTransferAsync(Xx, ensemble, Callback);
 }
 
 /**
@@ -418,7 +466,7 @@ std::vector<float> inn::NeuralNet::doSignalReceive() {
 void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries) {
     json j;
 
-    Prepared = false;
+    PrepareID = "";
     std::vector<std::string> enew;
     auto efrom = Ensembles.find(From);
 
@@ -499,6 +547,13 @@ void inn::NeuralNet::doReplicateEnsemble(const std::string& From, const std::str
                 ji["old_name"] = en;
                 ji["new_name"] = nname;
                 j["neurons"].push_back(ji);
+
+                auto sobject = StateSyncList.find(en);
+                if (sobject == StateSyncList.end()) {
+                    StateSyncList.insert(std::make_pair(en, std::vector<std::string>({nname})));
+                } else {
+                    sobject->second.push_back(nname);
+                }
 
                 if (eto == Ensembles.end()) {
                     enew.push_back(nname);
@@ -602,12 +657,13 @@ void inn::NeuralNet::setStructure(std::ifstream &Stream) {
  */
 void inn::NeuralNet::setStructure(const std::string &Str) {
     for (const auto& N: Neurons) delete N.second;
-    Prepared = false;
+    PrepareID = "";
     Entries.clear();
     Outputs.clear();
     Latencies.clear();
     Neurons.clear();
     Ensembles.clear();
+    StateSyncList.clear();
 
     try {
         auto j = json::parse(Str);

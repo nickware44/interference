@@ -18,7 +18,7 @@ uint64_t getTimestampMS() {
             time_since_epoch()).count();
 }
 
-std::vector<std::vector<float>> doBuildInputVector(std::vector<BMPImage> &images) {
+std::vector<std::vector<float>> doBuildInputVector(std::vector<BMPImage> images) {
     std::vector<std::vector<float>> input;
     for (int d = 0; d < images[0].size(); d+=2) {
         input.emplace_back();
@@ -47,7 +47,7 @@ void doLog(const std::string& element, uint64_t time, float speed, bool endl = t
 }
 
 int main() {
-    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 2);
+//    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 2);
     constexpr uint8_t TEACH_COUNT = 10;
     constexpr uint8_t TEST_COUNT = 10;
     constexpr uint8_t TEST_ELEMENTS = 10;
@@ -59,6 +59,7 @@ int main() {
     // load neural network structure from file
     std::ifstream structure(STRUCTURE_PATH);
     auto NN = new inn::NeuralNet(STRUCTURE_PATH);
+//    NN->doInterlinkInit(4408);
 
     // replicate neurons for classification
     for (int i = 2; i <= TEACH_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
@@ -100,12 +101,10 @@ int main() {
         for (int e = 1; e <= TEST_ELEMENTS; e++) {
             std::string name = std::to_string(b)+"-"+std::to_string(e)+".bmp";
             auto image = doReadBMP(IMAGES_TESTING_PATH+name);
-            std::vector<BMPImage> rimages;
-            for (int i = 1; i <= TEST_COUNT; i++) rimages.push_back(image);
-            auto rinput = doBuildInputVector(rimages);
+            auto rinput = doBuildInputVector({image});
 
             T = getTimestampMS();
-            NN -> doRecognise(rinput);
+            NN -> doRecognise(rinput, "A1");
             T = getTimestampMS() - T;
 
             // Compute speed
