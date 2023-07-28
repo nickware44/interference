@@ -78,7 +78,8 @@ namespace inn {
         void doReserveSignalBuffer(int64_t L);
         void setStructure(std::ifstream&);
         void setStructure(const std::string &Str);
-        void setLearned(bool LearnedFlag);
+        void setLearned(bool);
+        void setStateSyncEnabled(bool enabled = true);
         bool isLearned();
         std::string getStructure(bool minimized = true);
         std::string getName();

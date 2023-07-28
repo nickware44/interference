@@ -59,6 +59,7 @@ int main() {
     // load neural network structure from file
     std::ifstream structure(STRUCTURE_PATH);
     auto NN = new inn::NeuralNet(STRUCTURE_PATH);
+    NN -> setStateSyncEnabled();
 //    NN->doInterlinkInit(4408);
 
     // replicate neurons for classification

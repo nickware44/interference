@@ -17,13 +17,14 @@ typedef nlohmann::json json;
 
 inn::NeuralNet::NeuralNet() {
     t = 0;
+    StateSyncEnabled = false;
     LastUsedComputeBackend = -1;
     InterlinkService = nullptr;
 }
 
 inn::NeuralNet::NeuralNet(const std::string &path) {
     t = 0;
-    StateSyncEnabled = true;
+    StateSyncEnabled = false;
     LastUsedComputeBackend = -1;
     InterlinkService = nullptr;
     std::ifstream filestream(path);
@@ -839,6 +840,14 @@ void inn::NeuralNet::setLearned(bool LearnedFlag) {
     for (const auto& N: Neurons) {
         N.second -> setLearned(LearnedFlag);
     }
+}
+
+/**
+ * Enable neuron state synchronization.
+ * @param enable
+ */
+void inn::NeuralNet::setStateSyncEnabled(bool enabled) {
+    StateSyncEnabled = enabled;
 }
 
 /**
