@@ -35,7 +35,7 @@ void inn::Interlink::doInitInput(int port) {
     Input -> set_keep_alive_timeout(60);
 
     Input -> Post("/io_init", [&](const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &content_reader) {
-        Host = req.local_addr;
+        Host = req.remote_addr;
         std::string body;
 
         content_reader([&](const char *data, size_t data_length) {
@@ -87,7 +87,7 @@ void inn::Interlink::doInitOutput() {
 }
 
 void inn::Interlink::doSend(const std::string& command, const std::string& data) {
-    if (!Interlinked.load()) return;
+    if (!Interlinked.load() || !Output) return;
     auto res = Output -> Post("/"+command, data.size(),
                    [data](size_t offset, size_t length, httplib::DataSink &sink) {
                         sink.write(data.c_str()+offset, length);
