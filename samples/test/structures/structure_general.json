@@ -40,7 +40,7 @@
           "position": [100, 100, 0],
           "radius": 50,
           "neurotransmitter": "activation",
-          "k1": 25
+          "k1": 250
         }
       ],
       "receptors": [
@@ -54,7 +54,7 @@
     },
     {
       "name": "N3",
-      "size": 200,
+      "size": 201,
       "dimensions": 3,
       "input_signals": ["N1", "N6"],
       "ensemble": "A1",
@@ -65,7 +65,7 @@
           "position": [100, 100, 0],
           "radius": 50,
           "neurotransmitter": "activation",
-          "k1": 25
+          "k1": 250
         }
       ],
       "receptors": [
@@ -91,7 +91,7 @@
           "position": [150, 150, 0],
           "radius": 5,
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 25
         }
       ],
       "receptors": [
@@ -115,7 +115,7 @@
           "entry": 0,
           "position": [100, 100, 0],
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 100
         }
       ],
       "receptors": [

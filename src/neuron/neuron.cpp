@@ -125,6 +125,17 @@ void inn::Neuron::doCreateNewReceptorCluster(const std::vector<float>& PosVector
         doCreateNewReceptor({xr, yr, 0});
         fi += dfi;
     }
+
+//    float xr = x-(C+1)*R, yr;
+//    int count = C;
+//    for (int i = -count; i <= count; i++) {
+//        xr += R;
+//        yr = y-(C+1)*R;
+//        for (int j = -count; j <= count; j++) {
+//            yr += R;
+//            doCreateNewReceptor({xr, yr, 0});
+//        }
+//    }
 }
 
 bool inn::Neuron::doSignalSendEntry(const std::string& From, float X, int64_t tn) {
