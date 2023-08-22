@@ -37,5 +37,5 @@
   "output_signals": ["N1"],
   "name": "vision",
   "desc": "neural net structure for interference vision sample",
-  "version": "1.2"
+  "version": "1.3"
 }
