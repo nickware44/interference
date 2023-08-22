@@ -3,7 +3,7 @@
   "neurons": [
     {
       "name": "N1",
-      "size": 500,
+      "size": 1000,
       "dimensions": 3,
       "input_signals": ["E1", "E2"],
       "ensemble": "A1",
@@ -11,8 +11,8 @@
       "synapses": [
         {
           "type": "cluster",
-          "position": [250, 250, 0],
-          "radius": 50,
+          "position": [500, 500, 0],
+          "radius": 25,
           "neurotransmitter": "activation",
           "k1": 10
         }
@@ -21,7 +21,7 @@
       "receptors": [
         {
           "type": "cluster",
-          "position": [250, 250, 0],
+          "position": [500, 500, 0],
           "count": 15,
           "radius": 10
         }
@@ -38,9 +38,9 @@
         {
           "type": "cluster",
           "position": [100, 100, 0],
-          "radius": 50,
+          "radius": 30,
           "neurotransmitter": "activation",
-          "k1": 25
+          "k1": 30
         }
       ],
       "receptors": [
@@ -54,7 +54,7 @@
     },
     {
       "name": "N3",
-      "size": 200,
+      "size": 201,
       "dimensions": 3,
       "input_signals": ["N1", "N6"],
       "ensemble": "A1",
@@ -63,9 +63,9 @@
         {
           "type": "cluster",
           "position": [100, 100, 0],
-          "radius": 50,
+          "radius": 30,
           "neurotransmitter": "activation",
-          "k1": 25
+          "k1": 50
         }
       ],
       "receptors": [
@@ -91,7 +91,7 @@
           "position": [150, 150, 0],
           "radius": 5,
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 25
         }
       ],
       "receptors": [
@@ -115,7 +115,7 @@
           "entry": 0,
           "position": [100, 100, 0],
           "neurotransmitter": "activation",
-          "k1": 1
+          "k1": 100
         }
       ],
       "receptors": [
@@ -147,7 +147,7 @@
           "position": [50, 50, 0],
           "radius": 50,
           "neurotransmitter": "activation",
-          "k1": 5000
+          "k1": 100
         }
       ],
       "receptors": [
@@ -155,13 +155,13 @@
           "type": "cluster",
           "position": [50, 50, 0],
           "count": 15,
-          "radius": 5
+          "radius": 30
         },
         {
           "type": "cluster",
           "position": [50, 50, 0],
           "count": 10,
-          "radius": 10
+          "radius": 35
         }
       ]
     }
@@ -169,5 +169,5 @@
   "output_signals": ["N6"],
   "name": "superstructure test net",
   "desc": "neural net structure for general testing",
-  "version": "1.2"
+  "version": "1.3"
 }

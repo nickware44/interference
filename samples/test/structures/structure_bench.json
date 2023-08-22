@@ -12,7 +12,7 @@
         {
           "type": "cluster",
           "position": [600, 600, 0],
-          "radius": 500,
+          "radius": 50,
           "neurotransmitter": "activation",
           "k1": 1050
         }
@@ -31,5 +31,5 @@
   "output_signals": ["N1"],
   "name": "benchmark net",
   "desc": "neural net structure for benchmark",
-  "version": "1.0"
+  "version": "1.1"
 }

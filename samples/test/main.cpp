@@ -80,11 +80,10 @@ int doTests(const std::string& name, float ref) {
     return count;
 }
 
-
 int main() {
     constexpr unsigned STRUCTURE_COUNT                      = 2;
-    constexpr float SUPERSTRUCTURE_TEST_REFERENCE_OUTPUT    = 10.614;
-    constexpr float BENCHMARK_TEST_REFERENCE_OUTPUT         = 1.233;
+    constexpr float SUPERSTRUCTURE_TEST_REFERENCE_OUTPUT    = 0.0291;
+    constexpr float BENCHMARK_TEST_REFERENCE_OUTPUT         = 2.7622;
     const unsigned TOTAL_TEST_COUNT                         = STRUCTURE_COUNT*backends.size();
 
     int count = 0;

@@ -53,7 +53,7 @@ void inn::Position::doAdd(const inn::Position *P) {
     }
     for (unsigned int i = 0; i < DimensionsCount; i++) {
         X[i] += P->getPositionValue(i);
-        if (X[i] < 0 || X[i] > Xm) {
+        if (X[i] > Xm) {
             throw inn::Error(inn::Error::EX_POSITION_OUT_RANGES, {X[i], (float)Xm});
         }
     }
@@ -67,8 +67,8 @@ void inn::Position::doSubtract(const inn::Position *P) {
         throw inn::Error(inn::Error::EX_POSITION_RANGES);
     }
     for (unsigned int i = 0; i < DimensionsCount; i++) {
-        X[i] = std::fabs(X[i]-P->getPositionValue(i));
-        if (X[i] < 0 || X[i] > Xm) {
+        X[i] = (X[i]-P->getPositionValue(i));
+        if (X[i] > Xm) {
             throw inn::Error(inn::Error::EX_POSITION_OUT_RANGES, {X[i], (float)Xm});
         }
     }
@@ -83,7 +83,7 @@ void inn::Position::doDivide(float D) {
 void inn::Position::doMultiply(float M) {
     for (unsigned int i = 0; i < DimensionsCount; i++) {
         X[i] *= M;
-        if (X[i] < 0 || X[i] > Xm) {
+        if (X[i] > Xm) {
             throw inn::Error(inn::Error::EX_POSITION_OUT_RANGES, {X[i], (float)Xm});
         }
     }

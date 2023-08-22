@@ -69,7 +69,7 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
         }
 
         R -> setFi(FiSum);
-        R -> setPos(dRPos);
+        R -> doUpdatePos(dRPos);
         P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, zPos);
         R -> doUpdateSensitivityValue();
     }
