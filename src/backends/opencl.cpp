@@ -77,10 +77,10 @@ inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
                        float fi = ngamma * e;
                        float dfi = (ngamma-pairs[id].s4) * e;
                        float nx = 0, ny = 0;
-                       if (dfi > 0) {
+                       if (dfi > 0 && d > 0) {
                            float nposd = sqrt(dfi) / d;
-                           nx = fabs(pairs[id].s0-pairs[id].s2) * nposd;
-                           ny = fabs(pairs[id].s1-pairs[id].s3) * nposd;
+                           nx = (pairs[id].s0-pairs[id].s2) * nposd;
+                           ny = (pairs[id].s1-pairs[id].s3) * nposd;
                        }
 
                        // update gamma value
@@ -129,7 +129,7 @@ inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
                        d = sqrt(d);
 
                        float p = 0;
-                       if (d > 0 && fisum > receptors[id].s3) p = dfisum * dry / d;
+                       if (d > 0 && fisum > receptors[id].s3) p = d;
 
                        if (dfisum > 0 && fisum >= receptors[id].s3) receptors[id].s3 += dfisum;
                        else receptors[id].s3 = receptors[id].s3 / (receptors[id].s5*receptors[id].s3+1);
@@ -358,11 +358,10 @@ void inn::ComputeBackendOpenCL::doUnregisterHost() {
     Queue.enqueueReadBuffer(ReceptorsBuffer, CL_TRUE, 0, sizeof(cl_float8)*ReceptorPoolSize, ReceptorsInfo);
 
     uint64_t rx = 0;
-    inn::Position *rpos;
-    inn::Position npos(0, 3);
 
     for (auto &o : Objects) {
         auto n = (inn::Neuron*)o;
+        inn::Position npos(0, n->getDimensionsCount());
         auto rc = n -> getReceptorsCount();
 
         npos.setXm(n->getXm());
@@ -370,13 +369,11 @@ void inn::ComputeBackendOpenCL::doUnregisterHost() {
 
         for (int i = 0; i < rc; i++) {
             auto r = n -> getReceptor(i);
-            if (!r->isLocked()) rpos = r -> getPos();
-            else rpos = r -> getPosf();
 
             float nrx = PairsInfo[(int)ReceptorsInfo[rx].s0].s0;
             float nry = PairsInfo[(int)ReceptorsInfo[rx].s0].s1;
 
-            npos.setPosition({nrx-rpos->getPositionValue(0), nry-rpos->getPositionValue(1), 0});
+            npos.setPosition({nrx, nry, 0});
             r -> setPos(&npos);
             r -> setRs(ReceptorsInfo[rx].s3);
             r -> setFi(ReceptorsInfo[rx].s4);
