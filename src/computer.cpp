@@ -49,8 +49,8 @@ std::pair<float, float> inn::Computer::getFiFunctionValue(float Lambda, float Ga
 
 float inn::Computer::getReceptorInfluenceValue(bool Active, float dFi, inn::Position *dPos, inn::Position *RPr) {
     float Yn = 0;
-    auto d = dPos->getDistanceFrom(RPr);
-    if (d > 0 && Active) Yn = dFi;
+    auto d = dPos -> getDistanceFrom(RPr);
+    if (d > 0 && Active) Yn = d; // TODO: research output variants
     return Yn;
 }
 
