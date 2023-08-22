@@ -117,7 +117,7 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
                     }
 
                     R -> setFi(FiSum);
-                    R -> setPos(dRPos);
+                    R -> doUpdatePos(dRPos);
                     P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, zPos);
                     R -> doUpdateSensitivityValue();
                 }

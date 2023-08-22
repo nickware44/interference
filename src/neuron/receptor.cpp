@@ -104,13 +104,21 @@ void inn::Neuron::Receptor::doUpdateSensitivityValue() {
     Rs = inn::Computer::getRcValue(k3, Rs, Fi, dFi);
 }
 
-void inn::Neuron::Receptor::setPos(inn::Position *_RPos) {
+void inn::Neuron::Receptor::doUpdatePos(inn::Position *_RPos) {
     if (Locked) {
         Lf += inn::Position::getDistance(PhantomPos, _RPos);
         PhantomPos -> doAdd(_RPos);
     } else {
         L += inn::Position::getDistance(ReferencePos[Scope], _RPos);
         ReferencePos[Scope] -> doAdd(_RPos);
+    }
+}
+
+void inn::Neuron::Receptor::setPos(inn::Position *_RPos) {
+    if (Locked) {
+        PhantomPos -> setPosition(_RPos);
+    } else {
+        ReferencePos[Scope] -> setPosition(_RPos);
     }
 }
 

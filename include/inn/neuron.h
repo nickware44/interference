@@ -191,6 +191,7 @@ namespace inn {
         void doPrepare();
         void doSavePos();
         void doUpdateSensitivityValue();
+        void doUpdatePos(inn::Position*);
         void setPos(inn::Position*);
         void setRs(float);
         void setk3(float);
