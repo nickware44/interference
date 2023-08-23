@@ -7,12 +7,12 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include <inn/neuron.h>
-#include <inn/system.h>
+#include <indk/neuron.h>
+#include <indk/system.h>
 
-inn::Neuron::Receptor::Receptor() {
-	DefaultPos = new inn::Position();
-	PhantomPos = new inn::Position();
+indk::Neuron::Receptor::Receptor() {
+	DefaultPos = new indk::Position();
+	PhantomPos = new indk::Position();
     k3 = 0;
     Rs = 0.01;
     Locked = false;
@@ -22,11 +22,11 @@ inn::Neuron::Receptor::Receptor() {
     dFi = 0;
 }
 
-inn::Neuron::Receptor::Receptor(const Receptor &R) {
+indk::Neuron::Receptor::Receptor(const Receptor &R) {
     CP = R.getCP();
     CPf = R.getCPf();
-	DefaultPos = new inn::Position(*R.getPos0());
-	PhantomPos = new inn::Position(*R.getPosf());
+	DefaultPos = new indk::Position(*R.getPos0());
+	PhantomPos = new indk::Position(*R.getPosf());
     k3 = R.getk3();
     Rs = R.getSensitivityValue();
     Locked = R.isLocked();
@@ -36,9 +36,9 @@ inn::Neuron::Receptor::Receptor(const Receptor &R) {
     dFi = 0;
 }
 
-inn::Neuron::Receptor::Receptor(inn::Position *_RPos, float _k3) {
-	DefaultPos = new inn::Position(*_RPos);
-	PhantomPos = new inn::Position(*_RPos);
+indk::Neuron::Receptor::Receptor(indk::Position *_RPos, float _k3) {
+	DefaultPos = new indk::Position(*_RPos);
+	PhantomPos = new indk::Position(*_RPos);
     k3 = _k3;
     Rs = 0.01;
     Locked = false;
@@ -48,25 +48,25 @@ inn::Neuron::Receptor::Receptor(inn::Position *_RPos, float _k3) {
     dFi = 0;
 }
 
-bool inn::Neuron::Receptor::doCheckActive() const {
+bool indk::Neuron::Receptor::doCheckActive() const {
     return Fi >= Rs;
 }
 
-void inn::Neuron::Receptor::doLock() {
+void indk::Neuron::Receptor::doLock() {
     Locked = true;
 }
 
-void inn::Neuron::Receptor::doUnlock() {
+void indk::Neuron::Receptor::doUnlock() {
     Locked = false;
 }
 
-void inn::Neuron::Receptor::doCreateNewScope() {
-    auto pos = new inn::Position(DefaultPos->getXm(), DefaultPos->getDimensionsCount());
+void indk::Neuron::Receptor::doCreateNewScope() {
+    auto pos = new indk::Position(DefaultPos->getXm(), DefaultPos->getDimensionsCount());
     Scope = ReferencePos.size();
     ReferencePos.push_back(pos);
 }
 
-void inn::Neuron::Receptor::doChangeScope(uint64_t scope) {
+void indk::Neuron::Receptor::doChangeScope(uint64_t scope) {
     if (scope > ReferencePos.size()) {
         Scope = ReferencePos.size() - 1;
         return;
@@ -74,7 +74,7 @@ void inn::Neuron::Receptor::doChangeScope(uint64_t scope) {
     Scope = scope;
 }
 
-void inn::Neuron::Receptor::doReset() {
+void indk::Neuron::Receptor::doReset() {
     CPf.clear();
     Rs = 0.01;
     Lf = 0;
@@ -85,7 +85,7 @@ void inn::Neuron::Receptor::doReset() {
     Locked = false;
 }
 
-void inn::Neuron::Receptor::doPrepare() {
+void indk::Neuron::Receptor::doPrepare() {
     CPf.clear();
     Rs = 0.01;
     Lf = 0;
@@ -95,26 +95,26 @@ void inn::Neuron::Receptor::doPrepare() {
     else ReferencePos[Scope] -> setPosition(DefaultPos);
 }
 
-void inn::Neuron::Receptor::doSavePos() {
-    if (Locked) CPf.push_back(new inn::Position(*PhantomPos));
-    else CP.push_back(new inn::Position(*ReferencePos[Scope]));
+void indk::Neuron::Receptor::doSavePos() {
+    if (Locked) CPf.push_back(new indk::Position(*PhantomPos));
+    else CP.push_back(new indk::Position(*ReferencePos[Scope]));
 }
 
-void inn::Neuron::Receptor::doUpdateSensitivityValue() {
-    Rs = inn::Computer::getRcValue(k3, Rs, Fi, dFi);
+void indk::Neuron::Receptor::doUpdateSensitivityValue() {
+    Rs = indk::Computer::getRcValue(k3, Rs, Fi, dFi);
 }
 
-void inn::Neuron::Receptor::doUpdatePos(inn::Position *_RPos) {
+void indk::Neuron::Receptor::doUpdatePos(indk::Position *_RPos) {
     if (Locked) {
-        Lf += inn::Position::getDistance(PhantomPos, _RPos);
+        Lf += indk::Position::getDistance(PhantomPos, _RPos);
         PhantomPos -> doAdd(_RPos);
     } else {
-        L += inn::Position::getDistance(ReferencePos[Scope], _RPos);
+        L += indk::Position::getDistance(ReferencePos[Scope], _RPos);
         ReferencePos[Scope] -> doAdd(_RPos);
     }
 }
 
-void inn::Neuron::Receptor::setPos(inn::Position *_RPos) {
+void indk::Neuron::Receptor::setPos(indk::Position *_RPos) {
     if (Locked) {
         PhantomPos -> setPosition(_RPos);
     } else {
@@ -122,71 +122,71 @@ void inn::Neuron::Receptor::setPos(inn::Position *_RPos) {
     }
 }
 
-void inn::Neuron::Receptor::setRs(float _Rs) {
+void indk::Neuron::Receptor::setRs(float _Rs) {
     Rs = _Rs;
 }
 
-void inn::Neuron::Receptor::setk3(float _k3) {
+void indk::Neuron::Receptor::setk3(float _k3) {
     k3 = _k3;
 }
 
-void inn::Neuron::Receptor::setFi(float _Fi) {
+void indk::Neuron::Receptor::setFi(float _Fi) {
     dFi = _Fi - Fi;
     Fi = _Fi;
 }
 
-std::vector<inn::Position*> inn::Neuron::Receptor::getCP() const {
+std::vector<indk::Position*> indk::Neuron::Receptor::getCP() const {
     return CP;
 }
 
-std::vector<inn::Position*> inn::Neuron::Receptor::getCPf() const {
+std::vector<indk::Position*> indk::Neuron::Receptor::getCPf() const {
     return CPf;
 }
 
-inn::Position* inn::Neuron::Receptor::getPos() const {
+indk::Position* indk::Neuron::Receptor::getPos() const {
     return ReferencePos[Scope];
 }
 
-inn::Position* inn::Neuron::Receptor::getPos0() const {
+indk::Position* indk::Neuron::Receptor::getPos0() const {
     return DefaultPos;
 }
 
-inn::Position* inn::Neuron::Receptor::getPosf() const {
+indk::Position* indk::Neuron::Receptor::getPosf() const {
     return PhantomPos;
 }
 
-std::vector<inn::Position*> inn::Neuron::Receptor::getReferencePosScopes() {
+std::vector<indk::Position*> indk::Neuron::Receptor::getReferencePosScopes() {
     return ReferencePos;
 }
 
-float inn::Neuron::Receptor::getRs() const {
+float indk::Neuron::Receptor::getRs() const {
     return Rs;
 }
 
-float inn::Neuron::Receptor::getk3() const {
+float indk::Neuron::Receptor::getk3() const {
     return k3;
 }
 
-float inn::Neuron::Receptor::getFi() {
+float indk::Neuron::Receptor::getFi() {
     return Fi;
 }
 
-float inn::Neuron::Receptor::getdFi() {
+float indk::Neuron::Receptor::getdFi() {
     return dFi;
 }
 
-float inn::Neuron::Receptor::getSensitivityValue() const {
+float indk::Neuron::Receptor::getSensitivityValue() const {
     return Rs;
 }
 
-bool inn::Neuron::Receptor::isLocked() const {
+bool indk::Neuron::Receptor::isLocked() const {
     return Locked;
 }
 
-float inn::Neuron::Receptor::getL() const {
+float indk::Neuron::Receptor::getL() const {
     return L;
 }
 
-float inn::Neuron::Receptor::getLf() const {
+float indk::Neuron::Receptor::getLf() const {
     return Lf;
 }

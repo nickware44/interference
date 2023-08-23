@@ -7,29 +7,29 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include <inn/interlink.h>
-#include <inn/system.h>
+#include <indk/interlink.h>
+#include <indk/system.h>
 #include <json.hpp>
 #include <httplib.h>
 #include <unistd.h>
 
 typedef nlohmann::json json;
 
-inn::Interlink::Interlink() {
+indk::Interlink::Interlink() {
     Input = nullptr;
     Output = nullptr;
     Interlinked.store(false);
     doInitInput(4408);
 }
 
-inn::Interlink::Interlink(int port) {
+indk::Interlink::Interlink(int port) {
     Input = nullptr;
     Output = nullptr;
     Interlinked.store(false);
     doInitInput(port);
 }
 
-void inn::Interlink::doInitInput(int port) {
+void indk::Interlink::doInitInput(int port) {
     Input = new httplib::Server();
     auto input = (httplib::Server*)Input;
 
@@ -76,13 +76,13 @@ void inn::Interlink::doInitInput(int port) {
     while (!Interlinked.load() && timeout < 5) {
         sleep(1);
         timeout++;
-        if (inn::System::getVerbosityLevel() > 1)
+        if (indk::System::getVerbosityLevel() > 1)
             std::cout << "Interlink connection timeout " << timeout << std::endl;
     }
 }
 
-void inn::Interlink::doInitOutput() {
-    if (inn::System::getVerbosityLevel() > 0)
+void indk::Interlink::doInitOutput() {
+    if (indk::System::getVerbosityLevel() > 0)
         std::cout << "Incoming Interlink connection from " << Host+":"+OutputPort << std::endl;
     Output = new httplib::Client(Host+":"+OutputPort);
     auto output = (httplib::Client*)Output;
@@ -92,7 +92,7 @@ void inn::Interlink::doInitOutput() {
     Interlinked.store(true);
 }
 
-void inn::Interlink::doSend(const std::string& command, const std::string& data) {
+void indk::Interlink::doSend(const std::string& command, const std::string& data) {
     if (!Interlinked.load() || !Output) return;
     auto output = (httplib::Client*)Output;
     auto res = output -> Post("/"+command, data.size(),
@@ -110,28 +110,28 @@ void inn::Interlink::doSend(const std::string& command, const std::string& data)
     }
 }
 
-void inn::Interlink::doUpdateStructure(const std::string &data) {
+void indk::Interlink::doUpdateStructure(const std::string &data) {
     doSend("io_app_update_structure", data);
 }
 
-void inn::Interlink::doUpdateData(const std::string &data) {
+void indk::Interlink::doUpdateData(const std::string &data) {
     doSend("io_app_update_data", data);
 }
 
-void inn::Interlink::setStructure(const std::string &data) {
+void indk::Interlink::setStructure(const std::string &data) {
     doSend("io_app_write_structure", data);
     std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 }
 
-std::string inn::Interlink::getStructure() {
+std::string indk::Interlink::getStructure() {
     return Structure;
 }
 
-bool inn::Interlink::isInterlinked() {
+bool indk::Interlink::isInterlinked() {
     return Interlinked.load();
 }
 
-inn::Interlink::~Interlink() {
+indk::Interlink::~Interlink() {
     Thread.detach();
     delete (httplib::Server*)Input;
     delete (httplib::Client*)Output;

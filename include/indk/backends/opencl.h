@@ -9,7 +9,7 @@
 #ifndef INTERFERENCE_OPENCL_H
 #define INTERFERENCE_OPENCL_H
 
-#include <inn/computer.h>
+#include <indk/computer.h>
 #include <thread>
 #include <condition_variable>
 #include <atomic>
@@ -18,7 +18,7 @@
     #include <CL/cl.hpp>
 #endif
 
-namespace inn {
+namespace indk {
     class ComputeBackendOpenCL : public Computer {
     private:
 #ifdef INDK_OPENCL_SUPPORT

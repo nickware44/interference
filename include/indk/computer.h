@@ -10,9 +10,9 @@
 #define INTERFERENCE_COMPUTER_H
 
 #include <queue>
-#include <inn/position.h>
+#include <indk/position.h>
 
-namespace inn {
+namespace indk {
     class Computer {
     public:
         Computer();
@@ -20,14 +20,14 @@ namespace inn {
         virtual void doUnregisterHost() = 0;
         virtual void doWaitTarget() = 0;
         virtual void doProcess(void*) = 0;
-        static std::vector<float> doCompareCPFunction(std::vector<inn::Position*>, std::vector<inn::Position*>);
-        static float doCompareCPFunctionD(std::vector<inn::Position*>, std::vector<inn::Position*>);
-        static float doCompareFunction(inn::Position*, inn::Position*);
+        static std::vector<float> doCompareCPFunction(std::vector<indk::Position*>, std::vector<indk::Position*>);
+        static float doCompareCPFunctionD(std::vector<indk::Position*>, std::vector<indk::Position*>);
+        static float doCompareFunction(indk::Position*, indk::Position*);
         static float getGammaFunctionValue(float, float, float, float);
         static std::pair<float, float> getFiFunctionValue(float, float, float, float);
-        static float getReceptorInfluenceValue(bool, float, inn::Position*, inn::Position*);
+        static float getReceptorInfluenceValue(bool, float, indk::Position*, indk::Position*);
         static float getRcValue(float, float, float, float);
-        static void getNewPosition(inn::Position*, inn::Position*, inn::Position*, float, float);
+        static void getNewPosition(indk::Position*, indk::Position*, indk::Position*, float, float);
         static float getLambdaValue(unsigned int);
         static float getFiVectorLength(float);
         static float getSynapticSensitivityValue(unsigned int, unsigned int);

@@ -9,12 +9,12 @@
 #ifndef INTERFERENCE_DEFAULT_H
 #define INTERFERENCE_DEFAULT_H
 
-#include <inn/computer.h>
+#include <indk/computer.h>
 
-namespace inn {
+namespace indk {
     class ComputeBackendDefault : public Computer {
     private:
-        inn::Position *dRPos, *nRPos, *zPos;
+        indk::Position *dRPos, *nRPos, *zPos;
     public:
         ComputeBackendDefault();
         void doRegisterHost(const std::vector<void*>&) override;

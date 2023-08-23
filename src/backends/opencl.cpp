@@ -7,13 +7,13 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include <inn/backends/opencl.h>
-#include <inn/neuron.h>
-#include <inn/system.h>
+#include <indk/backends/opencl.h>
+#include <indk/neuron.h>
+#include <indk/system.h>
 
 #define KERNEL(name, ...) std::string name = #__VA_ARGS__
 
-inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
+indk::ComputeBackendOpenCL::ComputeBackendOpenCL() {
 #ifdef INDK_OPENCL_SUPPORT
     std::vector<cl::Platform> all_platforms;
     std::vector<cl::Device> all_devices;
@@ -42,7 +42,7 @@ inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
 //    std::cout << "Driver version: " << default_device.getInfo<CL_DRIVER_VERSION>() << std::endl;
 
     KERNEL(kernel_code_pairs,
-           __kernel void inn_kernel_pairs(__global float16 *pairs, __global float2 *inputs) {
+           __kernel void indk_kernel_pairs(__global float16 *pairs, __global float2 *inputs) {
                    int id = get_global_id(0);
                    // pairs.s0 - receptor x
                    // pairs.s1 - receptor y
@@ -94,7 +94,7 @@ inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
     );
 
     KERNEL(kernel_code_receptors,
-           __kernel void inn_kernel_receptors(__global float8 *receptors,  __global float16 *pairs, __global float2 *inputs) {
+           __kernel void indk_kernel_receptors(__global float8 *receptors,  __global float16 *pairs, __global float2 *inputs) {
                    int id = get_global_id(0);
                    // receptors.s0 - left pairs range edge           (const)
                    // receptors.s1 - right pairs range edge          (const)
@@ -140,7 +140,7 @@ inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
     );
 
     KERNEL(kernel_code_neurons,
-           __kernel void inn_kernel_neurons(__global float3 *neurons,  __global float8 *receptors, __global float2 *inputs, __global float *outputs) {
+           __kernel void indk_kernel_neurons(__global float3 *neurons,  __global float8 *receptors, __global float2 *inputs, __global float *outputs) {
                    int id = get_global_id(0);
                    // neurons.s0 - left receptors range edge           (const)
                    // neurons.s1 - right receptors range edge          (const)
@@ -181,20 +181,20 @@ inn::ComputeBackendOpenCL::ComputeBackendOpenCL() {
         return;
     }
 
-    KernelPairs = cl::Kernel(pairs, "inn_kernel_pairs");
-    KernelReceptors = cl::Kernel(receptors, "inn_kernel_receptors");
-    KernelNeurons = cl::Kernel(neurons, "inn_kernel_neurons");
+    KernelPairs = cl::Kernel(pairs, "indk_kernel_pairs");
+    KernelReceptors = cl::Kernel(receptors, "indk_kernel_receptors");
+    KernelNeurons = cl::Kernel(neurons, "indk_kernel_neurons");
     Queue = cl::CommandQueue(Context,default_device);
 #endif
 }
 
-void inn::ComputeBackendOpenCL::doRegisterHost(const std::vector<void*> &objects) {
+void indk::ComputeBackendOpenCL::doRegisterHost(const std::vector<void*> &objects) {
     PairPoolSize = 0;
     ReceptorPoolSize = 0;
     InputPoolSize = 0;
     NeuronPoolSize = objects.size();
     for (const auto &o: objects) {
-        auto n = (inn::Neuron*)o;
+        auto n = (indk::Neuron*)o;
         PairPoolSize += n->getReceptorsCount() * n->getSynapsesCount();
         ReceptorPoolSize += n->getReceptorsCount();
         InputPoolSize += n->getEntriesCount();
@@ -224,13 +224,13 @@ void inn::ComputeBackendOpenCL::doRegisterHost(const std::vector<void*> &objects
     KernelNeurons.setArg(2, InputsBuffer);
     KernelNeurons.setArg(3, OutputsBuffer);
 
-    inn::Position *rpos, *spos;
+    indk::Position *rpos, *spos;
     uint64_t px = 0, pxstart;
     uint64_t rx = 0, rxstart;
     uint64_t ex = 0, exstart;
 
     for (uint64_t ni = 0; ni < objects.size(); ni++) {
-        auto n = (inn::Neuron*)objects[ni];
+        auto n = (indk::Neuron*)objects[ni];
 
         std::vector<std::pair<std::string, uint64_t>> emap;
         auto we = n -> getWaitingEntries();
@@ -303,17 +303,17 @@ void inn::ComputeBackendOpenCL::doRegisterHost(const std::vector<void*> &objects
 #endif
 }
 
-void inn::ComputeBackendOpenCL::doWaitTarget() {
+void indk::ComputeBackendOpenCL::doWaitTarget() {
 #ifdef INDK_OPENCL_SUPPORT
     uint64_t x = 0;
     for (const auto &o: Objects) {
-        auto n = (inn::Neuron*)o;
+        auto n = (indk::Neuron*)o;
         auto state = n->getState(n->getTime());
         auto ec = n -> getEntriesCount();
 
         for (int j = 0; j < ec; j++) {
             auto e = n -> getEntry(j);
-            if (state == inn::Neuron::States::Pending) {
+            if (state == indk::Neuron::States::Pending) {
                 Inputs[x] = {
                         static_cast<cl_float>(1),
                         static_cast<cl_float>(e->getIn()),
@@ -343,16 +343,16 @@ void inn::ComputeBackendOpenCL::doWaitTarget() {
         if (Inputs[(int)NeuronsInfo[ni].s2].s0 == 0) {
             continue;
         }
-        auto n = (inn::Neuron*)Objects[ni];
+        auto n = (indk::Neuron*)Objects[ni];
         n -> doFinalizeInput(Outputs[ni]);
     }
 #endif
 }
 
-void inn::ComputeBackendOpenCL::doProcess(void *object) {
+void indk::ComputeBackendOpenCL::doProcess(void *object) {
 }
 
-void inn::ComputeBackendOpenCL::doUnregisterHost() {
+void indk::ComputeBackendOpenCL::doUnregisterHost() {
 #ifdef INDK_OPENCL_SUPPORT
     Queue.enqueueReadBuffer(PairsBuffer, CL_TRUE, 0, sizeof(cl_float16)*PairPoolSize, PairsInfo);
     Queue.enqueueReadBuffer(ReceptorsBuffer, CL_TRUE, 0, sizeof(cl_float8)*ReceptorPoolSize, ReceptorsInfo);
@@ -360,8 +360,8 @@ void inn::ComputeBackendOpenCL::doUnregisterHost() {
     uint64_t rx = 0;
 
     for (auto &o : Objects) {
-        auto n = (inn::Neuron*)o;
-        inn::Position npos(0, n->getDimensionsCount());
+        auto n = (indk::Neuron*)o;
+        indk::Position npos(0, n->getDimensionsCount());
         auto rc = n -> getReceptorsCount();
 
         npos.setXm(n->getXm());

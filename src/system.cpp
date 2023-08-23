@@ -7,34 +7,34 @@
 // Licence: MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include <inn/system.h>
-#include <inn/backends/default.h>
-#include <inn/backends/multithread.h>
-#include <inn/backends/opencl.h>
+#include <indk/system.h>
+#include <indk/backends/default.h>
+#include <indk/backends/multithread.h>
+#include <indk/backends/opencl.h>
 
 int CurrentComputeBackend = -1, VerbosityLevel = 1;
 int ComputeBackendParameter = 0;
 bool SynchronizationNeeded;
-inn::Computer *ComputeBackend;
+indk::Computer *ComputeBackend;
 
-void inn::System::setComputeBackend(int Backend, int Parameter) {
+void indk::System::setComputeBackend(int Backend, int Parameter) {
     if (CurrentComputeBackend != -1) delete ComputeBackend;
     CurrentComputeBackend = Backend;
 
     switch (CurrentComputeBackend) {
-        case inn::System::ComputeBackends::Default:
+        case indk::System::ComputeBackends::Default:
             SynchronizationNeeded = false;
-            ComputeBackend = new inn::ComputeBackendDefault();
+            ComputeBackend = new indk::ComputeBackendDefault();
             Parameter = 1;
             break;
-        case inn::System::ComputeBackends::Multithread:
+        case indk::System::ComputeBackends::Multithread:
             SynchronizationNeeded = true;
-            ComputeBackend = new inn::ComputeBackendMultithread(Parameter>1?Parameter:INN_MULTITHREAD_DEFAULT_NUM);
+            ComputeBackend = new indk::ComputeBackendMultithread(Parameter>1?Parameter:indk_MULTITHREAD_DEFAULT_NUM);
             break;
-        case inn::System::ComputeBackends::OpenCL:
+        case indk::System::ComputeBackends::OpenCL:
 #ifdef INDK_OPENCL_SUPPORT
             SynchronizationNeeded = true;
-            ComputeBackend = new inn::ComputeBackendOpenCL();
+            ComputeBackend = new indk::ComputeBackendOpenCL();
             Parameter = 1;
             break;
 #else
@@ -47,31 +47,31 @@ void inn::System::setComputeBackend(int Backend, int Parameter) {
     ComputeBackendParameter = Parameter;
 }
 
-inn::Computer* inn::System::getComputeBackend() {
+indk::Computer* indk::System::getComputeBackend() {
     return ComputeBackend;
 }
 
-int inn::System::getComputeBackendKind() {
+int indk::System::getComputeBackendKind() {
     return CurrentComputeBackend;
 }
 
-bool inn::System::isSynchronizationNeeded() {
+bool indk::System::isSynchronizationNeeded() {
     return SynchronizationNeeded;
 }
 
-void inn::System::setVerbosityLevel(int VL) {
+void indk::System::setVerbosityLevel(int VL) {
     VerbosityLevel = VL;
 }
 
-int inn::System::getVerbosityLevel() {
+int indk::System::getVerbosityLevel() {
     return VerbosityLevel;
 }
 
-int inn::System::getComputeBackendParameter() {
+int indk::System::getComputeBackendParameter() {
     return ComputeBackendParameter;
 }
 
-bool inn::Event::doWaitTimed(int T) {
+bool indk::Event::doWaitTimed(int T) {
     auto rTimeout = std::chrono::milliseconds(T);
     bool bTimeout = false;
     bool bRet;
@@ -84,7 +84,7 @@ bool inn::Event::doWaitTimed(int T) {
     return bRet;
 }
 
-bool inn::Event::doWait() {
+bool indk::Event::doWait() {
     bool bRet;
     std::unique_lock<std::mutex> oNotifierLock(m_oMutex);
     m_oConditionVariable.wait(oNotifierLock);
@@ -93,7 +93,7 @@ bool inn::Event::doWait() {
     return bRet;
 }
 
-void inn::Event::doNotifyOne() {
+void indk::Event::doNotifyOne() {
     std::unique_lock<std::mutex> oNotifierLock(m_oMutex);
     m_bEvent = true;
     m_oConditionVariable.notify_one();

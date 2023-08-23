@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        inn/position.h
+// Name:        indk/position.h
 // Purpose:     Multidimensional position class header
 // Author:      Nickolay Babbysh
 // Created:     07.05.2019
@@ -14,7 +14,7 @@
 #include <cmath>
 #include <vector>
 
-namespace inn {
+namespace indk {
     /// Object position class. Provides the ability to store Cartesian
     /// coordinates of object positions in n-dimensional space,
     /// and also allows you to perform basic arithmetic operations on them:
@@ -26,39 +26,39 @@ namespace inn {
         float *X;
     public:
         Position();
-        Position(const inn::Position&);
+        Position(const indk::Position&);
         Position(unsigned int, unsigned int);
         Position(unsigned int, std::vector<float>);
-        void doAdd(const inn::Position*);
-        void doSubtract(const inn::Position*);
+        void doAdd(const indk::Position*);
+        void doSubtract(const indk::Position*);
         void doDivide(float);
         void doMultiply(float);
         void doZeroPosition();
-        void setPosition(const inn::Position&);
-        void setPosition(const inn::Position*);
+        void setPosition(const indk::Position&);
+        void setPosition(const indk::Position*);
         void setPosition(std::vector<float>);
         void setDimensionsCount(unsigned int);
         void setXm(unsigned int);
         unsigned int getDimensionsCount() const;
         unsigned int getXm() const;
         float getPositionValue(unsigned int) const;
-        float getDistanceFrom(const inn::Position*);
-        inn::Position& operator= (const inn::Position&);
+        float getDistanceFrom(const indk::Position*);
+        indk::Position& operator= (const indk::Position&);
 
-        static float getDistance(const inn::Position&, const inn::Position&);
-        static float getDistance(const inn::Position*, const inn::Position*);
+        static float getDistance(const indk::Position&, const indk::Position&);
+        static float getDistance(const indk::Position*, const indk::Position*);
 
-        static inn::Position* getSum(const inn::Position*, const inn::Position*);
-        static inn::Position* getDiff(const inn::Position*, const inn::Position*);
-        static inn::Position* getQuotient(const inn::Position*, float);
-        static inn::Position* getProduct(const inn::Position*, float);
+        static indk::Position* getSum(const indk::Position*, const indk::Position*);
+        static indk::Position* getDiff(const indk::Position*, const indk::Position*);
+        static indk::Position* getQuotient(const indk::Position*, float);
+        static indk::Position* getProduct(const indk::Position*, float);
         ~Position();
     };
 
-    inn::Position operator+(const inn::Position&, const inn::Position&);
-    inn::Position operator-(const inn::Position&, const inn::Position&);
-    inn::Position operator/(const inn::Position&, float);
-    inn::Position operator*(const inn::Position&, float);
+    indk::Position operator+(const indk::Position&, const indk::Position&);
+    indk::Position operator-(const indk::Position&, const indk::Position&);
+    indk::Position operator/(const indk::Position&, float);
+    indk::Position operator*(const indk::Position&, float);
 }
 
 #endif //INTERFERENCE_POSITION_H

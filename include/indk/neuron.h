@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        inn/neuron.h
+// Name:        indk/neuron.h
 // Purpose:     Neuron classes header
 // Author:      Nickolay Babbysh
 // Created:     29.04.2019
@@ -15,9 +15,9 @@
 #include <atomic>
 #include <map>
 #include <iostream>
-#include <inn/position.h>
+#include <indk/position.h>
 
-namespace inn {
+namespace indk {
     typedef enum {
         ProcessMin,
         ProcessAverage,
@@ -30,9 +30,9 @@ namespace inn {
         class Entry;
         class Synapse;
         class Receptor;
-        std::map<std::string, inn::Neuron::Entry*> Entries;
+        std::map<std::string, indk::Neuron::Entry*> Entries;
         std::vector<std::string> Links;
-        std::vector<inn::Neuron::Receptor*> Receptors;
+        std::vector<indk::Neuron::Receptor*> Receptors;
         std::atomic<int64_t> t;
         int64_t Tlo;
         unsigned int Xm, DimensionsCount;
@@ -57,7 +57,7 @@ namespace inn {
         } States;
         typedef std::tuple<float, float> PatternDefinition;
         Neuron();
-        Neuron(const inn::Neuron&);
+        Neuron(const indk::Neuron&);
         Neuron(unsigned int, unsigned int, int64_t, const std::vector<std::string>& InputSignals);
         void doCreateNewSynapse(const std::string&, std::vector<float>, float, int64_t, int);
         void doCreateNewSynapseCluster(const std::vector<float>& PosVector, unsigned R, float k1, int64_t Tl, int NT);
@@ -72,7 +72,7 @@ namespace inn {
         void doChangeScope(uint64_t);
         void doReset();
         void doCreateCheckpoint();
-        inn::Neuron::PatternDefinition doComparePattern(int ProcessingMethod = inn::ScopeProcessingMethods::ProcessMin) const;
+        indk::Neuron::PatternDefinition doComparePattern(int ProcessingMethod = indk::ScopeProcessingMethods::ProcessMin) const;
         void doLinkOutput(const std::string&);
         void doClearOutputLinks();
         void doReplaceEntryName(const std::string&, const std::string&);
@@ -87,8 +87,8 @@ namespace inn {
         bool isLearned() const;
         std::vector<std::string> getLinkOutput() const;
         std::vector<std::string> getEntries() const;
-        inn::Neuron::Entry*  getEntry(int64_t) const;
-        inn::Neuron::Receptor* getReceptor(int64_t) const;
+        indk::Neuron::Entry*  getEntry(int64_t) const;
+        indk::Neuron::Receptor* getReceptor(int64_t) const;
         std::vector<std::string> getWaitingEntries();
         int64_t getEntriesCount() const;
         unsigned int getSynapsesCount() const;
@@ -106,16 +106,16 @@ namespace inn {
 
     class Neuron::Entry {
     private:
-        std::vector<inn::Neuron::Synapse*> Synapses;
+        std::vector<indk::Neuron::Synapse*> Synapses;
         int64_t t, tm;
         float *Signal;
         int64_t SignalSize;
         int64_t SignalPointer;
     public:
         Entry();
-        Entry(const inn::Neuron::Entry&);
+        Entry(const indk::Neuron::Entry&);
         bool doCheckState(int64_t) const;
-        void doAddSynapse(inn::Position*, unsigned int, float, int64_t, int);
+        void doAddSynapse(indk::Position*, unsigned int, float, int64_t, int);
         void doIn(float, int64_t);
         void doProcess();
         void doPrepare();
@@ -123,7 +123,7 @@ namespace inn {
         void doReserveSignalBuffer(uint64_t);
         void setk1(float);
         void setk2(float);
-        inn::Neuron::Synapse* getSynapse(int64_t) const;
+        indk::Neuron::Synapse* getSynapse(int64_t) const;
         int64_t getSynapsesCount() const;
         float getIn();
         ~Entry();
@@ -131,7 +131,7 @@ namespace inn {
 
     class Neuron::Synapse {
     private:
-        inn::Position* SPos;
+        indk::Position* SPos;
         float ok1, ok2, k1, k2;
         float Lambda;
         int NeurotransmitterType;
@@ -142,8 +142,8 @@ namespace inn {
         std::atomic<int64_t> QSize;
     public:
         Synapse();
-        Synapse(const inn::Neuron::Synapse&);
-        Synapse(inn::Position*, float, float, int64_t, int);
+        Synapse(const indk::Neuron::Synapse&);
+        Synapse(indk::Position*, float, float, int64_t, int);
         void doIn(float);
         void doSendToQueue(float, float);
         bool doInFromQueue(int64_t);
@@ -153,7 +153,7 @@ namespace inn {
         void setk1(float);
         void setk2(float);
         void setLambda(float);
-        inn::Position* getPos() const;
+        indk::Position* getPos() const;
         float getk1() const;
         float getk2() const;
         float getLambda() const;
@@ -167,11 +167,11 @@ namespace inn {
 
     class Neuron::Receptor {
     private:
-        std::vector<inn::Position*> CP, CPf;
-        //inn::Position *RPos, *RPos0, *RPosf;
-        std::vector<inn::Position*> ReferencePos;
-        inn::Position* DefaultPos;
-        inn::Position* PhantomPos;
+        std::vector<indk::Position*> CP, CPf;
+        //indk::Position *RPos, *RPos0, *RPosf;
+        std::vector<indk::Position*> ReferencePos;
+        indk::Position* DefaultPos;
+        indk::Position* PhantomPos;
         float k3;
         float Rs;
         bool Locked;
@@ -180,8 +180,8 @@ namespace inn {
         uint64_t Scope;
     public:
         Receptor();
-        Receptor(const inn::Neuron::Receptor&);
-        Receptor(inn::Position*, float);
+        Receptor(const indk::Neuron::Receptor&);
+        Receptor(indk::Position*, float);
         bool doCheckActive() const;
         void doLock();
         void doUnlock();
@@ -191,17 +191,17 @@ namespace inn {
         void doPrepare();
         void doSavePos();
         void doUpdateSensitivityValue();
-        void doUpdatePos(inn::Position*);
-        void setPos(inn::Position*);
+        void doUpdatePos(indk::Position*);
+        void setPos(indk::Position*);
         void setRs(float);
         void setk3(float);
         void setFi(float);
-        std::vector<inn::Position*> getCP() const;
-        std::vector<inn::Position*> getCPf() const;
-        inn::Position* getPos() const;
-        inn::Position* getPos0() const;
-        inn::Position* getPosf() const;
-        std::vector<inn::Position*> getReferencePosScopes();
+        std::vector<indk::Position*> getCP() const;
+        std::vector<indk::Position*> getCPf() const;
+        indk::Position* getPos() const;
+        indk::Position* getPos0() const;
+        indk::Position* getPosf() const;
+        std::vector<indk::Position*> getReferencePosScopes();
         float getRs() const;
         float getk3() const;
         float getFi();

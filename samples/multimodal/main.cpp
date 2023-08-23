@@ -9,8 +9,8 @@
 
 #include <chrono>
 #include <iomanip>
-#include "inn/system.h"
-#include "inn/neuralnet.h"
+#include "indk/system.h"
+#include "indk/neuralnet.h"
 #include "bmp.hpp"
 
 uint64_t getTimestampMS() {
@@ -43,7 +43,6 @@ std::vector<std::vector<float>> doBuildInputVector(std::vector<BMPImage> &images
 }
 
 int main() {
-    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 2);
     constexpr uint8_t COUNT = 3;
     constexpr uint16_t IMAGE_SIZE = 128*128;
     constexpr char STRUCTURE_PATH[128] = "structures/structure.json";
@@ -52,13 +51,13 @@ int main() {
     std::vector<std::string> variants = {"mug with a melons", "mug wth a meln", "mug with a big apple", "mug w th a bi ap ple", "tomato", "tomto"};
 
     // load neural network structure from file
-    auto NN = new inn::NeuralNet(STRUCTURE_PATH);
+    auto NN = new indk::NeuralNet(STRUCTURE_PATH);
 
     // replicate neurons
     for (int i = 2; i <= COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
     NN -> doStructurePrepare();
 
-    std::cout << "Threads     : " << inn::System::getComputeBackendParameter() << std::endl;
+    std::cout << "Threads     : " << indk::System::getComputeBackendParameter() << std::endl;
     std::cout << "Model name  : " << NN->getName() << std::endl;
     std::cout << "Model desc  : " << NN->getDescription() << std::endl;
     std::cout << "Model ver   : " << NN->getVersion() << std::endl;
@@ -103,7 +102,7 @@ int main() {
 
             NN -> doRecognise(rinput);
 
-            auto patterns = NN -> doComparePatterns(inn::PatternCompareFlags::CompareNormalized);
+            auto patterns = NN -> doComparePatterns(indk::PatternCompareFlags::CompareNormalized);
             auto r = std::max_element(patterns.begin(), patterns.end());
             if (std::distance(patterns.begin(), r) == b-1) {
                 std::cout << "[CORRECT ANSWER]" << std::endl;

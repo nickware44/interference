@@ -29,7 +29,7 @@ Version 2.0.0
 ### LICENCE
 Interference library is distributed under the MIT Licence.
 
-inn_vision example uses the part of COIL-100 dataset.
+interference_vision example uses the part of COIL-100 dataset.
 
 "Columbia Object Image Library (COIL-100)," S. A. Nene, S. K. Nayar and H. Murase, Technical Report CUCS-006-96, February 1996.
 http://www1.cs.columbia.edu/CAVE/software/softlib/coil-100.php

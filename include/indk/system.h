@@ -11,9 +11,9 @@
 
 #include <mutex>
 #include <condition_variable>
-#include <inn/computer.h>
+#include <indk/computer.h>
 
-namespace inn {
+namespace indk {
     typedef std::tuple<std::string, std::string, void*, void*, int> LinkDefinition;
     typedef std::vector<LinkDefinition> LinkList;
 
@@ -38,7 +38,7 @@ namespace inn {
          * Get current compute backend.
          * @return Pointer of current compute backend object.
          */
-        static inn::Computer* getComputeBackend();
+        static indk::Computer* getComputeBackend();
 
         /**
          * Get current compute backend.
@@ -53,7 +53,7 @@ namespace inn {
         static int getVerbosityLevel();
 
         /**
-         * Get current compute backend parameter. The parameter can be set as an argument to the setComputeBackend method. It is always zero for inn::ComputeBackends::Default backend.
+         * Get current compute backend parameter. The parameter can be set as an argument to the setComputeBackend method. It is always zero for indk::ComputeBackends::Default backend.
          * @return Backend parameter.
          */
         static int getComputeBackendParameter();

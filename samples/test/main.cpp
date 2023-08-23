@@ -9,17 +9,17 @@
 
 #include <cmath>
 #include <fstream>
-#include <inn/neuralnet.h>
+#include <indk/neuralnet.h>
 #include <iomanip>
 
 
-inn::NeuralNet *NN;
+indk::NeuralNet *NN;
 std::vector<std::vector<float>> X;
 
-std::vector<std::tuple<inn::System::ComputeBackends, int, std::string>> backends = {
-        std::make_tuple(inn::System::ComputeBackends::Default, 0, "singlethread"),
-        std::make_tuple(inn::System::ComputeBackends::Multithread, 2, "multithread"),
-        std::make_tuple(inn::System::ComputeBackends::OpenCL, 0, "OpenCL"),
+std::vector<std::tuple<indk::System::ComputeBackends, int, std::string>> backends = {
+        std::make_tuple(indk::System::ComputeBackends::Default, 0, "singlethread"),
+        std::make_tuple(indk::System::ComputeBackends::Multithread, 2, "multithread"),
+        std::make_tuple(indk::System::ComputeBackends::OpenCL, 0, "OpenCL"),
 };
 
 uint64_t getTimestampMS() {
@@ -72,7 +72,7 @@ int doTests(const std::string& name, float ref) {
     for (auto &b: backends) {
         NN -> doReset();
         std::cout << std::setw(50) << std::left << name+" ("+std::get<2>(b)+"): ";
-        inn::System::setComputeBackend(std::get<0>(b), std::get<1>(b));
+        indk::System::setComputeBackend(std::get<0>(b), std::get<1>(b));
         count += doTest(ref);
     }
     std::cout << std::endl;
@@ -87,8 +87,8 @@ int main() {
     const unsigned TOTAL_TEST_COUNT                         = STRUCTURE_COUNT*backends.size();
 
     int count = 0;
-    inn::System::setVerbosityLevel(1);
-    NN = new inn::NeuralNet();
+    indk::System::setVerbosityLevel(1);
+    NN = new indk::NeuralNet();
 
     // creating data array
     for (int i = 0; i < 170; i++) {

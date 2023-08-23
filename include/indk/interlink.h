@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        inn/interlink.h
+// Name:        indk/interlink.h
 // Purpose:     Interlink service class header
 // Author:      Nickolay Babbysh
 // Created:     19.07.2023
@@ -13,7 +13,7 @@
 #include <thread>
 #include <atomic>
 
-namespace inn {
+namespace indk {
     /**
      * Interlink class.
      */

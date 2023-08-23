@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        inn/error.h
+// Name:        indk/error.h
 // Purpose:     Exception system class header
 // Author:      Nickolay Babbysh
 // Created:     07.05.2019
@@ -15,7 +15,7 @@
 #include <vector>
 #include <string>
 
-namespace inn {
+namespace indk {
     /// Error handler class.
     class Error: public std::exception {
     public:
