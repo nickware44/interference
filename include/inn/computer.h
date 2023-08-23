@@ -10,7 +10,7 @@
 #define INTERFERENCE_COMPUTER_H
 
 #include <queue>
-#include "position.h"
+#include <inn/position.h>
 
 namespace inn {
     class Computer {

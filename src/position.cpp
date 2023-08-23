@@ -9,8 +9,8 @@
 
 #include <cmath>
 
-#include "../include/inn/position.h"
-#include "../include/inn/error.h"
+#include <inn/position.h>
+#include <inn/error.h>
 
 inn::Position::Position() {
     Xm = 0;

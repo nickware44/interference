@@ -7,8 +7,8 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/inn/neuron.h"
-#include "../../include/inn/system.h"
+#include <inn/neuron.h>
+#include <inn/system.h>
 
 inn::Neuron::Receptor::Receptor() {
 	DefaultPos = new inn::Position();

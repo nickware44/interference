@@ -7,9 +7,9 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/inn/backends/multithread.h"
-#include "../../include/inn/neuron.h"
-#include "../../include/inn/system.h"
+#include <inn/backends/multithread.h>
+#include <inn/neuron.h>
+#include <inn/system.h>
 
 inn::ComputeBackendMultithread::ComputeBackendMultithread(int WC) {
     WorkerCount = WC;

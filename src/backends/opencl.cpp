@@ -7,9 +7,9 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/inn/backends/opencl.h"
-#include "../../include/inn/neuron.h"
-#include "../../include/inn/system.h"
+#include <inn/backends/opencl.h>
+#include <inn/neuron.h>
+#include <inn/system.h>
 
 #define KERNEL(name, ...) std::string name = #__VA_ARGS__
 

@@ -14,7 +14,7 @@
 #include <condition_variable>
 #include <map>
 #include <atomic>
-#include "../computer.h"
+#include <inn/computer.h>
 
 #define INN_MULTITHREAD_DEFAULT_NUM 2
 

@@ -9,7 +9,7 @@
 #ifndef INTERFERENCE_DEFAULT_H
 #define INTERFERENCE_DEFAULT_H
 
-#include "../computer.h"
+#include <inn/computer.h>
 
 namespace inn {
     class ComputeBackendDefault : public Computer {

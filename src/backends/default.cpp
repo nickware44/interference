@@ -7,8 +7,8 @@
 // Licence: MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/inn/neuron.h"
-#include "../../include/inn/backends/default.h"
+#include <inn/neuron.h>
+#include <inn/backends/default.h>
 
 inn::ComputeBackendDefault::ComputeBackendDefault() {
     zPos = new inn::Position(0, 3);

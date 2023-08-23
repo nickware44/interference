@@ -7,7 +7,7 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../include/inn/error.h"
+#include <inn/error.h>
 
 inn::Error::Error() {
     ET = 0;

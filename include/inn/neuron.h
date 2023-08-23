@@ -15,7 +15,7 @@
 #include <atomic>
 #include <map>
 #include <iostream>
-#include "position.h"
+#include <inn/position.h>
 
 namespace inn {
     typedef enum {

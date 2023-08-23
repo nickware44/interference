@@ -7,8 +7,10 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../include/inn/interlink.h"
-#include "../3rdparty/json.hpp"
+#include <inn/interlink.h>
+#include <inn/system.h>
+#include <json.hpp>
+#include <httplib.h>
 #include <unistd.h>
 
 typedef nlohmann::json json;
@@ -29,12 +31,14 @@ inn::Interlink::Interlink(int port) {
 
 void inn::Interlink::doInitInput(int port) {
     Input = new httplib::Server();
-    Input -> set_idle_interval(60, 0);
-    Input -> set_read_timeout(60, 0);
-    Input -> set_write_timeout(60, 0);
-    Input -> set_keep_alive_timeout(60);
+    auto input = (httplib::Server*)Input;
 
-    Input -> Post("/io_init", [&](const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &content_reader) {
+    input-> set_idle_interval(60, 0);
+    input -> set_read_timeout(60, 0);
+    input -> set_write_timeout(60, 0);
+    input-> set_keep_alive_timeout(60);
+
+    input -> Post("/io_init", [&](const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &content_reader) {
         Host = req.remote_addr;
         std::string body;
 
@@ -50,45 +54,48 @@ void inn::Interlink::doInitInput(int port) {
         doInitOutput();
     });
 
-    Input -> Post("/io_ping", [&](const httplib::Request &req, httplib::Response &res) {
+    input -> Post("/io_ping", [&](const httplib::Request &req, httplib::Response &res) {
     });
 
-    Input -> Post("/io_model_write_structure", [&](const httplib::Request &req, httplib::Response &res) {
+    input -> Post("/io_model_write_structure", [&](const httplib::Request &req, httplib::Response &res) {
         Structure = "";
         res.set_content_provider(
                 "text/plain",
                 [&](size_t offset, httplib::DataSink &sink) {
                     sink.write(Structure.c_str(), Structure.size());
-                    std::cout << "data done" << std::endl;
                     sink.done();
                     return true;
                 });
     });
 
-    Thread = std::thread([this, port]() {
-        Input -> listen("0.0.0.0", port);
+    Thread = std::thread([this, port, input]() {
+        input -> listen("0.0.0.0", port);
     });
 
     int timeout = 0;
     while (!Interlinked.load() && timeout < 5) {
         sleep(1);
         timeout++;
-        std::cout << "Interlink connection timeout " << timeout << std::endl;
+        if (inn::System::getVerbosityLevel() > 1)
+            std::cout << "Interlink connection timeout " << timeout << std::endl;
     }
 }
 
 void inn::Interlink::doInitOutput() {
-    std::cout << "Incoming Interlink connection from " << Host+":"+OutputPort << std::endl;
+    if (inn::System::getVerbosityLevel() > 0)
+        std::cout << "Incoming Interlink connection from " << Host+":"+OutputPort << std::endl;
     Output = new httplib::Client(Host+":"+OutputPort);
-    Output -> set_read_timeout(5, 0);
-    Output -> set_write_timeout(5, 0);
-    Output -> set_connection_timeout(0, 500000);
+    auto output = (httplib::Client*)Output;
+    output -> set_read_timeout(5, 0);
+    output -> set_write_timeout(5, 0);
+    output -> set_connection_timeout(0, 500000);
     Interlinked.store(true);
 }
 
 void inn::Interlink::doSend(const std::string& command, const std::string& data) {
     if (!Interlinked.load() || !Output) return;
-    auto res = Output -> Post("/"+command, data.size(),
+    auto output = (httplib::Client*)Output;
+    auto res = output -> Post("/"+command, data.size(),
                    [data](size_t offset, size_t length, httplib::DataSink &sink) {
                         sink.write(data.c_str()+offset, length);
                         return true;
@@ -126,6 +133,6 @@ bool inn::Interlink::isInterlinked() {
 
 inn::Interlink::~Interlink() {
     Thread.detach();
-    delete Input;
-    delete Output;
+    delete (httplib::Server*)Input;
+    delete (httplib::Client*)Output;
 }

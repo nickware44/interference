@@ -11,7 +11,7 @@
 
 #include <mutex>
 #include <condition_variable>
-#include "computer.h"
+#include <inn/computer.h>
 
 namespace inn {
     typedef std::tuple<std::string, std::string, void*, void*, int> LinkDefinition;

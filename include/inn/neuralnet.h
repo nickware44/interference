@@ -15,9 +15,9 @@
 #include <tuple>
 #include <functional>
 #include <unordered_map>
-#include "neuron.h"
-#include "system.h"
-#include "interlink.h"
+#include <inn/neuron.h>
+#include <inn/system.h>
+#include <inn/interlink.h>
 
 namespace inn {
     typedef enum {

@@ -7,9 +7,9 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/inn/neuron.h"
-#include "../../include/inn/error.h"
-#include "../../include/inn/system.h"
+#include <inn/neuron.h>
+#include <inn/error.h>
+#include <inn/system.h>
 
 inn::Neuron::Neuron() {
     t = 0;

@@ -10,7 +10,8 @@
 #ifndef INTERFERENCE_INTERLINK_H
 #define INTERFERENCE_INTERLINK_H
 
-#include "../../3rdparty/httplib.h"
+#include <thread>
+#include <atomic>
 
 namespace inn {
     /**
@@ -19,8 +20,8 @@ namespace inn {
     class Interlink {
     private:
         void *LinkedObject;
-        httplib::Server *Input;
-        httplib::Client *Output;
+        void *Input;
+        void *Output;
         std::string Host;
         std::string InputPort, OutputPort;
         std::thread Thread;

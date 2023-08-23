@@ -9,8 +9,8 @@
 
 #include <chrono>
 #include <iomanip>
-#include "inn/system.h"
-#include "inn/neuralnet.h"
+#include <inn/system.h>
+#include <inn/neuralnet.h>
 #include "bmp.hpp"
 
 uint64_t getTimestampMS() {
@@ -60,7 +60,7 @@ int main() {
     std::ifstream structure(STRUCTURE_PATH);
     auto NN = new inn::NeuralNet(STRUCTURE_PATH);
     NN -> setStateSyncEnabled();
-//    NN -> doInterlinkInit(4408);
+    NN -> doInterlinkInit(4408);
 
     // replicate neurons for classification
     for (int i = 2; i <= TEACH_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);

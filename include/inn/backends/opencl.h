@@ -9,7 +9,7 @@
 #ifndef INTERFERENCE_OPENCL_H
 #define INTERFERENCE_OPENCL_H
 
-#include "../computer.h"
+#include <inn/computer.h>
 #include <thread>
 #include <condition_variable>
 #include <atomic>

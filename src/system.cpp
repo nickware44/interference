@@ -7,10 +7,10 @@
 // Licence: MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../include/inn/system.h"
-#include "../include/inn/backends/default.h"
-#include "../include/inn/backends/multithread.h"
-#include "../include/inn/backends/opencl.h"
+#include <inn/system.h>
+#include <inn/backends/default.h>
+#include <inn/backends/multithread.h>
+#include <inn/backends/opencl.h>
 
 int CurrentComputeBackend = -1, VerbosityLevel = 1;
 int ComputeBackendParameter = 0;

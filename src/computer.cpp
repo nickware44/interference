@@ -8,8 +8,7 @@
 /////////////////////////////////////////////////////////////////////////////
 
 #include <cmath>
-
-#include "../include/inn/computer.h"
+#include <inn/computer.h>
 
 inn::Computer::Computer() {
 

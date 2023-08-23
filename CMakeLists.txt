@@ -12,6 +12,8 @@ add_library(interference
         src/backends/multithread.cpp include/inn/backends/multithread.h
         src/backends/opencl.cpp include/inn/backends/opencl.h src/interlink.cpp include/inn/interlink.h)
 
+include_directories(include/)
+include_directories(3rdparty/)
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} Threads::Threads -latomic)
 

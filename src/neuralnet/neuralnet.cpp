@@ -10,8 +10,8 @@
 #include <fstream>
 #include <queue>
 #include <thread>
-#include "../../3rdparty/json.hpp"
-#include "../../include/inn/neuralnet.h"
+#include <json.hpp>
+#include <inn/neuralnet.h>
 
 typedef nlohmann::json json;
 
