@@ -10,7 +10,8 @@ add_library(interference
         src/computer.cpp include/indk/computer.h
         src/backends/default.cpp include/indk/backends/default.h
         src/backends/multithread.cpp include/indk/backends/multithread.h
-        src/backends/opencl.cpp include/indk/backends/opencl.h src/interlink.cpp include/indk/interlink.h)
+        src/backends/opencl.cpp include/indk/backends/opencl.h src/interlink.cpp include/indk/interlink.h
+        src/profiler.cpp include/indk//profiler.h)
 
 include_directories(include/)
 include_directories(3rdparty/)

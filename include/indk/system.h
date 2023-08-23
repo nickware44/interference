@@ -83,8 +83,6 @@ namespace indk {
         std::condition_variable m_oConditionVariable;
         bool m_bEvent;
     };
-
-
 }
 
 #endif //INTERFERENCE_SYSTEM_H

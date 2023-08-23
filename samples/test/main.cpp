@@ -10,6 +10,7 @@
 #include <cmath>
 #include <fstream>
 #include <indk/neuralnet.h>
+#include <indk/profiler.h>
 #include <iomanip>
 
 
@@ -94,6 +95,10 @@ int main() {
     for (int i = 0; i < 170; i++) {
         X.push_back({50, 50});
     }
+
+    indk::Profiler::doAttachCallback(NN, indk::Profiler::EventFlags::EventTick, [](indk::NeuralNet *nn) {
+        std::cout << nn->getName() << std::endl;
+    });
 
     // running tests
     std::cout << "=== SUPERSTRUCTURE TEST ===" << std::endl;

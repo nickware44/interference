@@ -12,6 +12,7 @@
 #include <thread>
 #include <json.hpp>
 #include <indk/neuralnet.h>
+#include <indk/profiler.h>
 
 typedef nlohmann::json json;
 
@@ -342,7 +343,9 @@ std::vector<float> indk::NeuralNet::doSignalTransfer(const std::vector<std::vect
             doReserveSignalBuffer(1);
             for (auto &X: Xx) {
                 doSignalProcessStart({X}, eentries);
+                indk::Profiler::doEmit(this, indk::Profiler::EventFlags::EventTick);
             }
+            indk::Profiler::doEmit(this, indk::Profiler::EventFlags::EventProcessed);
             break;
 
         case indk::System::ComputeBackends::Multithread:
