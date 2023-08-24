@@ -55,6 +55,7 @@ namespace indk {
         int LastUsedComputeBackend;
 
         indk::Interlink *InterlinkService;
+        std::vector<std::vector<std::string>> InterlinkDataBuffer;
         void doInterlinkAppUpdateData();
     public:
         NeuralNet();
@@ -87,6 +88,7 @@ namespace indk {
         std::string getVersion();
         std::vector<indk::Neuron*> getEnsemble(const std::string&);
         indk::Neuron* getNeuron(const std::string&);
+        std::vector<indk::Neuron*> getNeurons();
         uint64_t getNeuronCount();
         int64_t getSignalBufferSize();
         ~NeuralNet();

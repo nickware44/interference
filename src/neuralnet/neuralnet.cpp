@@ -34,16 +34,34 @@ indk::NeuralNet::NeuralNet(const std::string &path) {
 
 void indk::NeuralNet::doInterlinkInit(int port) {
     InterlinkService = new indk::Interlink(port);
+
+    indk::Profiler::doAttachCallback(this, indk::Profiler::EventFlags::EventTick, [this](indk::NeuralNet *nn) {
+        auto neurons = getNeurons();
+        for (uint64_t i = 0; i < neurons.size(); i++) {
+            if (i >= InterlinkDataBuffer.size()) {
+                InterlinkDataBuffer.emplace_back();
+            }
+            InterlinkDataBuffer[i].push_back(std::to_string(neurons[i]->doSignalReceive().second));
+        }
+    });
+
+    indk::Profiler::doAttachCallback(this, indk::Profiler::EventFlags::EventProcessed, [this](indk::NeuralNet *nn) {
+        doInterlinkAppUpdateData();
+    });
 }
 
 void indk::NeuralNet::doInterlinkAppUpdateData() {
     if (!InterlinkService || InterlinkService && !InterlinkService->isInterlinked()) return;
     json j;
+    uint64_t in = 0;
 
     for (const auto &n: Neurons) {
         json jn;
+
         jn["name"] = n.second->getName();
-        jn["time"] = n.second->getTime();
+        for (const auto& o: InterlinkDataBuffer[in]) {
+            jn["output_signal"].push_back(o);
+        }
 
         for (int i = 0; i < n.second->getReceptorsCount(); i++) {
             json jr;
@@ -67,8 +85,10 @@ void indk::NeuralNet::doInterlinkAppUpdateData() {
         }
 
         j["neurons"].push_back(jn);
+        in++;
     }
 
+    InterlinkDataBuffer.clear();
     InterlinkService -> doUpdateData(j.dump());
 }
 
@@ -345,7 +365,6 @@ std::vector<float> indk::NeuralNet::doSignalTransfer(const std::vector<std::vect
                 doSignalProcessStart({X}, eentries);
                 indk::Profiler::doEmit(this, indk::Profiler::EventFlags::EventTick);
             }
-            indk::Profiler::doEmit(this, indk::Profiler::EventFlags::EventProcessed);
             break;
 
         case indk::System::ComputeBackends::Multithread:
@@ -370,7 +389,7 @@ std::vector<float> indk::NeuralNet::doSignalTransfer(const std::vector<std::vect
     }
 
     LastUsedComputeBackend = indk::System::getComputeBackendKind();
-    doInterlinkAppUpdateData();
+    indk::Profiler::doEmit(this, indk::Profiler::EventFlags::EventProcessed);
 
     if (!ensemble.empty() && StateSyncEnabled) {
         for (const auto &name: nsync) {
@@ -873,6 +892,18 @@ indk::Neuron* indk::NeuralNet::getNeuron(const std::string& NName) {
     auto N = Neurons.find(NName);
     if (N != Neurons.end()) return N->second;
     return nullptr;
+}
+
+/**
+ * Get neuron list.
+ * @return Vector of indk::Neuron object pointers.
+ */
+std::vector<indk::Neuron*> indk::NeuralNet::getNeurons() {
+    std::vector<indk::Neuron*> neurons;
+    for (auto &n: Neurons) {
+        neurons.push_back(n.second);
+    }
+    return neurons;
 }
 
 /**
