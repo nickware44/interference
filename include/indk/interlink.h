@@ -37,7 +37,8 @@ namespace indk {
         Interlink();
         Interlink(int);
         void doUpdateStructure(const std::string&);
-        void doUpdateData(const std::string&);
+        void doUpdateModelData(const std::string&);
+        void doUpdateMetrics(const std::string&);
         void setStructure(const std::string&);
         std::string getStructure();
         bool isInterlinked();

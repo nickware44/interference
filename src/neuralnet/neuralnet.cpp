@@ -52,16 +52,19 @@ void indk::NeuralNet::doInterlinkInit(int port) {
 
 void indk::NeuralNet::doInterlinkAppUpdateData() {
     if (!InterlinkService || InterlinkService && !InterlinkService->isInterlinked()) return;
-    json j;
+    json j, jm;
     uint64_t in = 0;
 
     for (const auto &n: Neurons) {
-        json jn;
+        json jn, jnm;
 
         jn["name"] = n.second->getName();
+
+        jm["name"] = n.second->getName();
         for (const auto& o: InterlinkDataBuffer[in]) {
-            jn["output_signal"].push_back(o);
+            jnm.push_back(o);
         }
+        jm["output_signal"].push_back(jnm);
 
         for (int i = 0; i < n.second->getReceptorsCount(); i++) {
             json jr;
@@ -89,7 +92,8 @@ void indk::NeuralNet::doInterlinkAppUpdateData() {
     }
 
     InterlinkDataBuffer.clear();
-    InterlinkService -> doUpdateData(j.dump());
+    InterlinkService -> doUpdateModelData(j.dump());
+    InterlinkService -> doUpdateMetrics(jm.dump());
 }
 
 int64_t indk::NeuralNet::doFindEntry(const std::string& ename) {

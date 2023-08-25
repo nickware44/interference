@@ -114,8 +114,12 @@ void indk::Interlink::doUpdateStructure(const std::string &data) {
     doSend("io_app_update_structure", data);
 }
 
-void indk::Interlink::doUpdateData(const std::string &data) {
-    doSend("io_app_update_data", data);
+void indk::Interlink::doUpdateModelData(const std::string &data) {
+    doSend("io_app_update_model_data", data);
+}
+
+void indk::Interlink::doUpdateMetrics(const std::string &data) {
+    doSend("io_app_update_metrics", data);
 }
 
 void indk::Interlink::setStructure(const std::string &data) {
