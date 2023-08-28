@@ -60,11 +60,11 @@ void indk::NeuralNet::doInterlinkAppUpdateData() {
 
         jn["name"] = n.second->getName();
 
-        jm["name"] = n.second->getName();
+        jnm["name"] = n.second->getName();
         for (const auto& o: InterlinkDataBuffer[in]) {
-            jnm.push_back(o);
+            jnm["output_signal"].push_back(o);
         }
-        jm["output_signal"].push_back(jnm);
+        jm.push_back(jnm);
 
         for (int i = 0; i < n.second->getReceptorsCount(); i++) {
             json jr;
