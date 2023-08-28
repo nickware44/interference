@@ -10,6 +10,7 @@
 #ifndef INTERFERENCE_INTERLINK_H
 #define INTERFERENCE_INTERLINK_H
 
+#include <string>
 #include <thread>
 #include <atomic>
 
