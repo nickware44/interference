@@ -59,6 +59,7 @@ void indk::NeuralNet::doInterlinkAppUpdateData() {
         json jn, jnm;
 
         jn["name"] = n.second->getName();
+        jn["total_time"] = n.second->getTime();
 
         jnm["name"] = n.second->getName();
         for (const auto& o: InterlinkDataBuffer[in]) {
