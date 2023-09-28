@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        inn/neuralnet.h
+// Name:        indk/neuralnet.h
 // Purpose:     Neural net classes header
 // Author:      Nickolay Babbysh
 // Created:     12.05.2019
@@ -15,11 +15,11 @@
 #include <tuple>
 #include <functional>
 #include <unordered_map>
-#include "neuron.h"
-#include "system.h"
-#include "interlink.h"
+#include <indk/neuron.h>
+#include <indk/system.h>
+#include <indk/interlink.h>
 
-namespace inn {
+namespace indk {
     typedef enum {
         CompareDefault,
         CompareNormalized
@@ -38,7 +38,7 @@ namespace inn {
 
         EntryList Entries;
         std::map<std::string, std::vector<std::string>> Ensembles;
-        std::map<std::string, inn::Neuron*> Neurons;
+        std::map<std::string, indk::Neuron*> Neurons;
         std::map<std::string, int> Latencies;
         std::vector<std::string> Outputs;
 
@@ -49,19 +49,20 @@ namespace inn {
         void doSignalProcessStart(const std::vector<std::vector<float>>&, const EntryList&);
         void doSyncNeuronStates(const std::string&);
 
-        inn::LinkList Links;
+        indk::LinkList Links;
         std::string PrepareID;
         bool StateSyncEnabled;
         int LastUsedComputeBackend;
 
-        inn::Interlink *InterlinkService;
+        indk::Interlink *InterlinkService;
+        std::vector<std::vector<std::string>> InterlinkDataBuffer;
         void doInterlinkAppUpdateData();
     public:
         NeuralNet();
         explicit NeuralNet(const std::string &path);
         void doInterlinkInit(int);
-        std::vector<float> doComparePatterns(int CompareFlag = inn::PatternCompareFlags::CompareDefault,
-                                             int ProcessingMethod = inn::ScopeProcessingMethods::ProcessMin);
+        std::vector<float> doComparePatterns(int CompareFlag = indk::PatternCompareFlags::CompareDefault,
+                                             int ProcessingMethod = indk::ScopeProcessingMethods::ProcessMin);
         void doCreateNewScope();
         void doChangeScope(uint64_t);
         void doReset();
@@ -85,8 +86,9 @@ namespace inn {
         std::string getName();
         std::string getDescription();
         std::string getVersion();
-        std::vector<inn::Neuron*> getEnsemble(const std::string&);
-        inn::Neuron* getNeuron(const std::string&);
+        std::vector<indk::Neuron*> getEnsemble(const std::string&);
+        indk::Neuron* getNeuron(const std::string&);
+        std::vector<indk::Neuron*> getNeurons();
         uint64_t getNeuronCount();
         int64_t getSignalBufferSize();
         ~NeuralNet();

@@ -7,26 +7,26 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/inn/backends/multithread.h"
-#include "../../include/inn/neuron.h"
-#include "../../include/inn/system.h"
+#include <indk/backends/multithread.h>
+#include <indk/neuron.h>
+#include <indk/system.h>
 
-inn::ComputeBackendMultithread::ComputeBackendMultithread(int WC) {
+indk::ComputeBackendMultithread::ComputeBackendMultithread(int WC) {
     WorkerCount = WC;
     while (Workers.size() < WorkerCount) {
-        auto w = new inn::Worker;
+        auto w = new indk::Worker;
         w -> thread = std::thread(tWorker, (void*)w);
         Workers.emplace_back(w);
     }
 }
 
 // TODO: handling of cases when computing of multiple neural networks goes in parallel
-void inn::ComputeBackendMultithread::doRegisterHost(const std::vector<void*>& objects) {
+void indk::ComputeBackendMultithread::doRegisterHost(const std::vector<void*>& objects) {
     int last = 0;
     for (const auto &o: objects) {
         if (last >= Workers.size()) last = 0;
         Workers[last] -> objects.push_back(o);
-        Workers[last] -> event = new inn::Event;
+        Workers[last] -> event = new indk::Event;
         Workers[last] -> done = false;
         last++;
     }
@@ -35,27 +35,27 @@ void inn::ComputeBackendMultithread::doRegisterHost(const std::vector<void*>& ob
     }
 }
 
-void inn::ComputeBackendMultithread::doWaitTarget() {
+void indk::ComputeBackendMultithread::doWaitTarget() {
     for (const auto &w: Workers) {
         while (!w->done.load()) {
-            ((inn::Event*)w->event) -> doWaitTimed(100);
+            ((indk::Event*)w->event) -> doWaitTimed(100);
         }
     }
 }
 
-void inn::ComputeBackendMultithread::doProcess(void* object) {
+void indk::ComputeBackendMultithread::doProcess(void* object) {
 }
 
-[[noreturn]] void inn::ComputeBackendMultithread::tWorker(void* object) {
-    auto worker = (inn::Worker*)object;
+[[noreturn]] void indk::ComputeBackendMultithread::tWorker(void* object) {
+    auto worker = (indk::Worker*)object;
 
     while (true) {
         std::unique_lock<std::mutex> lk(worker->m);
         worker -> cv.wait(lk);
 
-        auto zPos = new inn::Position(0, 3);
-        auto dRPos = new inn::Position(0, 3);
-        auto nRPos = new inn::Position(0, 3);
+        auto zPos = new indk::Position(0, 3);
+        auto dRPos = new indk::Position(0, 3);
+        auto nRPos = new indk::Position(0, 3);
 
         std::vector<int64_t> times;
         int tdone = 0;
@@ -63,13 +63,13 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
         while (tdone < size) {
             for (uint64_t n = 0; n < size; n++) {
                 if (n >= times.size()) times.push_back(0);
-                auto N = (inn::Neuron*)worker -> objects[n];
+                auto N = (indk::Neuron*)worker -> objects[n];
                 auto t = times[n];
                 auto ComputeSize = N -> getSignalBufferSize();
 
                 if (t >= ComputeSize) continue;
 
-                if (N->getState(t) != inn::Neuron::States::Pending) {
+                if (N->getState(t) != indk::Neuron::States::Pending) {
                     continue;
                 }
 
@@ -84,7 +84,7 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
                 nRPos -> setXm(Xm);
                 nRPos -> setDimensionsCount(DimensionsCount);
 
-                inn::Position *RPos;
+                indk::Position *RPos;
 
                 for (int j = 0; j < N->getEntriesCount(); j++) {
                     auto E = N -> getEntry(j);
@@ -95,7 +95,7 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
                     auto R = N->getReceptor(i);
                     if (!R->isLocked()) RPos = R -> getPos();
                     else RPos = R -> getPosf();
-                    inn::Position *SPos;
+                    indk::Position *SPos;
                     std::pair<float, float> FiValues;
                     FiSum = 0;
                     dRPos -> doZeroPosition();
@@ -107,9 +107,9 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
                             auto *S = E -> getSynapse(k);
                             SPos = S -> getPos();
                             D = SPos -> getDistanceFrom(RPos);
-                            FiValues = inn::Computer::getFiFunctionValue(S->getLambda(), S->getGamma(), S->getdGamma(), D);
+                            FiValues = indk::Computer::getFiFunctionValue(S->getLambda(), S->getGamma(), S->getdGamma(), D);
                             if (FiValues.second > 0) {
-                                inn::Computer::getNewPosition(nRPos, RPos, SPos, inn::Computer::getFiVectorLength(FiValues.second), D);
+                                indk::Computer::getNewPosition(nRPos, RPos, SPos, indk::Computer::getFiVectorLength(FiValues.second), D);
                                 dRPos -> doAdd(nRPos);
                             }
                             FiSum += FiValues.first;
@@ -118,7 +118,7 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
 
                     R -> setFi(FiSum);
                     R -> doUpdatePos(dRPos);
-                    P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, zPos);
+                    P += indk::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, zPos);
                     R -> doUpdateSensitivityValue();
                 }
                 P /= (float)N->getReceptorsCount();
@@ -138,13 +138,13 @@ void inn::ComputeBackendMultithread::doProcess(void* object) {
         delete dRPos;
 
         worker -> done.store(true);
-        ((inn::Event*)worker->event) -> doNotifyOne();
+        ((indk::Event*)worker->event) -> doNotifyOne();
     }
 }
 
-void inn::ComputeBackendMultithread::doUnregisterHost() {
+void indk::ComputeBackendMultithread::doUnregisterHost() {
     for (const auto &w: Workers) {
         w -> objects.clear();
-        delete (inn::Event*)w->event;
+        delete (indk::Event*)w->event;
     }
 }

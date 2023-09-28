@@ -7,10 +7,10 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/inn/neuron.h"
-#include "../../include/inn/system.h"
+#include <indk/neuron.h>
+#include <indk/system.h>
 
-inn::Neuron::Entry::Entry() {
+indk::Neuron::Entry::Entry() {
     t = 0;
     tm = -1;
     SignalPointer = 0;
@@ -18,7 +18,7 @@ inn::Neuron::Entry::Entry() {
     SignalSize = 1;
 }
 
-inn::Neuron::Entry::Entry(const Entry &E) {
+indk::Neuron::Entry::Entry(const Entry &E) {
     for (int64_t i = 0; i < E.getSynapsesCount(); i++) {
         auto *S = new Synapse(*E.getSynapse(i));
         Synapses.push_back(S);
@@ -30,17 +30,17 @@ inn::Neuron::Entry::Entry(const Entry &E) {
     SignalPointer = 0;
 }
 
-bool inn::Neuron::Entry::doCheckState(int64_t tn) const {
+bool indk::Neuron::Entry::doCheckState(int64_t tn) const {
 //    std::cout << "check state " << tm << " " << tn << std::endl;
     return tm >= tn;
 }
 
-void inn::Neuron::Entry::doAddSynapse(inn::Position *SPos, unsigned int Xm, float k1, int64_t Tl, int NT) {
-	auto *S = new Synapse(SPos, k1, inn::Computer::getLambdaValue(Xm), Tl, NT);
+void indk::Neuron::Entry::doAddSynapse(indk::Position *SPos, unsigned int Xm, float k1, int64_t Tl, int NT) {
+	auto *S = new Synapse(SPos, k1, indk::Computer::getLambdaValue(Xm), Tl, NT);
     Synapses.push_back(S);
 }
 
-void inn::Neuron::Entry::doIn(float Xt, int64_t tn) {
+void indk::Neuron::Entry::doIn(float Xt, int64_t tn) {
     if (SignalPointer >= SignalSize) SignalPointer = 0;
     Signal[SignalPointer] = Xt;
     SignalPointer++;
@@ -48,7 +48,7 @@ void inn::Neuron::Entry::doIn(float Xt, int64_t tn) {
 //    std::cout << "In entry " << tm << " " << t << " " << SignalPointer << " " << Signal[SignalPointer-1] << " " << Xt << std::endl;
 }
 
-void inn::Neuron::Entry::doProcess() {
+void indk::Neuron::Entry::doProcess() {
     auto d = tm - t + 1;
 //    std::cout << "Entry " << tm << " " << t << " " << d << " " << SignalPointer-d << " " << Signal[SignalPointer-d] << std::endl;
     if (d > 0 && SignalPointer-d >= 0) {
@@ -61,44 +61,44 @@ void inn::Neuron::Entry::doProcess() {
     }
 }
 
-void inn::Neuron::Entry::doPrepare() {
+void indk::Neuron::Entry::doPrepare() {
     t = 0;
     tm = -1;
     for (auto S: Synapses) S -> doReset();
     //for (auto S: Synapses) S -> doPrepare();
 }
 
-void inn::Neuron::Entry::doFinalize() {
+void indk::Neuron::Entry::doFinalize() {
     //for (auto Sig: Signal)
         //for (auto S: Synapses) S -> doIn(Sig);
     for (auto S: Synapses) S -> doReset();
     //Signal.clear();
 }
 
-void inn::Neuron::Entry::doReserveSignalBuffer(uint64_t L) {
+void indk::Neuron::Entry::doReserveSignalBuffer(uint64_t L) {
     delete [] Signal;
     Signal = new float[L];
     SignalSize = L;
     SignalPointer = 0;
 }
 
-void inn::Neuron::Entry::setk1(float _k1) {
+void indk::Neuron::Entry::setk1(float _k1) {
     for (auto S: Synapses) S -> setk1(_k1);
 }
 
-void inn::Neuron::Entry::setk2(float _k2) {
+void indk::Neuron::Entry::setk2(float _k2) {
     for (auto S: Synapses) S -> setk2(_k2);
 }
 
-inn::Neuron::Synapse* inn::Neuron::Entry::getSynapse(int64_t SID) const {
+indk::Neuron::Synapse* indk::Neuron::Entry::getSynapse(int64_t SID) const {
     return Synapses[SID];
 }
 
-int64_t inn::Neuron::Entry::getSynapsesCount() const {
+int64_t indk::Neuron::Entry::getSynapsesCount() const {
     return Synapses.size();
 }
 
-float inn::Neuron::Entry::getIn() {
+float indk::Neuron::Entry::getIn() {
     auto d = tm - t + 1;
     if (d > 0 && SignalPointer-d >= 0) {
         t++;
@@ -107,6 +107,6 @@ float inn::Neuron::Entry::getIn() {
     return 0;
 }
 
-inn::Neuron::Entry::~Entry() {
+indk::Neuron::Entry::~Entry() {
     for (auto S: Synapses) delete S;
 }

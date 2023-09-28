@@ -7,22 +7,22 @@
 // Licence:     MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../include/inn/error.h"
+#include <indk/error.h>
 
-inn::Error::Error() {
+indk::Error::Error() {
     ET = 0;
 }
 
-inn::Error::Error(ExceptionType _ET) {
+indk::Error::Error(ExceptionType _ET) {
     ET = _ET;
 }
 
-inn::Error::Error(ExceptionType _ET, std::vector<float> _ED) {
+indk::Error::Error(ExceptionType _ET, std::vector<float> _ED) {
     ET = _ET;
 	ED = std::move(_ED);
 }
 
-const char* inn::Error::what() const noexcept {
+const char* indk::Error::what() const noexcept {
     std::string Msg;
     char *B;
     switch (ET) {

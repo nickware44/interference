@@ -1,5 +1,5 @@
 /////////////////////////////////////////////////////////////////////////////
-// Name:        inn/interlink.h
+// Name:        indk/interlink.h
 // Purpose:     Interlink service class header
 // Author:      Nickolay Babbysh
 // Created:     19.07.2023
@@ -10,17 +10,19 @@
 #ifndef INTERFERENCE_INTERLINK_H
 #define INTERFERENCE_INTERLINK_H
 
-#include "../../3rdparty/httplib.h"
+#include <string>
+#include <thread>
+#include <atomic>
 
-namespace inn {
+namespace indk {
     /**
      * Interlink class.
      */
     class Interlink {
     private:
         void *LinkedObject;
-        httplib::Server *Input;
-        httplib::Client *Output;
+        void *Input;
+        void *Output;
         std::string Host;
         std::string InputPort, OutputPort;
         std::thread Thread;
@@ -36,7 +38,8 @@ namespace inn {
         Interlink();
         Interlink(int);
         void doUpdateStructure(const std::string&);
-        void doUpdateData(const std::string&);
+        void doUpdateModelData(const std::string&);
+        void doUpdateMetrics(const std::string&);
         void setStructure(const std::string&);
         std::string getStructure();
         bool isInterlinked();

@@ -7,23 +7,23 @@
 // Licence: MIT licence
 /////////////////////////////////////////////////////////////////////////////
 
-#include "../../include/inn/neuron.h"
-#include "../../include/inn/backends/default.h"
+#include <indk/neuron.h>
+#include <indk/backends/default.h>
 
-inn::ComputeBackendDefault::ComputeBackendDefault() {
-    zPos = new inn::Position(0, 3);
-    dRPos = new inn::Position(0, 3);
-    nRPos = new inn::Position(0, 3);
+indk::ComputeBackendDefault::ComputeBackendDefault() {
+    zPos = new indk::Position(0, 3);
+    dRPos = new indk::Position(0, 3);
+    nRPos = new indk::Position(0, 3);
 }
 
-void inn::ComputeBackendDefault::doRegisterHost(const std::vector<void*>&) {
+void indk::ComputeBackendDefault::doRegisterHost(const std::vector<void*>&) {
 }
 
-void inn::ComputeBackendDefault::doWaitTarget() {
+void indk::ComputeBackendDefault::doWaitTarget() {
 }
 
-void inn::ComputeBackendDefault::doProcess(void* Object) {
-    auto N = (inn::Neuron*)Object;
+void indk::ComputeBackendDefault::doProcess(void* Object) {
+    auto N = (indk::Neuron*)Object;
     float FiSum, D, P = 0;
 
     auto Xm = N -> getXm();
@@ -36,7 +36,7 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
     nRPos -> setXm(Xm);
     nRPos -> setDimensionsCount(DimensionsCount);
 
-    inn::Position *RPos;
+    indk::Position *RPos;
 
     for (int j = 0; j < N->getEntriesCount(); j++) {
         auto E = N -> getEntry(j);
@@ -47,7 +47,7 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
         auto R = N->getReceptor(i);
         if (!R->isLocked()) RPos = R -> getPos();
         else RPos = R -> getPosf();
-        inn::Position *SPos;
+        indk::Position *SPos;
         std::pair<float, float> FiValues;
         FiSum = 0;
         dRPos -> doZeroPosition();
@@ -59,9 +59,9 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
                 auto *S = E -> getSynapse(k);
                 SPos = S -> getPos();
                 D = SPos -> getDistanceFrom(RPos);
-                FiValues = inn::Computer::getFiFunctionValue(S->getLambda(), S->getGamma(), S->getdGamma(), D);
+                FiValues = indk::Computer::getFiFunctionValue(S->getLambda(), S->getGamma(), S->getdGamma(), D);
                 if (FiValues.second > 0) {
-                    inn::Computer::getNewPosition(nRPos, RPos, SPos, inn::Computer::getFiVectorLength(FiValues.second), D);
+                    indk::Computer::getNewPosition(nRPos, RPos, SPos, indk::Computer::getFiVectorLength(FiValues.second), D);
                     dRPos -> doAdd(nRPos);
                 }
                 FiSum += FiValues.first;
@@ -70,7 +70,7 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
 
         R -> setFi(FiSum);
         R -> doUpdatePos(dRPos);
-        P += inn::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, zPos);
+        P += indk::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, zPos);
         R -> doUpdateSensitivityValue();
     }
     P /= (float)N->getReceptorsCount();
@@ -78,5 +78,5 @@ void inn::ComputeBackendDefault::doProcess(void* Object) {
     N -> doFinalizeInput(P);
 }
 
-void inn::ComputeBackendDefault::doUnregisterHost() {
+void indk::ComputeBackendDefault::doUnregisterHost() {
 }

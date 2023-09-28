@@ -14,11 +14,11 @@
 #include <condition_variable>
 #include <map>
 #include <atomic>
-#include "../computer.h"
+#include <indk/computer.h>
 
-#define INN_MULTITHREAD_DEFAULT_NUM 2
+#define indk_MULTITHREAD_DEFAULT_NUM 2
 
-namespace inn {
+namespace indk {
     /// \private
     typedef struct worker {
         std::vector<void*> objects;
@@ -32,7 +32,7 @@ namespace inn {
 
     class ComputeBackendMultithread : public Computer {
     private:
-        std::vector<inn::Worker*> Workers;
+        std::vector<indk::Worker*> Workers;
         std::map<void*, unsigned int> ObjectTable;
         unsigned int WorkerCount;
 

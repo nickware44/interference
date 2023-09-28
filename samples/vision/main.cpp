@@ -9,8 +9,8 @@
 
 #include <chrono>
 #include <iomanip>
-#include "inn/system.h"
-#include "inn/neuralnet.h"
+#include <indk/system.h>
+#include <indk/neuralnet.h>
 #include "bmp.hpp"
 
 uint64_t getTimestampMS() {
@@ -47,7 +47,7 @@ void doLog(const std::string& element, uint64_t time, float speed, bool endl = t
 }
 
 int main() {
-//    inn::System::setComputeBackend(inn::System::ComputeBackends::Multithread, 2);
+//    indk::System::setComputeBackend(indk::System::ComputeBackends::Multithread, 2);
     constexpr uint8_t TEACH_COUNT = 10;
     constexpr uint8_t TEST_COUNT = 10;
     constexpr uint8_t TEST_ELEMENTS = 10;
@@ -58,14 +58,14 @@ int main() {
 
     // load neural network structure from file
     std::ifstream structure(STRUCTURE_PATH);
-    auto NN = new inn::NeuralNet(STRUCTURE_PATH);
+    auto NN = new indk::NeuralNet(STRUCTURE_PATH);
     NN -> setStateSyncEnabled();
-//    NN -> doInterlinkInit(4408);
+    NN -> doInterlinkInit(4408);
 
     // replicate neurons for classification
     for (int i = 2; i <= TEACH_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
 
-    std::cout << "Threads     : " << inn::System::getComputeBackendParameter() << std::endl;
+    std::cout << "Threads     : " << indk::System::getComputeBackendParameter() << std::endl;
     std::cout << "Model name  : " << NN->getName() << std::endl;
     std::cout << "Model desc  : " << NN->getDescription() << std::endl;
     std::cout << "Model ver   : " << NN->getVersion() << std::endl;
@@ -112,7 +112,7 @@ int main() {
             S = (IMAGE_SIZE*24./1024/1024)*1000 / T;
             doLog("Recognizing "+std::to_string(b)+"-"+std::to_string(e)+".bmp", T, S, false);
 
-            auto patterns = NN -> doComparePatterns(inn::PatternCompareFlags::CompareNormalized);
+            auto patterns = NN -> doComparePatterns(indk::PatternCompareFlags::CompareNormalized);
             auto r = std::max_element(patterns.begin(), patterns.end());
             if (std::distance(patterns.begin(), r) == b-1) {
                 std::cout << "[RECOGNIZED]" << std::endl;

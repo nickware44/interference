@@ -4,14 +4,17 @@ project(interference)
 set(CMAKE_CXX_STANDARD 14)
 
 add_library(interference
-        src/neuron/neuron.cpp include/inn/neuron.h src/neuron/entry.cpp src/neuron/synapse.cpp src/neuron/receptor.cpp
-        src/neuralnet/neuralnet.cpp include/inn/neuralnet.h
-        src/error.cpp include/inn/error.h src/system.cpp include/inn/system.h src/position.cpp include/inn/position.h
-        src/computer.cpp include/inn/computer.h
-        src/backends/default.cpp include/inn/backends/default.h
-        src/backends/multithread.cpp include/inn/backends/multithread.h
-        src/backends/opencl.cpp include/inn/backends/opencl.h src/interlink.cpp include/inn/interlink.h)
+        src/neuron/neuron.cpp include/indk/neuron.h src/neuron/entry.cpp src/neuron/synapse.cpp src/neuron/receptor.cpp
+        src/neuralnet/neuralnet.cpp include/indk/neuralnet.h
+        src/error.cpp include/indk/error.h src/system.cpp include/indk/system.h src/position.cpp include/indk/position.h
+        src/computer.cpp include/indk/computer.h
+        src/backends/default.cpp include/indk/backends/default.h
+        src/backends/multithread.cpp include/indk/backends/multithread.h
+        src/backends/opencl.cpp include/indk/backends/opencl.h src/interlink.cpp include/indk/interlink.h
+        src/profiler.cpp include/indk//profiler.h)
 
+include_directories(include/)
+include_directories(3rdparty/)
 find_package(Threads REQUIRED)
 target_link_libraries(${PROJECT_NAME} Threads::Threads -latomic)
 
