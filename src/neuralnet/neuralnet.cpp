@@ -48,6 +48,10 @@ void indk::NeuralNet::doInterlinkInit(int port) {
     indk::Profiler::doAttachCallback(this, indk::Profiler::EventFlags::EventProcessed, [this](indk::NeuralNet *nn) {
         doInterlinkAppUpdateData();
     });
+
+    if (InterlinkService->isInterlinked()) {
+        if (!InterlinkService->getStructure().empty()) setStructure(InterlinkService->getStructure());
+    }
 }
 
 void indk::NeuralNet::doInterlinkAppUpdateData() {
