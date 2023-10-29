@@ -35,7 +35,7 @@ indk::Neuron::Neuron(const indk::Neuron &N) {
     NID = 0;
     Learned = false;
     auto elabels = N.getEntries();
-    for (int64_t i = 0; i < N.getEntriesCount(); i++) Entries.insert(std::make_pair(elabels[i], new Entry(*N.getEntry(i))));
+    for (int64_t i = 0; i < N.getEntriesCount(); i++) Entries.emplace_back(elabels[i], new Entry(*N.getEntry(i)));
     for (int64_t i = 0; i < N.getReceptorsCount(); i++) Receptors.push_back(new Receptor(*N.getReceptor(i)));
     Links = N.getLinkOutput();
 }
@@ -52,7 +52,7 @@ indk::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std:
     Learned = false;
     for (auto &i: InputNames) {
         auto *E = new Entry();
-        Entries.insert(std::make_pair(i, E));
+        Entries.emplace_back(i, E);
     }
 }
 
@@ -68,9 +68,11 @@ void indk::Neuron::doCreateNewSynapse(const std::string& EName, std::vector<floa
 	if (PosVector.size() != DimensionsCount) {
         throw indk::Error(indk::Error::EX_POSITION_DIMENSIONS);
 	}
-    auto nentry = Entries.find(EName);
-    if (nentry != Entries.end()) {
-        nentry -> second -> doAddSynapse(new indk::Position(Xm, std::move(PosVector)), Xm, k1, Tl, NT);
+    for (const auto &e: Entries) {
+        if (e.first == EName) {
+            e.second -> doAddSynapse(new indk::Position(Xm, std::move(PosVector)), Xm, k1, Tl, NT);
+            break;
+        }
     }
 }
 
@@ -139,8 +141,13 @@ void indk::Neuron::doCreateNewReceptorCluster(const std::vector<float>& PosVecto
 }
 
 bool indk::Neuron::doSignalSendEntry(const std::string& From, float X, int64_t tn) {
-    auto entry = Entries.find(From);
-    entry -> second -> doIn(X, tn);
+    for (const auto &e: Entries) {
+        if (e.first == From) {
+            e.second -> doIn(X, tn);
+            break;
+        }
+    }
+
     for (auto &e: Entries) {
         if (!e.second->doCheckState(tn)) {
 //            std::cout << "In to entry of " << Name << " from " << e.first << " (" << tn << ") - not ready" << std::endl;
@@ -287,11 +294,11 @@ void indk::Neuron::doClearOutputLinks() {
  * @param New New name of entry.
  */
 void indk::Neuron::doReplaceEntryName(const std::string& Original, const std::string& New) {
-    auto e = Entries.find(Original);
-    if (e != Entries.end()) {
-        auto entry = e -> second;
-        Entries.erase(e);
-        Entries.insert(std::make_pair(New, entry));
+    for (auto &e: Entries) {
+        if (e.first == Original) {
+            e.first = New;
+            break;
+        }
     }
 }
 

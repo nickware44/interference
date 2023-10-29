@@ -30,7 +30,7 @@ namespace indk {
         class Entry;
         class Synapse;
         class Receptor;
-        std::map<std::string, indk::Neuron::Entry*> Entries;
+        std::vector<std::pair<std::string, indk::Neuron::Entry*>> Entries;
         std::vector<std::string> Links;
         std::vector<indk::Neuron::Receptor*> Receptors;
         std::atomic<int64_t> t;
