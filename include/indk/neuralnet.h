@@ -70,10 +70,10 @@ namespace indk {
         void doStructurePrepare();
         std::vector<float> doSignalTransfer(const std::vector<std::vector<float>>&, const std::string& ensemble = "");
         void doSignalTransferAsync(const std::vector<std::vector<float>>&, const std::string& ensemble = "", const std::function<void(std::vector<float>)>& Callback = nullptr);
-        std::vector<float> doLearn(const std::vector<std::vector<float>>&);
-        std::vector<float> doRecognise(const std::vector<std::vector<float>>&, const std::string& ensemble = "");
-        void doLearnAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr);
-        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::string& ensemble, const std::function<void(std::vector<float>)>& Callback = nullptr);
+        std::vector<float> doLearn(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true);
+        std::vector<float> doRecognise(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true);
+        void doLearnAsync(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true, const std::function<void(std::vector<float>)>& Callback = nullptr);
+        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true, const std::function<void(std::vector<float>)>& Callback = nullptr);
         std::vector<float> doSignalReceive();
         void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);
         void doReserveSignalBuffer(int64_t L);

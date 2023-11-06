@@ -337,8 +337,8 @@ void indk::NeuralNet::doStructurePrepare() {
  */
 std::vector<float> indk::NeuralNet::doSignalTransfer(const std::vector<std::vector<float>>& Xx, const std::string& ensemble) {
     if (indk::System::getComputeBackendKind() == -1) {
-        if (indk::System::getVerbosityLevel() > 0)
-            std::cerr << "Switching to default compute backend." << std::endl;
+        if (indk::System::getVerbosityLevel() > 1)
+            std::cout << "Switching to default compute backend." << std::endl;
 
         indk::System::setComputeBackend(indk::System::ComputeBackends::Default);
     }
@@ -431,14 +431,14 @@ void indk::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<float>
  * @param Xx Input data vector that contain signals for learning.
  * @return Output signals.
  */
-std::vector<float> indk::NeuralNet::doLearn(const std::vector<std::vector<float>>& Xx) {
+std::vector<float> indk::NeuralNet::doLearn(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, bool prepare) {
     if (InterlinkService && InterlinkService->isInterlinked()) {
         InterlinkService -> doUpdateStructure(getStructure());
     }
+    t = 0;
     setLearned(false);
-    doCreateNewScope();
-    doPrepare();
-    return doSignalTransfer(Xx);
+    if (prepare) doPrepare();
+    return doSignalTransfer(Xx, ensemble);
 }
 
 /**
@@ -446,9 +446,10 @@ std::vector<float> indk::NeuralNet::doLearn(const std::vector<std::vector<float>
  * @param Xx Input data vector that contain signals for recognizing.
  * @return Output signals.
  */
-std::vector<float> indk::NeuralNet::doRecognise(const std::vector<std::vector<float>>& Xx, const std::string& ensemble) {
+std::vector<float> indk::NeuralNet::doRecognise(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, bool prepare) {
     setLearned(true);
-    doPrepare();
+    t = 0;
+    if (prepare) doPrepare();
     return doSignalTransfer(Xx, ensemble);
 }
 
@@ -457,11 +458,11 @@ std::vector<float> indk::NeuralNet::doRecognise(const std::vector<std::vector<fl
  * @param Xx Input data vector that contain signals for learning.
  * @param Callback Callback function for output signals.
  */
-void indk::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<float>)>& Callback) {
+void indk::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, bool prepare, const std::function<void(std::vector<float>)>& Callback) {
     setLearned(false);
-    doCreateNewScope();
-    doPrepare();
-    doSignalTransferAsync(Xx, "", Callback);
+    t = 0;
+    if (prepare) doPrepare();
+    doSignalTransferAsync(Xx, ensemble, Callback);
 }
 
 /**
@@ -469,9 +470,10 @@ void indk::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, co
  * @param Xx Input data vector that contain signals for recognizing.
  * @param Callback Callback function for output signals.
  */
-void indk::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, const std::function<void(std::vector<float>)>& Callback) {
+void indk::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, bool prepare, const std::function<void(std::vector<float>)>& Callback) {
     setLearned(true);
-    doPrepare();
+    t = 0;
+    if (prepare) doPrepare();
     doSignalTransferAsync(Xx, ensemble, Callback);
 }
 

@@ -20,6 +20,7 @@ indk::Neuron::Receptor::Receptor() {
     Lf = 0;
     Fi = 0;
     dFi = 0;
+    doCreateNewScope();
 }
 
 indk::Neuron::Receptor::Receptor(const Receptor &R) {
@@ -34,6 +35,7 @@ indk::Neuron::Receptor::Receptor(const Receptor &R) {
     Lf = R.getLf();
     Fi = 0;
     dFi = 0;
+    doCreateNewScope();
 }
 
 indk::Neuron::Receptor::Receptor(indk::Position *_RPos, float _k3) {
@@ -46,6 +48,7 @@ indk::Neuron::Receptor::Receptor(indk::Position *_RPos, float _k3) {
     Lf = 0;
     Fi = 0;
     dFi = 0;
+    doCreateNewScope();
 }
 
 bool indk::Neuron::Receptor::doCheckActive() const {
