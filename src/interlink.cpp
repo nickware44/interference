@@ -19,24 +19,24 @@ indk::Interlink::Interlink() {
     Input = nullptr;
     Output = nullptr;
     Interlinked.store(false);
-    doInitInput(4408);
+    doInitInput(4408, 5);
 }
 
-indk::Interlink::Interlink(int port) {
+indk::Interlink::Interlink(int port, int timeout) {
     Input = nullptr;
     Output = nullptr;
     Interlinked.store(false);
-    doInitInput(port);
+    doInitInput(port, timeout);
 }
 
-void indk::Interlink::doInitInput(int port) {
+void indk::Interlink::doInitInput(int port, int _timeout) {
     Input = new httplib::Server();
     auto input = (httplib::Server*)Input;
 
-    input-> set_idle_interval(60, 0);
+    input -> set_idle_interval(60, 0);
     input -> set_read_timeout(60, 0);
     input -> set_write_timeout(60, 0);
-    input-> set_keep_alive_timeout(60);
+    input -> set_keep_alive_timeout(60);
 
     input -> Post("/io_init", [&](const httplib::Request &req, httplib::Response &res, const httplib::ContentReader &content_reader) {
         Host = req.remote_addr;
@@ -73,7 +73,7 @@ void indk::Interlink::doInitInput(int port) {
     });
 
     int timeout = 0;
-    while (!Interlinked.load() && timeout < 5) {
+    while (!Interlinked.load() && timeout < _timeout) {
         sleep(1);
         timeout++;
         if (indk::System::getVerbosityLevel() > 1)

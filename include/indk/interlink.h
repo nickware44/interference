@@ -20,23 +20,22 @@ namespace indk {
      */
     class Interlink {
     private:
-        void *LinkedObject;
+//        void *LinkedObject;
         void *Input;
         void *Output;
         std::string Host;
         std::string InputPort, OutputPort;
         std::thread Thread;
         std::atomic<bool> Interlinked;
-
         std::string Structure;
 
-        void doInitInput(int);
+        void doInitInput(int, int);
         void doInitOutput();
 
         void doSend(const std::string&, const std::string&);
     public:
         Interlink();
-        Interlink(int);
+        Interlink(int, int timeout);
         void doUpdateStructure(const std::string&);
         void doUpdateModelData(const std::string&);
         void doUpdateMetrics(const std::string&);

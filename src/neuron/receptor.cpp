@@ -64,7 +64,7 @@ void indk::Neuron::Receptor::doUnlock() {
 }
 
 void indk::Neuron::Receptor::doCreateNewScope() {
-    auto pos = new indk::Position(DefaultPos->getXm(), DefaultPos->getDimensionsCount());
+    auto pos = new indk::Position(*DefaultPos);
     Scope = ReferencePos.size();
     ReferencePos.push_back(pos);
 }
