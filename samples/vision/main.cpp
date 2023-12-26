@@ -12,6 +12,7 @@
 #include <indk/system.h>
 #include <indk/neuralnet.h>
 #include "bmp.hpp"
+#include "indk/profiler.h"
 
 uint64_t getTimestampMS() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().
@@ -33,6 +34,15 @@ std::vector<std::vector<float>> doBuildInputVector(std::vector<BMPImage> images)
                 input.back().emplace_back(HSI[1]);
                 input.back().emplace_back(HSI[2]);
             }
+            for (int s = 0; s < 2; s++) {
+                float r = images[i][d+s][0];
+                float g = images[i][d+s][1];
+                float b = images[i][d+s][2];
+                auto rgbn = std::vector<float>({r/255, g/255, b/255});
+                input.back().emplace_back(rgbn[0]);
+                input.back().emplace_back(rgbn[1]);
+                input.back().emplace_back(rgbn[2]);
+            }
         }
     }
     return input;
@@ -52,7 +62,7 @@ int main() {
     constexpr uint8_t TEST_COUNT = 10;
     constexpr uint8_t TEST_ELEMENTS = 10;
     constexpr uint16_t IMAGE_SIZE = 128*128;
-    constexpr char STRUCTURE_PATH[128] = "structures/structure.json";
+    constexpr char STRUCTURE_PATH[128] = "structures/structure2.json";
     constexpr char IMAGES_TEACHING_PATH[128] = "images/learn/";
     constexpr char IMAGES_TESTING_PATH[128] = "images/test/";
 
@@ -61,6 +71,15 @@ int main() {
     auto NN = new indk::NeuralNet(STRUCTURE_PATH);
     NN -> setStateSyncEnabled();
     NN -> doInterlinkInit(4408);
+
+//    indk::Profiler::doAttachCallback(NN, indk::Profiler::EventFlags::EventTick, [](indk::NeuralNet *nn) {
+//        if (nn->getNeuron("N1")->getTime() >= 8192) {
+//            auto p1 = nn->getNeuron("N1")->getReceptor(0)->getPos();
+//            auto p2 = nn->getNeuron("N1")->getReceptor(0)->getPosf();
+//            std::cout << p1->getPositionValue(0) << " " << p1->getPositionValue(1) << " ";
+//            std::cout << p2->getPositionValue(0) << " " << p2->getPositionValue(1) << std::endl;
+//        }
+//    });
 
     // replicate neurons for classification
     for (int i = 2; i <= TEACH_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
@@ -113,8 +132,16 @@ int main() {
             doLog("Recognizing "+std::to_string(b)+"-"+std::to_string(e)+".bmp", T, S, false);
 
             auto patterns = NN -> doComparePatterns(indk::PatternCompareFlags::CompareNormalized);
-            auto r = std::max_element(patterns.begin(), patterns.end());
-            if (std::distance(patterns.begin(), r) == b-1) {
+//            std::vector<float> patterns1, patterns2;
+//            for (int i = 0; i < patterns.size(); i++) {
+//                if (!(i%2))
+//                    patterns1.push_back(patterns[i]);
+//                else
+//                    patterns2.push_back(patterns[i]);
+//            }
+            auto r1 = std::max_element(patterns.begin(), patterns.end());
+//            auto r2 = std::max_element(patterns2.begin(), patterns2.end());
+            if (std::distance(patterns.begin(), r1) == b-1) {
                 std::cout << "[RECOGNIZED]" << std::endl;
                 rcount++;
             } else {
