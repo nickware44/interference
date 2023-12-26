@@ -39,6 +39,7 @@ http://www1.cs.columbia.edu/CAVE/software/softlib/coil-100.php
 - [Test](samples/test) - benchmark
 - [Vision](samples/vision) - example of image recognition system
 - [Multimodal](samples/multimodal) - example of multimodal (image+text) data processing
+- [Lang](samples/lang) - example of natural language processing (NLP)
 
 ----------------------------------------------------------------
 ### HOW TO BUILD
