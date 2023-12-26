@@ -75,9 +75,12 @@ namespace indk {
         indk::Neuron::PatternDefinition doComparePattern(int ProcessingMethod = indk::ScopeProcessingMethods::ProcessMin) const;
         void doLinkOutput(const std::string&);
         void doClearOutputLinks();
+        void doClearEntries();
         void doReplaceEntryName(const std::string&, const std::string&);
         void doReserveSignalBuffer(int64_t);
         void setTime(int64_t);
+        void setEntries(const std::vector<std::string>& inputs);
+        void setLambda(float);
         void setk1(float);
         void setk2(float);
         void setk3(float);
@@ -121,6 +124,7 @@ namespace indk {
         void doPrepare();
         void doFinalize();
         void doReserveSignalBuffer(uint64_t);
+        void setLambda(float);
         void setk1(float);
         void setk2(float);
         indk::Neuron::Synapse* getSynapse(int64_t) const;

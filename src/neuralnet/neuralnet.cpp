@@ -21,6 +21,11 @@ indk::NeuralNet::NeuralNet() {
     StateSyncEnabled = false;
     LastUsedComputeBackend = -1;
     InterlinkService = nullptr;
+
+    if (indk::System::getVerbosityLevel() > 1)
+        std::cout << "Using default compute backend." << std::endl;
+
+    indk::System::setComputeBackend(indk::System::ComputeBackends::Default);
 }
 
 indk::NeuralNet::NeuralNet(const std::string &path) {
@@ -30,10 +35,15 @@ indk::NeuralNet::NeuralNet(const std::string &path) {
     InterlinkService = nullptr;
     std::ifstream filestream(path);
     setStructure(filestream);
+
+    if (indk::System::getVerbosityLevel() > 1)
+        std::cout << "Using default compute backend." << std::endl;
+
+    indk::System::setComputeBackend(indk::System::ComputeBackends::Default);
 }
 
-void indk::NeuralNet::doInterlinkInit(int port) {
-    InterlinkService = new indk::Interlink(port);
+void indk::NeuralNet::doInterlinkInit(int port, int timeout) {
+    InterlinkService = new indk::Interlink(port, timeout);
 
     indk::Profiler::doAttachCallback(this, indk::Profiler::EventFlags::EventTick, [this](indk::NeuralNet *nn) {
         auto neurons = getNeurons();
@@ -46,7 +56,7 @@ void indk::NeuralNet::doInterlinkInit(int port) {
     });
 
     indk::Profiler::doAttachCallback(this, indk::Profiler::EventFlags::EventProcessed, [this](indk::NeuralNet *nn) {
-        doInterlinkAppUpdateData();
+        doInterlinkSyncData();
     });
 
     if (InterlinkService->isInterlinked()) {
@@ -54,7 +64,12 @@ void indk::NeuralNet::doInterlinkInit(int port) {
     }
 }
 
-void indk::NeuralNet::doInterlinkAppUpdateData() {
+void indk::NeuralNet::doInterlinkSyncStructure() {
+    if (!InterlinkService || InterlinkService && !InterlinkService->isInterlinked()) return;
+    InterlinkService -> doUpdateStructure(getStructure());
+}
+
+void indk::NeuralNet::doInterlinkSyncData() {
     if (!InterlinkService || InterlinkService && !InterlinkService->isInterlinked()) return;
     json j, jm;
     uint64_t in = 0;
@@ -66,8 +81,12 @@ void indk::NeuralNet::doInterlinkAppUpdateData() {
 
         jnm["name"] = n.second->getName();
         jnm["total_time"] = n.second->getTime();
-        for (const auto& o: InterlinkDataBuffer[in]) {
-            jnm["output_signal"].push_back(o);
+        jnm["output_signal"] = json::parse("[]");
+
+        if (in < InterlinkDataBuffer.size()) {
+            for (const auto& o: InterlinkDataBuffer[in]) {
+                jnm["output_signal"].push_back(o);
+            }
         }
         jm.push_back(jnm);
 
@@ -144,6 +163,19 @@ void indk::NeuralNet::doCreateNewScope() {
 
 void indk::NeuralNet::doChangeScope(uint64_t scope) {
     for (const auto& N: Neurons) N.second -> doChangeScope(scope);
+}
+
+void indk::NeuralNet::doAddNewOutput(const std::string& name) {
+    Outputs.push_back(name);
+}
+
+void indk::NeuralNet::doIncludeNeuronToEnsemble(const std::string& name, const std::string& ensemble) {
+    auto en = Ensembles.find(ensemble);
+    if (en != Ensembles.end()) {
+        en -> second.push_back(name);
+    } else {
+        Ensembles.insert(std::make_pair(name, std::vector<std::string>({ensemble})));
+    }
 }
 
 /**
@@ -336,12 +368,6 @@ void indk::NeuralNet::doStructurePrepare() {
  * @return Output signals.
  */
 std::vector<float> indk::NeuralNet::doSignalTransfer(const std::vector<std::vector<float>>& Xx, const std::string& ensemble) {
-    if (indk::System::getComputeBackendKind() == -1) {
-        if (indk::System::getVerbosityLevel() > 0)
-            std::cerr << "Switching to default compute backend." << std::endl;
-
-        indk::System::setComputeBackend(indk::System::ComputeBackends::Default);
-    }
     std::vector<void*> v;
     std::vector<std::string> nsync;
     EntryList eentries;
@@ -431,14 +457,14 @@ void indk::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<float>
  * @param Xx Input data vector that contain signals for learning.
  * @return Output signals.
  */
-std::vector<float> indk::NeuralNet::doLearn(const std::vector<std::vector<float>>& Xx) {
+std::vector<float> indk::NeuralNet::doLearn(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, bool prepare) {
     if (InterlinkService && InterlinkService->isInterlinked()) {
         InterlinkService -> doUpdateStructure(getStructure());
     }
+    t = 0;
     setLearned(false);
-    doCreateNewScope();
-    doPrepare();
-    return doSignalTransfer(Xx);
+    if (prepare) doPrepare();
+    return doSignalTransfer(Xx, ensemble);
 }
 
 /**
@@ -446,9 +472,10 @@ std::vector<float> indk::NeuralNet::doLearn(const std::vector<std::vector<float>
  * @param Xx Input data vector that contain signals for recognizing.
  * @return Output signals.
  */
-std::vector<float> indk::NeuralNet::doRecognise(const std::vector<std::vector<float>>& Xx, const std::string& ensemble) {
+std::vector<float> indk::NeuralNet::doRecognise(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, bool prepare) {
     setLearned(true);
-    doPrepare();
+    t = 0;
+    if (prepare) doPrepare();
     return doSignalTransfer(Xx, ensemble);
 }
 
@@ -457,11 +484,11 @@ std::vector<float> indk::NeuralNet::doRecognise(const std::vector<std::vector<fl
  * @param Xx Input data vector that contain signals for learning.
  * @param Callback Callback function for output signals.
  */
-void indk::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<float>)>& Callback) {
+void indk::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, bool prepare, const std::function<void(std::vector<float>)>& Callback) {
     setLearned(false);
-    doCreateNewScope();
-    doPrepare();
-    doSignalTransferAsync(Xx, "", Callback);
+    t = 0;
+    if (prepare) doPrepare();
+    doSignalTransferAsync(Xx, ensemble, Callback);
 }
 
 /**
@@ -469,9 +496,10 @@ void indk::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, co
  * @param Xx Input data vector that contain signals for recognizing.
  * @param Callback Callback function for output signals.
  */
-void indk::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, const std::function<void(std::vector<float>)>& Callback) {
+void indk::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx, const std::string& ensemble, bool prepare, const std::function<void(std::vector<float>)>& Callback) {
     setLearned(true);
-    doPrepare();
+    t = 0;
+    if (prepare) doPrepare();
     doSignalTransferAsync(Xx, ensemble, Callback);
 }
 
@@ -489,10 +517,50 @@ std::vector<float> indk::NeuralNet::doSignalReceive() {
 }
 
 /**
+ * Creates full copy of neuron.
+ * @param from Source neuron name.
+ * @param to Name of new neuron.
+ * @param integrate Link neuron to the same elements as the source neuron.
+ */
+void indk::NeuralNet::doReplicateNeuron(const std::string& from, const std::string& to, bool integrate) {
+    auto n = Neurons.find(from);
+    if (n == Neurons.end()) return;
+    if (Neurons.find(to) != Neurons.end()) return;
+
+    auto nnew = new indk::Neuron(*n->second);
+    nnew -> setName(to);
+    Neurons.insert(std::make_pair(to, nnew));
+
+    if (integrate) {
+        auto entries = nnew -> getEntries();
+        for (auto &e: entries) {
+            std::string ename = e;
+            auto ne = doFindEntry(ename);
+            if (ne != -1) {
+                Entries[ne].second.push_back(to);
+            }
+        }
+    } else {
+        nnew ->  doClearEntries();
+    }
+}
+
+/**
+ * Delete the neuron.
+ * @param name Name of the neuron.
+ */
+void indk::NeuralNet::doDeleteNeuron(const std::string& name) {
+    auto n = Neurons.find(name);
+    if (n == Neurons.end()) return;
+    delete n->second;
+    Neurons.erase(n);
+}
+
+/**
  * Creates full copy of group of neurons.
- * @param From Source ensemble name.
- * @param To Name of new ensemble.
- * @param CopyEntries Copy entries during replication. So, if neuron `A1N1` (ensemble `A1`) has an entry `A1E1`
+ * @param from Source ensemble name.
+ * @param to Name of new ensemble.
+ * @param entries Copy entries during replication. So, if neuron `A1N1` (ensemble `A1`) has an entry `A1E1`
  * and you replicating to ensemble `A2`, a new entry `A2E1` will be added.
  */
 void indk::NeuralNet::doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries) {
@@ -545,7 +613,7 @@ void indk::NeuralNet::doReplicateEnsemble(const std::string& From, const std::st
                     } else if (CopyEntries && r == newnames.end()) {
                         std::vector<std::string> elinks;
                         elinks.push_back(nname);
-                        j["entries"].push_back( ename);
+                        j["entries"].push_back(ename);
                         Entries.emplace_back(ename, elinks);
                     }
                 }

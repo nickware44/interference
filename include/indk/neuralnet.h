@@ -56,25 +56,31 @@ namespace indk {
 
         indk::Interlink *InterlinkService;
         std::vector<std::vector<std::string>> InterlinkDataBuffer;
-        void doInterlinkAppUpdateData();
+
     public:
         NeuralNet();
         explicit NeuralNet(const std::string &path);
-        void doInterlinkInit(int);
+        void doInterlinkInit(int port, int timeout = 5);
+        void doInterlinkSyncStructure();
+        void doInterlinkSyncData();
         std::vector<float> doComparePatterns(int CompareFlag = indk::PatternCompareFlags::CompareDefault,
                                              int ProcessingMethod = indk::ScopeProcessingMethods::ProcessMin);
         void doCreateNewScope();
         void doChangeScope(uint64_t);
+        void doAddNewOutput(const std::string&);
+        void doIncludeNeuronToEnsemble(const std::string&, const std::string&);
         void doReset();
         void doPrepare();
         void doStructurePrepare();
         std::vector<float> doSignalTransfer(const std::vector<std::vector<float>>&, const std::string& ensemble = "");
         void doSignalTransferAsync(const std::vector<std::vector<float>>&, const std::string& ensemble = "", const std::function<void(std::vector<float>)>& Callback = nullptr);
-        std::vector<float> doLearn(const std::vector<std::vector<float>>&);
-        std::vector<float> doRecognise(const std::vector<std::vector<float>>&, const std::string& ensemble = "");
-        void doLearnAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr);
-        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::string& ensemble, const std::function<void(std::vector<float>)>& Callback = nullptr);
+        std::vector<float> doLearn(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true);
+        std::vector<float> doRecognise(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true);
+        void doLearnAsync(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true, const std::function<void(std::vector<float>)>& Callback = nullptr);
+        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true, const std::function<void(std::vector<float>)>& Callback = nullptr);
         std::vector<float> doSignalReceive();
+        void doReplicateNeuron(const std::string& from, const std::string& to, bool integrate);
+        void doDeleteNeuron(const std::string& name);
         void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);
         void doReserveSignalBuffer(int64_t L);
         void setStructure(std::ifstream&);

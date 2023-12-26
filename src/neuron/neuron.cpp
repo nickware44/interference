@@ -288,6 +288,10 @@ void indk::Neuron::doClearOutputLinks() {
     Links.clear();
 }
 
+void indk::Neuron::doClearEntries() {
+    Entries.clear();
+}
+
 /**
  * Relink neuron by replacing entry name.
  * @param Original Name of entry to rename.
@@ -318,6 +322,20 @@ void indk::Neuron::doReserveSignalBuffer(int64_t L) {
  */
 void indk::Neuron::setTime(int64_t ts) {
     t.store(ts);
+}
+
+void indk::Neuron::setEntries(const std::vector<std::string>& inputs) {
+    for (const auto& e: Entries)
+        delete e.second;
+
+    for (const auto &i: inputs) {
+        auto *E = new Entry();
+        Entries.emplace_back(i, E);
+    }
+}
+
+void indk::Neuron::setLambda(float _l) {
+    for (auto E: Entries) E.second -> setLambda(_l);
 }
 
 /**
