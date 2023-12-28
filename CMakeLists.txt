@@ -14,6 +14,7 @@ set(TARGET_SOURCE
         src/profiler.cpp include/indk//profiler.h)
 
 add_library(objlib OBJECT ${TARGET_SOURCE})
+set_property(TARGET objlib PROPERTY POSITION_INDEPENDENT_CODE ON)
 
 function(build_indk LIBTYPE)
     message("Building ${LIBTYPE} variant")
@@ -60,9 +61,14 @@ endfunction()
 build_indk(shared)
 build_indk(static)
 
-install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/dist/lib NAMELINK_COMPONENT)
+if (WIN32)
+    install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION ${CMAKE_SOURCE_DIR}/dist/lib NAMELINK_COMPONENT)
+else()
+    install(TARGETS ${PROJECT_NAME} LIBRARY DESTINATION ${CMAKE_SOURCE_DIR}/dist/lib NAMELINK_COMPONENT)
+endif()
+
 install(TARGETS ${PROJECT_NAME}_static ARCHIVE DESTINATION ${CMAKE_SOURCE_DIR}/dist/lib NAMELINK_COMPONENT)
-install(DIRECTORY include DESTINATION ${CMAKE_SOURCE_DIR}/dist/)
+install(DIRECTORY include DESTINATION ${CMAKE_SOURCE_DIR}/dist)
 
 add_subdirectory(samples/test)
 add_subdirectory(samples/vision)
