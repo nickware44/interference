@@ -98,17 +98,11 @@ int doProcessTextSequence(indk::NeuralNet *NN,
                        const std::vector<std::vector<std::string>>& destinations,
                        std::string sequence,
                        int &space) {
-    NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space), false);
+    NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space), true);
     auto n = NN -> getNeuron("_SPACE_"+std::to_string(space));
     if (!n) return -1;
 
     // creating new space in the context
-    n -> setEntries({"SPACE_E1", "SPACE_E2", "SPACE_E3", "SPACE_E4", "SPACE_E5"});
-    n -> doCreateNewSynapse("SPACE_E1", {0,  0, 0}, 1000, 0, 0);
-    n -> doCreateNewSynapse("SPACE_E2", {0, 10, 0}, 1000, 0, 0);
-    n -> doCreateNewSynapse("SPACE_E3", {7,  0, 0}, 1000, 0, 0);
-    n -> doCreateNewSynapse("SPACE_E4", {3, 10, 0}, 1000, 0, 0);
-    n -> doCreateNewSynapse("SPACE_E5", {10, 5, 0}, 1000, 0, 0);
     n -> setLambda(1);
     std::vector<std::vector<float>> related;
 
@@ -124,7 +118,7 @@ int doProcessTextSequence(indk::NeuralNet *NN,
             for (int i = 0; i < definitions.size(); i++)
                 data.back().push_back(ch);
         }
-        auto Y = NN -> doRecognise(data);
+        auto Y = NN -> doRecognise(data, true, {"E1", "E2", "E3", "E4", "E5"});
         auto patterns = NN -> doComparePatterns();
 
         for (int i = 0; i < patterns.size(); i++) {
@@ -135,9 +129,11 @@ int doProcessTextSequence(indk::NeuralNet *NN,
     }
 
     n -> doReset();
+    indk::Position *pos = nullptr;
     for (auto & r : related) {
         n -> doCreateNewScope();
         n -> doPrepare();
+        if (pos) n -> getReceptor(0) -> getPos() -> setPosition(pos);
         for (int j = 0; j < definitions.size(); j++) {
             if (j == (int)r[1]) {
                 n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), r[0], n->getTime());
@@ -145,6 +141,7 @@ int doProcessTextSequence(indk::NeuralNet *NN,
                 n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), 0, n->getTime());
             }
         }
+        pos = n -> getReceptor(0) -> getPos();
     }
     n -> doFinalize();
 
@@ -209,7 +206,7 @@ int main() {
 
     // load neural network structure from file
     auto NN = new indk::NeuralNet(STRUCTURE_PATH);
-//    NN -> doInterlinkInit(4408, 2);
+    NN -> doInterlinkInit(4408, 2);
 //    indk::System::setVerbosityLevel(2);
     NN -> doPrepare();
 
@@ -250,8 +247,8 @@ int main() {
     doProcessTextSequence(NN, definitions, destinations, "Are the other aliens coming for the cat?", space);
     std::cout << std::endl;
 
-//    NN -> doInterlinkSyncStructure();
-//    NN -> doInterlinkSyncData();
+    NN -> doInterlinkSyncStructure();
+    NN -> doInterlinkSyncData();
 
     T = getTimestampMS() - T;
     std::cout << "Done in " << T << " ms" << std::endl;

@@ -5,7 +5,12 @@
         "E2",
         "E3",
         "E4",
-        "E5"
+        "E5",
+        "SPACE_E1",
+        "SPACE_E2",
+        "SPACE_E3",
+        "SPACE_E4",
+        "SPACE_E5"
     ],
     "name": "lang model",
     "neurons": [
@@ -376,7 +381,12 @@
         {
             "dimensions": 3,
             "ensemble": "",
-            "input_signals": [],
+            "input_signals": [
+              "SPACE_E1",
+              "SPACE_E2",
+              "SPACE_E3",
+              "SPACE_E4",
+              "SPACE_E5"],
             "latency": 0,
             "name": "_SPACE_INIT",
             "receptors": [
@@ -392,7 +402,36 @@
                 }
             ],
             "size": 10,
-            "synapses": []
+            "synapses": [{
+              "entry": 0,
+              "k1": 1000,
+              "neurotransmitter": "activation",
+              "position": [0, 0, 0]
+            },
+            {
+              "entry": 1,
+              "k1": 1000,
+              "neurotransmitter": "activation",
+              "position": [0, 10, 0]
+            },
+            {
+              "entry": 2,
+              "k1": 1000,
+              "neurotransmitter": "activation",
+              "position": [7,  0, 0]
+            },
+            {
+              "entry": 3,
+              "k1": 1000,
+              "neurotransmitter": "activation",
+              "position": [3, 10, 0]
+            },
+            {
+              "entry": 4,
+              "k1": 1000,
+              "neurotransmitter": "activation",
+              "position": [10, 5, 0]
+            }]
         }
     ],
     "output_signals": [],
