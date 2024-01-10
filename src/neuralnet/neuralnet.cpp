@@ -128,11 +128,23 @@ int64_t indk::NeuralNet::doFindEntry(const std::string& ename) {
     return std::distance(Entries.begin(), ne);
 }
 
+std::vector<float> indk::NeuralNet::doComparePatterns(int CompareFlag, int ProcessingMethod) {
+    return doComparePatterns(std::vector<std::string>(), CompareFlag, ProcessingMethod);
+}
+
+std::vector<float> indk::NeuralNet::doComparePatterns(const std::string& ename, int CompareFlag, int ProcessingMethod) {
+    auto en = Ensembles.find(ename);
+    if (en != Ensembles.end()) {
+        return doComparePatterns(en->second, CompareFlag, ProcessingMethod);
+    }
+    return {};
+}
+
 /**
  * Compare neuron patterns (learning and recognition patterns) for all output neurons.
  * @return Vector of pattern difference values for each output neuron.
  */
-std::vector<float> indk::NeuralNet::doComparePatterns(int CompareFlag, int ProcessingMethod, std::vector<std::string> nnames) {
+std::vector<float> indk::NeuralNet::doComparePatterns(std::vector<std::string> nnames, int CompareFlag, int ProcessingMethod) {
     std::vector<float> PDiffR, PDiff;
 
     if (nnames.empty()) nnames = Outputs;
@@ -176,7 +188,7 @@ void indk::NeuralNet::doIncludeNeuronToEnsemble(const std::string& name, const s
     if (en != Ensembles.end()) {
         en -> second.push_back(name);
     } else {
-        Ensembles.insert(std::make_pair(name, std::vector<std::string>({ensemble})));
+        Ensembles.insert(std::make_pair(ensemble, std::vector<std::string>({name})));
     }
 }
 
@@ -536,6 +548,18 @@ void indk::NeuralNet::doReplicateNeuron(const std::string& from, const std::stri
                 Entries[ne].second.push_back(to);
             }
         }
+
+//        bool found = false;
+//        for (auto& e: Ensembles) {
+//            for (const auto &en: e.second) {
+//                if (en == from) {
+//                    e.second.push_back(to);
+//                    found = true;
+//                    break;
+//                }
+//            }
+//            if (found) break;
+//        }
     } else {
         nnew ->  doClearEntries();
     }

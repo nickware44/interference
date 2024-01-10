@@ -404,31 +404,31 @@
             "size": 10,
             "synapses": [{
               "entry": 0,
-              "k1": 1000,
+              "k1": 100,
               "neurotransmitter": "activation",
               "position": [0, 0, 0]
             },
             {
               "entry": 1,
-              "k1": 1000,
+              "k1": 100,
               "neurotransmitter": "activation",
               "position": [0, 10, 0]
             },
             {
               "entry": 2,
-              "k1": 1000,
+              "k1": 100,
               "neurotransmitter": "activation",
               "position": [7,  0, 0]
             },
             {
               "entry": 3,
-              "k1": 1000,
+              "k1": 100,
               "neurotransmitter": "activation",
               "position": [3, 10, 0]
             },
             {
               "entry": 4,
-              "k1": 1000,
+              "k1": 100,
               "neurotransmitter": "activation",
               "position": [10, 5, 0]
             }]
