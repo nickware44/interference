@@ -3,7 +3,7 @@ black;PROPERTY
 gray;PROPERTY
 white;PROPERTY
 orange;PROPERTY
-wooden;PROPERTY
+blue;PROPERTY
 wooden;PROPERTY
 cat;OBJECT
 table;OBJECT
@@ -11,6 +11,8 @@ chair;OBJECT
 animal;OBJECT
 wood;OBJECT
 monitor;OBJECT
+window;OBJECT
+light;OBJECT
 human;OBJECT
 alien;OBJECT
 aliens;OBJECT
@@ -18,7 +20,9 @@ sit;PROCESS
 siting;PROCESS
 lying;PROCESS
 come;PROCESS
+falls;PROCESS
 in;PLACE
 on;PLACE
 under;PLACE
 at;PLACE
+from;PLACE

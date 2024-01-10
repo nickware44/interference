@@ -130,56 +130,101 @@ int doProcessTextSequence(indk::NeuralNet *NN,
 
     n -> doReset();
     indk::Position *pos = nullptr;
-    for (auto & r : related) {
-        n -> doCreateNewScope();
-        n -> doPrepare();
-        if (pos) n -> getReceptor(0) -> getPos() -> setPosition(pos);
-        for (int j = 0; j < definitions.size(); j++) {
-            if (j == (int)r[1]) {
-                n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), r[0], n->getTime());
-            } else {
-                n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), 0, n->getTime());
+    int nstart = 0;
+
+    while (nstart < related.size()) {
+        pos = nullptr;
+
+        std::cout << "nstart " << nstart << std::endl;
+        for (int r = nstart; r < related.size(); r++) {
+//            std::cout << r << std::endl;
+            n -> doCreateNewScope();
+            n -> doPrepare();
+            if (pos) n -> getReceptor(0) -> getPos() -> setPosition(pos);
+            for (int j = 0; j < definitions.size(); j++) {
+                if (j == (int)related[r][1]) {
+                    n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), related[r][0], n->getTime());
+                } else {
+                    n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), 0, n->getTime());
+                }
             }
+            pos = n -> getReceptor(0) -> getPos();
         }
-        pos = n -> getReceptor(0) -> getPos();
+        nstart++;
     }
+
+//    for (auto & r : related) {
+//        n -> doCreateNewScope();
+//        n -> doPrepare();
+//        if (pos) n -> getReceptor(0) -> getPos() -> setPosition(pos);
+//        for (int j = 0; j < definitions.size(); j++) {
+//            if (j == (int)r[1]) {
+//                n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), r[0], n->getTime());
+//            } else {
+//                n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), 0, n->getTime());
+//            }
+//        }
+//        pos = n -> getReceptor(0) -> getPos();
+//    }
     n -> doFinalize();
 
     // check info in the context if this is a question
     if (qflag) {
         int found = 0;
         auto vectors = n -> getReceptor(0) -> getReferencePosScopes();
-        std::vector<float> marks;
-        for (auto v: vectors) {
-            auto d = indk::Position::getDistance(*v, indk::Position(100, 3));
-            marks.push_back(d);
-        }
+        std::vector<std::vector<float>> marks;
+//        for (auto v: vectors) {
+//            auto d = indk::Position::getDistance(*v, indk::Position(100, 3));
+//            marks.push_back(d);
+//        }
 
-        for (int s = 1; s < space; s++) {
-            auto sn = NN -> getNeuron("_SPACE_"+std::to_string(s));
-            if (!sn) return -1;
-            int mfound = 0;
-
-            auto svectors = sn -> getReceptor(0) -> getReferencePosScopes();
-            for (auto sv: svectors) {
-                auto d = indk::Position::getDistance(*sv, indk::Position(100, 3));
-                if (marks.size() > mfound) {
-                    if (std::fabs(marks[mfound]-d) < 10e-4) {
-                        mfound++;
-                    } else if (std::fabs(marks[0]-d) < 10e-4) {
-                        mfound = 1;
-                    } else {
-                        mfound = 0;
-                    }
-                }
-
-                if (mfound == marks.size()) {
-                    found = 1;
-                    break;
+        for (int r = 0; r < related.size(); r++) {
+            marks.emplace_back();
+            for (int j = 0; j < definitions.size(); j++) {
+                if (j == (int)related[r][1]) {
+                    marks.back().push_back(related[r][0]);
+                } else {
+                    marks.back().push_back(0);
                 }
             }
-            if (found) break;
         }
+        std::cout << marks.size() << std::endl;
+
+        NN -> doRecognise(marks, true, {"SPACE_E1", "SPACE_E2", "SPACE_E3", "SPACE_E4", "SPACE_E5"});
+        auto patterns = NN -> doComparePatterns(indk::PatternCompareFlags::CompareDefault,
+                                                         indk::ScopeProcessingMethods::ProcessMin,
+                                                                  {"_SPACE_1", "_SPACE_2", "_SPACE_3", "_SPACE_4", "_SPACE_5", "_SPACE_6"});
+        for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
+        auto r = std::min_element(patterns.begin(), patterns.end());
+        std::cout << *r << std::endl;
+        if (*r == 0) found = 1;
+
+
+//        for (int s = 1; s < space; s++) {
+//            auto sn = NN -> getNeuron("_SPACE_"+std::to_string(s));
+//            if (!sn) return -1;
+//            int mfound = 0;
+//
+//            auto svectors = sn -> getReceptor(0) -> getReferencePosScopes();
+//            for (auto sv: svectors) {
+//                auto d = indk::Position::getDistance(*sv, indk::Position(100, 3));
+//                if (marks.size() > mfound) {
+//                    if (std::fabs(marks[mfound]-d) < 10e-4) {
+//                        mfound++;
+//                    } else if (std::fabs(marks[0]-d) < 10e-4) {
+//                        mfound = 1;
+//                    } else {
+//                        mfound = 0;
+//                    }
+//                }
+//
+//                if (mfound == marks.size()) {
+//                    found = 1;
+//                    break;
+//                }
+//            }
+//            if (found) break;
+//        }
 
         std::cout << std::setw(50) << std::left << sequence;
         if (found)

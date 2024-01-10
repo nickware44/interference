@@ -132,9 +132,11 @@ int64_t indk::NeuralNet::doFindEntry(const std::string& ename) {
  * Compare neuron patterns (learning and recognition patterns) for all output neurons.
  * @return Vector of pattern difference values for each output neuron.
  */
-std::vector<float> indk::NeuralNet::doComparePatterns(int CompareFlag, int ProcessingMethod) {
+std::vector<float> indk::NeuralNet::doComparePatterns(int CompareFlag, int ProcessingMethod, std::vector<std::string> nnames) {
     std::vector<float> PDiffR, PDiff;
-    for (const auto& O: Outputs) {
+
+    if (nnames.empty()) nnames = Outputs;
+    for (const auto& O: nnames) {
         auto n = Neurons.find(O);
         if (n == Neurons.end()) break;
         auto P = n -> second -> doComparePattern(ProcessingMethod);

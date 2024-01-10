@@ -64,7 +64,8 @@ namespace indk {
         void doInterlinkSyncStructure();
         void doInterlinkSyncData();
         std::vector<float> doComparePatterns(int CompareFlag = indk::PatternCompareFlags::CompareDefault,
-                                             int ProcessingMethod = indk::ScopeProcessingMethods::ProcessMin);
+                                             int ProcessingMethod = indk::ScopeProcessingMethods::ProcessMin,
+                                             std::vector<std::string> nnames = {});
         void doCreateNewScope();
         void doChangeScope(uint64_t);
         void doAddNewOutput(const std::string&);
