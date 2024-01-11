@@ -15,7 +15,7 @@
 #include <indk/system.h>
 #include <indk/neuralnet.h>
 #include <fstream>
-#include "indk/profiler.h"
+#include "bmp.hpp"
 
 uint64_t getTimestampMS() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().
@@ -51,6 +51,26 @@ auto doLoadVocabulary(const std::string& path) {
     }
 
     return data;
+}
+
+std::vector<std::vector<float>> doBuildImageInputVector(std::vector<BMPImage> images) {
+    std::vector<std::vector<float>> input;
+    for (int d = 0; d < images[0].size(); d+=2) {
+        input.emplace_back();
+        for (int i = 0; i < images.size(); i++) {
+            for (int s = 0; s < 2; s++) {
+                float r = images[i][d+s][0];
+                float g = images[i][d+s][1];
+                float b = images[i][d+s][2];
+                auto rgbn = std::vector<float>({r/255, g/255, b/255});
+                auto HSI = RGB2HSI(rgbn[0], rgbn[1], rgbn[2]);
+                input.back().emplace_back(HSI[0]/(2*M_PI));
+                input.back().emplace_back(HSI[1]);
+                input.back().emplace_back(HSI[2]);
+            }
+        }
+    }
+    return input;
 }
 
 auto doLearnVocabulary(indk::NeuralNet *NN,
@@ -91,6 +111,35 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
         n -> doFinalize();
     }
     return destinations;
+}
+
+auto doLearnVisual(indk::NeuralNet *NN,
+                   const std::array<std::string, 5>& definitions,
+                   const std::vector<std::string>& paths) {
+    for (int p = 0; p < paths.size(); p++) {
+        auto image = doReadBMP(paths[p]);
+        auto input = doBuildImageInputVector({image});
+        auto destination = "NV-"+std::to_string(p+2);
+        auto n = NN -> doReplicateNeuron("NV-1", destination, true);
+
+        for (auto& in: input) {
+            n -> doSignalSendEntry("EV-1", in[0], n->getTime());
+            n -> doSignalSendEntry("EV-2", in[1], n->getTime());
+            n -> doSignalSendEntry("EV-3", in[2], n->getTime());
+            n -> doSignalSendEntry("EV-4", in[3], n->getTime());
+            n -> doSignalSendEntry("EV-5", in[4], n->getTime());
+            n -> doSignalSendEntry("EV-6", in[5], n->getTime());
+        }
+        n -> doFinalize();
+
+//        images.push_back(image);
+//        if (image.size() != IMAGE_SIZE) {
+//            std::cout << "Error loading image " << b << ".bmp" << std::endl;
+//            return 1;
+//        }
+    }
+//    auto input = doBuildImageInputVector(images);
+//    NN -> doLearn(input);
 }
 
 int doProcessTextSequence(indk::NeuralNet *NN,
@@ -164,11 +213,8 @@ int doProcessTextSequence(indk::NeuralNet *NN,
         for (int r = 0; r < related.size(); r++) {
             marks.emplace_back();
             for (int j = 0; j < definitions.size(); j++) {
-                if (j == (int)related[r][1]) {
-                    marks.back().push_back(related[r][0]);
-                } else {
-                    marks.back().push_back(0);
-                }
+                if (j == (int)related[r][1]) marks.back().push_back(related[r][0]);
+                else marks.back().push_back(0);
             }
         }
 
@@ -176,7 +222,7 @@ int doProcessTextSequence(indk::NeuralNet *NN,
         auto patterns = NN -> doComparePatterns( "CONTEXT");
 //        for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
         auto r = std::min_element(patterns.begin(), patterns.end());
-        if (*r < 10e-4) found = 1;
+        if (r != patterns.end() && *r < 10e-4) found = 1;
 
         std::cout << std::setw(50) << std::left << sequence;
         if (found)
@@ -184,7 +230,6 @@ int doProcessTextSequence(indk::NeuralNet *NN,
         else
             std::cout << " [ NO  ]" << std::endl;
 
-        NN -> doDeleteNeuron("_SPACE_"+std::to_string(space));
         return found;
     }
 
@@ -196,6 +241,7 @@ int doProcessTextSequence(indk::NeuralNet *NN,
 int main() {
     constexpr char STRUCTURE_PATH[128] = "structures/structure.json";
     constexpr char VOCAB_PATH[128] = "texts/vocab.txt";
+    constexpr char IMAGES_PATH[128] = "images/";
     std::array<std::string, 5> definitions = {"STATE", "OBJECT", "PROCESS", "PLACE", "PROPERTY"};
 
     // load vocabulary from text file
@@ -203,7 +249,7 @@ int main() {
 
     // load neural network structure from file
     auto NN = new indk::NeuralNet(STRUCTURE_PATH);
-    NN -> doInterlinkInit(4408, 2);
+    NN -> doInterlinkInit(4408, 1);
 //    indk::System::setVerbosityLevel(2);
     NN -> doPrepare();
 
@@ -216,6 +262,7 @@ int main() {
     int space = 1;
     auto T = getTimestampMS();
     auto destinations = doLearnVocabulary(NN, definitions, vocab);
+    doLearnVisual(NN, definitions, {"images/1.bmp", "images/2.bmp"});
 
     // creating context
     doProcessTextSequence(NN, definitions, destinations, "The cat siting on the table.", space);

@@ -10,7 +10,13 @@
         "SPACE_E2",
         "SPACE_E3",
         "SPACE_E4",
-        "SPACE_E5"
+        "SPACE_E5",
+        "EV-1",
+        "EV-2",
+        "EV-3",
+        "EV-4",
+        "EV-5",
+        "EV-6"
     ],
     "name": "lang model",
     "neurons": [
@@ -173,6 +179,7 @@
             "receptors": [
                 {
                     "count": 2,
+                    "data_scopes": [],
                     "position": [
                         50,
                         50,
@@ -202,6 +209,45 @@
             "dimensions": 3,
             "ensemble": "",
             "input_signals": [
+                "EV-1",
+                "EV-2",
+                "EV-3",
+                "EV-4",
+                "EV-5",
+                "EV-6"
+            ],
+            "latency": 0,
+            "name": "NV-1",
+            "size": 1200,
+            "synapses": [
+                {
+                    "type": "cluster",
+                    "position": [600, 600, 0],
+                    "radius": 300,
+                    "neurotransmitter": "activation",
+                    "k1": 11
+                }
+            ],
+
+            "receptors": [
+                {
+                    "type": "cluster",
+                    "position": [600, 600, 0],
+                    "count": 5,
+                    "radius": 50
+                },
+                {
+                    "type": "cluster",
+                    "position": [600, 600, 0],
+                    "count": 3,
+                    "radius": 200
+                }
+            ]
+        },
+        {
+            "dimensions": 3,
+            "ensemble": "",
+            "input_signals": [
                 "N2"
             ],
             "latency": 1,
@@ -209,6 +255,7 @@
             "receptors": [
                 {
                     "count": 10,
+                    "data_scopes": [],
                     "position": [
                         40,
                         40,
@@ -245,6 +292,7 @@
             "receptors": [
                 {
                     "count": 10,
+                    "data_scopes": [],
                     "position": [
                         40,
                         40,
@@ -281,6 +329,7 @@
             "receptors": [
                 {
                     "count": 10,
+                    "data_scopes": [],
                     "position": [
                         40,
                         40,
@@ -317,6 +366,7 @@
             "receptors": [
                 {
                     "count": 10,
+                    "data_scopes": [],
                     "position": [
                         40,
                         40,
@@ -353,6 +403,7 @@
             "receptors": [
                 {
                     "count": 10,
+                    "data_scopes": [],
                     "position": [
                         40,
                         40,
@@ -382,16 +433,18 @@
             "dimensions": 3,
             "ensemble": "",
             "input_signals": [
-              "SPACE_E1",
-              "SPACE_E2",
-              "SPACE_E3",
-              "SPACE_E4",
-              "SPACE_E5"],
+                "SPACE_E1",
+                "SPACE_E2",
+                "SPACE_E3",
+                "SPACE_E4",
+                "SPACE_E5"
+            ],
             "latency": 0,
             "name": "_SPACE_INIT",
             "receptors": [
                 {
                     "count": 10,
+                    "data_scopes": [],
                     "position": [
                         5,
                         5,
@@ -402,38 +455,70 @@
                 }
             ],
             "size": 10,
-            "synapses": [{
-              "entry": 0,
-              "k1": 100,
-              "neurotransmitter": "activation",
-              "position": [0, 0, 0]
-            },
-            {
-              "entry": 1,
-              "k1": 100,
-              "neurotransmitter": "activation",
-              "position": [0, 10, 0]
-            },
-            {
-              "entry": 2,
-              "k1": 100,
-              "neurotransmitter": "activation",
-              "position": [7,  0, 0]
-            },
-            {
-              "entry": 3,
-              "k1": 100,
-              "neurotransmitter": "activation",
-              "position": [3, 10, 0]
-            },
-            {
-              "entry": 4,
-              "k1": 100,
-              "neurotransmitter": "activation",
-              "position": [10, 5, 0]
-            }]
+            "synapses": [
+                {
+                    "entry": 0,
+                    "k1": 100,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        0,
+                        0,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "single"
+                },
+                {
+                    "entry": 1,
+                    "k1": 100,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        0,
+                        10,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "single"
+                },
+                {
+                    "entry": 2,
+                    "k1": 100,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        7,
+                        0,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "single"
+                },
+                {
+                    "entry": 3,
+                    "k1": 100,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        3,
+                        10,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "single"
+                },
+                {
+                    "entry": 4,
+                    "k1": 100,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        10,
+                        5,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "single"
+                }
+            ]
         }
     ],
     "output_signals": [],
-    "version": "1.1"
+    "version": "1.0"
 }
