@@ -530,10 +530,10 @@ std::vector<float> indk::NeuralNet::doSignalReceive() {
  * @param to Name of new neuron.
  * @param integrate Link neuron to the same elements as the source neuron.
  */
-void indk::NeuralNet::doReplicateNeuron(const std::string& from, const std::string& to, bool integrate) {
+indk::Neuron* indk::NeuralNet::doReplicateNeuron(const std::string& from, const std::string& to, bool integrate) {
     auto n = Neurons.find(from);
-    if (n == Neurons.end()) return;
-    if (Neurons.find(to) != Neurons.end()) return;
+    if (n == Neurons.end()) return nullptr;
+    if (Neurons.find(to) != Neurons.end()) return nullptr;
 
     auto nnew = new indk::Neuron(*n->second);
     nnew -> setName(to);
@@ -563,6 +563,7 @@ void indk::NeuralNet::doReplicateNeuron(const std::string& from, const std::stri
     } else {
         nnew ->  doClearEntries();
     }
+    return nnew;
 }
 
 /**
