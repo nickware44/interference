@@ -11,12 +11,12 @@
         "SPACE_E3",
         "SPACE_E4",
         "SPACE_E5",
-        "EV-1",
-        "EV-2",
-        "EV-3",
-        "EV-4",
-        "EV-5",
-        "EV-6"
+        "EV1",
+        "EV2",
+        "EV3",
+        "EV4",
+        "EV5",
+        "EV6"
     ],
     "name": "lang model",
     "neurons": [
@@ -209,12 +209,12 @@
             "dimensions": 3,
             "ensemble": "",
             "input_signals": [
-                "EV-1",
-                "EV-2",
-                "EV-3",
-                "EV-4",
-                "EV-5",
-                "EV-6"
+                "EV1",
+                "EV2",
+                "EV3",
+                "EV4",
+                "EV5",
+                "EV6"
             ],
             "latency": 0,
             "name": "NV-1",
