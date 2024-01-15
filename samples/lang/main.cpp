@@ -114,8 +114,7 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
     return destinations;
 }
 
-auto doLearnVisual(indk::NeuralNet *NN,
-                   const std::array<std::string, 5>& definitions,
+auto doLearnVisuals(indk::NeuralNet *NN,
                    const std::vector<std::string>& paths) {
     for (int p = 0; p < paths.size(); p++) {
         auto image = doReadBMP(paths[p]);
@@ -275,7 +274,7 @@ int main() {
     int space = 1;
     auto T = getTimestampMS();
     auto destinations = doLearnVocabulary(NN, definitions, vocab);
-    doLearnVisual(NN, definitions, {"images/1.bmp", "images/2.bmp"});
+    doLearnVisuals(NN, {"images/1.bmp", "images/2.bmp"});
 
     // creating context
     doProcessTextSequence(NN, definitions, destinations, "The cat siting on the table.", space);
