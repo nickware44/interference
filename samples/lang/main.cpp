@@ -100,8 +100,8 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
         }
 
         auto n = NN -> getNeuron(destination);
-        NN -> doIncludeNeuronToEnsemble(n->getName(), "TEXT");
         if (!n) break;
+        NN -> doIncludeNeuronToEnsemble(destination, "TEXT");
         NN -> doAddNewOutput(destination);
 
         for (const auto& ch: word) {
@@ -133,15 +133,8 @@ auto doLearnVisual(indk::NeuralNet *NN,
             n -> doSignalSendEntry("EV6", in[5], n->getTime());
         }
         n -> doFinalize();
-
-//        images.push_back(image);
-//        if (image.size() != IMAGE_SIZE) {
-//            std::cout << "Error loading image " << b << ".bmp" << std::endl;
-//            return 1;
-//        }
+        NN -> doAddNewOutput(destination);
     }
-//    auto input = doBuildImageInputVector(images);
-//    NN -> doLearn(input);
 }
 
 int doProcessTextSequence(indk::NeuralNet *NN,
@@ -240,45 +233,22 @@ int doProcessTextSequence(indk::NeuralNet *NN,
     return 0;
 }
 
-auto doRhythm(indk::NeuralNet *NN) {
-    std::vector<std::vector<float>> wave_text;
-    std::vector<std::vector<float>> wave_vision;
+auto doInputWave(indk::NeuralNet *NN, const std::vector<std::string>& names) {
+    for (const auto& name: names) {
+        auto n = NN -> getNeuron(name);
+        if (!n) continue;
 
-    for (int r = 0; r < 10; r++) {
-        wave_text.emplace_back();
-        for (int j = 0; j < 5; j++) {
-            wave_text.back().push_back(10);
-        }
-    }
-
-    for (int r = 0; r < 10; r++) {
-        wave_vision.emplace_back();
-        for (int j = 0; j < 6; j++) {
-            wave_vision.back().push_back(10);
-        }
-    }
-
-    NN -> doPrepare();
-    auto neurons_text = NN -> getEnsemble("TEXT");
-    for (const auto &n: neurons_text) {
+        n -> doPrepare();
         for (int i = 0; i < n->getReceptorsCount(); i++)
             n -> getReceptor(i) -> setPos(n->getReceptor(i)->getPos());
+
+        auto we = n -> getWaitingEntries();
+        for (const auto &e: we) {
+            n -> doSignalSendEntry(e, 100, n->getTime());
+        }
+        n -> doFinalize();
+        std::cout << name << " \t" << n->doSignalReceive().second << std::endl;
     }
-
-    auto neurons_vision = NN -> getEnsemble("VISION");
-    for (const auto &n: neurons_text) {
-        for (int i = 0; i < n->getReceptorsCount(); i++)
-            n -> getReceptor(i) -> setPos(n->getReceptor(i)->getPos());
-    }
-
-    auto Y1 = NN -> doRecognise(wave_text, false, {"E1", "E2", "E3", "E4", "E5"});
-    auto Y2 = NN -> doRecognise(wave_vision, false, {"EV1", "EV2", "EV3", "EV4", "EV5", "EV6"});
-
-    for (const auto &y: Y1) std::cout << y << " ";
-    std::cout << std::endl << std::endl;
-
-    for (const auto &y: Y2) std::cout << y << " ";
-    std::cout << std::endl;
 }
 
 int main() {
@@ -334,7 +304,7 @@ int main() {
     doProcessTextSequence(NN, definitions, destinations, "Are the other aliens coming for the cat?", space);
     std::cout << std::endl;
 
-    doRhythm(NN);
+    doInputWave(NN, {"N3-3", "N3-4", "N2-10", "NV-2", "NV-3"});
 
     NN -> doInterlinkSyncStructure();
     NN -> doInterlinkSyncData();
