@@ -76,6 +76,8 @@ namespace indk {
         void doLinkOutput(const std::string&);
         void doClearOutputLinks();
         void doClearEntries();
+        void doAddEntryName(const std::string&);
+        void doCopyEntry(const std::string&, const std::string&);
         void doReplaceEntryName(const std::string&, const std::string&);
         void doReserveSignalBuffer(int64_t);
         void setTime(int64_t);

@@ -292,6 +292,21 @@ void indk::Neuron::doClearEntries() {
     Entries.clear();
 }
 
+void indk::Neuron::doAddEntryName(const std::string& name) {
+    auto *E = new Entry();
+    Entries.emplace_back(name, E);
+}
+
+void indk::Neuron::doCopyEntry(const std::string& from, const std::string& to) {
+    for (auto &e: Entries) {
+        if (e.first == from) {
+            auto *E = new Entry(*e.second);
+            Entries.emplace_back(to, E);
+            break;
+        }
+    }
+}
+
 /**
  * Relink neuron by replacing entry name.
  * @param Original Name of entry to rename.

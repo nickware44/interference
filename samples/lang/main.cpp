@@ -86,10 +86,11 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
 
         std::string word = item.substr(0, item.find(';'));
         std::string definition = item.substr(item.find(';')+1);
-        std::string destination;
+        std::string source, destination;
 
         for (d = 0; d < definitions.size(); d++) {
             if (definition == definitions[d]) {
+                source = "N"+std::to_string(d+1);
                 destination = "N"+std::to_string(d+1)+"-"+std::to_string(stats[d]);
                 destinations.push_back({destination, word, std::to_string(d)});
                 NN -> doReplicateNeuron("N"+std::to_string(d+1), destination, true);
@@ -100,8 +101,12 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
 
         auto n = NN -> getNeuron(destination);
         if (!n) break;
-        NN -> doIncludeNeuronToEnsemble(destination, "TEXT");
-        NN -> doAddNewOutput(destination);
+
+        NN -> doIncludeNeuronToEnsemble(n->getName(), "TEXT");
+//        NN -> doAddNewOutput(destination);
+        auto dn = NN -> getNeuron(n->getLinkOutput()[0]);
+        dn -> doCopyEntry(source, n->getName());
+        n -> doLinkOutput(dn->getName());
 
         for (const auto& ch: word) {
             n -> doSignalSendEntry("ET", (float)ch, n->getTime());
