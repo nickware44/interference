@@ -20,6 +20,7 @@ sit;PROCESS
 siting;PROCESS
 lying;PROCESS
 come;PROCESS
+coming;PROCESS
 falls;PROCESS
 in;PLACE
 on;PLACE

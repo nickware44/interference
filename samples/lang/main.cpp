@@ -82,7 +82,6 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
 
     // learn the vocabulary
     for (int i = 1; i <= vocab.size(); i++) {
-        std::vector<std::vector<float>> input;
         const auto& item = vocab[i-1];
 
         std::string word = item.substr(0, item.find(';'));
@@ -105,9 +104,7 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
         NN -> doAddNewOutput(destination);
 
         for (const auto& ch: word) {
-            input.emplace_back();
-            input.back().push_back(ch);
-            n -> doSignalSendEntry("E"+std::to_string(d+1), (float)ch, n->getTime());
+            n -> doSignalSendEntry("ET", (float)ch, n->getTime());
         }
         n -> doFinalize();
     }
@@ -136,15 +133,8 @@ auto doLearnVisuals(indk::NeuralNet *NN,
     }
 }
 
-int doProcessTextSequence(indk::NeuralNet *NN,
-                       const std::array<std::string, 5>& definitions,
-                       const std::vector<std::vector<std::string>>& destinations,
-                       std::string sequence,
-                       int &space) {
+auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type, const std::vector<std::vector<std::string>>& destinations) {
     std::vector<std::vector<float>> related;
-
-    // parse sequence
-    bool qflag = sequence.back() == '?';
     auto stripped = sequence.substr(0, sequence.size()-1);
     auto words = doStrSplit(stripped, " ", true);
 
@@ -154,18 +144,28 @@ int doProcessTextSequence(indk::NeuralNet *NN,
 
         for (const auto& ch: word) {
             data.emplace_back();
-            for (int i = 0; i < definitions.size(); i++)
-                data.back().push_back(ch);
+            data.back().push_back(ch);
         }
-        auto Y = NN -> doRecognise(data, true, {"E1", "E2", "E3", "E4", "E5"});
-        auto patterns = NN -> doComparePatterns();
 
+        auto Y = NN -> doRecognise(data, true, {"ET"});
+        auto patterns = NN -> doComparePatterns();
         for (int i = 0; i < patterns.size(); i++) {
-            if (patterns[i] == 0) {
+            if (patterns[i] <= 10e-6) {
                 related.push_back({Y[i], static_cast<float>(std::stoi(destinations[i][2]))});
             }
         }
     }
+    return related;
+}
+
+int doProcessTextSequence(indk::NeuralNet *NN,
+                       const std::array<std::string, 5>& definitions,
+                       const std::vector<std::vector<std::string>>& destinations,
+                       std::string sequence,
+                       int &space) {
+    // parse sequence
+    bool qflag = sequence.back() == '?';
+    auto related = doRecognizeInput(NN, sequence, 0, destinations);
 
     if (!qflag) {
         // create new space in the context
@@ -216,7 +216,7 @@ int doProcessTextSequence(indk::NeuralNet *NN,
         auto patterns = NN -> doComparePatterns( "CONTEXT");
 //        for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
         auto r = std::min_element(patterns.begin(), patterns.end());
-        if (r != patterns.end() && *r < 10e-4) found = 1;
+        if (r != patterns.end() && *r >= 0 && *r < 10e-6) found = 1;
 
         std::cout << std::setw(50) << std::left << sequence;
         if (found)
