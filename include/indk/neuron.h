@@ -39,7 +39,7 @@ namespace indk {
         float *OutputSignal;
         int64_t OutputSignalSize;
         int64_t OutputSignalPointer;
-        int NID;
+        int NID, OutputMode;
         bool Learned;
         std::vector<float> doCompareCheckpoints();
         std::string Name;

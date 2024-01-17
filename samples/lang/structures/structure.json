@@ -528,6 +528,12 @@
             ]
         }
     ],
-    "output_signals": [],
+    "output_signals": [
+        "STATE",
+        "OBJECT",
+        "PROCESS",
+        "PLACE",
+        "PROPERTY"
+    ],
     "version": "1.0"
 }

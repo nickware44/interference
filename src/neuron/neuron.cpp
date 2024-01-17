@@ -10,6 +10,7 @@
 #include <indk/neuron.h>
 #include <indk/error.h>
 #include <indk/system.h>
+#include <algorithm>
 
 indk::Neuron::Neuron() {
     t = 0;
@@ -20,6 +21,7 @@ indk::Neuron::Neuron() {
     OutputSignalSize = 1;
     OutputSignalPointer = 0;
     NID = 0;
+    OutputMode = 0;
     Learned = false;
 //    ReceptorPositionComputer = nullptr;
 }
@@ -33,6 +35,7 @@ indk::Neuron::Neuron(const indk::Neuron &N) {
     OutputSignalPointer = 0;
     DimensionsCount = N.getDimensionsCount();
     NID = 0;
+    OutputMode = 0;
     Learned = false;
     auto elabels = N.getEntries();
     for (int64_t i = 0; i < N.getEntriesCount(); i++) Entries.emplace_back(elabels[i], new Entry(*N.getEntry(i)));
@@ -49,6 +52,7 @@ indk::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std:
     OutputSignalSize = 1;
     OutputSignalPointer = 0;
     NID = 0;
+    OutputMode = 0;
     Learned = false;
     for (auto &i: InputNames) {
         auto *E = new Entry();
@@ -168,7 +172,15 @@ std::pair<int64_t, float> indk::Neuron::doSignalReceive(int64_t tT) {
     auto tlocal = t.load();
     if (tT == -1) tT = tlocal - 1;
     auto d = tlocal - tT;
+
     if (d > 0 && OutputSignalPointer-d >= 0) {
+        if (OutputMode == 1) {
+            auto patterns = doComparePattern();
+            if (std::get<0>(patterns) < 10e-6) {
+                return std::make_pair(tT, OutputSignal[OutputSignalPointer-d]);
+            } else
+                return std::make_pair(tT, 0);
+        }
         return std::make_pair(tT, OutputSignal[OutputSignalPointer-d]);
     } else {
         if (indk::System::getVerbosityLevel() > 1)
