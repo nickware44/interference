@@ -174,9 +174,10 @@ std::pair<int64_t, float> indk::Neuron::doSignalReceive(int64_t tT) {
     auto d = tlocal - tT;
 
     if (d > 0 && OutputSignalPointer-d >= 0) {
-        if (OutputMode == 1) {
+        if (OutputMode == 1 && Learned) {
             auto patterns = doComparePattern();
             if (std::get<0>(patterns) < 10e-6) {
+//                std::cout << Name << " p " << std::get<0>(patterns) << " " << OutputSignal[OutputSignalPointer-d] << std::endl;
                 return std::make_pair(tT, OutputSignal[OutputSignalPointer-d]);
             } else
                 return std::make_pair(tT, 0);
@@ -383,6 +384,10 @@ void indk::Neuron::setk3(float _k3) {
 
 void indk::Neuron::setNID(int _NID) {
     NID = _NID;
+}
+
+void indk::Neuron::setOutputMode(int mode) {
+    OutputMode = mode;
 }
 
 void indk::Neuron::setName(const std::string& NName) {

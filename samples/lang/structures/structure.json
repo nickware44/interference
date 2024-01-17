@@ -255,11 +255,11 @@
         },
         {
             "dimensions": 3,
-            "ensemble": "",
+            "ensemble": "DEFINITION",
             "input_signals": [
                 "N2"
             ],
-            "latency": 1,
+            "latency": 0,
             "name": "OBJECT",
             "receptors": [
                 {
@@ -278,7 +278,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 1,
+                    "k1": 10,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
@@ -286,17 +286,17 @@
                         0
                     ],
                     "radius": 10,
-                    "type": "cluster"
+                    "type": "single"
                 }
             ]
         },
         {
             "dimensions": 3,
-            "ensemble": "",
+            "ensemble": "DEFINITION",
             "input_signals": [
                 "N4"
             ],
-            "latency": 1,
+            "latency": 0,
             "name": "PLACE",
             "receptors": [
                 {
@@ -315,7 +315,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 1,
+                    "k1": 10,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
@@ -323,17 +323,17 @@
                         0
                     ],
                     "radius": 10,
-                    "type": "cluster"
+                    "type": "single"
                 }
             ]
         },
         {
             "dimensions": 3,
-            "ensemble": "",
+            "ensemble": "DEFINITION",
             "input_signals": [
                 "N3"
             ],
-            "latency": 1,
+            "latency": 0,
             "name": "PROCESS",
             "receptors": [
                 {
@@ -352,7 +352,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 1,
+                    "k1": 10,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
@@ -360,17 +360,17 @@
                         0
                     ],
                     "radius": 10,
-                    "type": "cluster"
+                    "type": "single"
                 }
             ]
         },
         {
             "dimensions": 3,
-            "ensemble": "",
+            "ensemble": "DEFINITION",
             "input_signals": [
                 "N5"
             ],
-            "latency": 1,
+            "latency": 0,
             "name": "PROPERTY",
             "receptors": [
                 {
@@ -389,7 +389,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 1,
+                    "k1": 10,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
@@ -397,21 +397,20 @@
                         0
                     ],
                     "radius": 10,
-                    "type": "cluster"
+                    "type": "single"
                 }
             ]
         },
         {
             "dimensions": 3,
-            "ensemble": "",
+            "ensemble": "DEFINITION",
             "input_signals": [
                 "N1"
             ],
-            "latency": 1,
+            "latency": 0,
             "name": "STATE",
             "receptors": [
                 {
-                    "count": 10,
                     "data_scopes": [],
                     "position": [
                         40,
@@ -426,15 +425,14 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 1,
+                    "k1": 10,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
                         50,
                         0
                     ],
-                    "radius": 10,
-                    "type": "cluster"
+                    "type": "single"
                 }
             ]
         },
@@ -528,12 +526,6 @@
             ]
         }
     ],
-    "output_signals": [
-        "STATE",
-        "OBJECT",
-        "PROCESS",
-        "PLACE",
-        "PROPERTY"
-    ],
+    "output_signals": [],
     "version": "1.0"
 }

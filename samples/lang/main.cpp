@@ -80,6 +80,8 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
     std::vector<std::vector<std::string>> destinations;
     std::array<int, 5> stats = {0};
 
+    for (int i = 0; i < definitions.size(); i++) NN -> getNeuron("N"+std::to_string(i+1)) -> setOutputMode(1);
+
     // learn the vocabulary
     for (int i = 1; i <= vocab.size(); i++) {
         const auto& item = vocab[i-1];
@@ -93,7 +95,7 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
                 source = "N"+std::to_string(d+1);
                 destination = "N"+std::to_string(d+1)+"-"+std::to_string(stats[d]);
                 destinations.push_back({destination, word, std::to_string(d)});
-                NN -> doReplicateNeuron("N"+std::to_string(d+1), destination, true);
+                NN -> doReplicateNeuron(source, destination, true);
                 stats[d]++;
                 break;
             }
@@ -112,6 +114,7 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
             n -> doSignalSendEntry("ET", (float)ch, n->getTime());
         }
         n -> doFinalize();
+        n -> setOutputMode(1);
     }
     return destinations;
 }
@@ -153,10 +156,12 @@ auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type
         }
 
         auto Y = NN -> doRecognise(data, true, {"ET"});
-        auto patterns = NN -> doComparePatterns();
+        auto patterns = NN -> doComparePatterns("DEFINITION");
         for (int i = 0; i < patterns.size(); i++) {
-            if (patterns[i] <= 10e-6) {
-                related.push_back({Y[i], static_cast<float>(std::stoi(destinations[i][2]))});
+//            std::cout << patterns.size() << std::endl;
+            if (patterns[i] > 10e-6) {
+                related.push_back({patterns[i], static_cast<float>(i)});
+                std::cout << i << ". " << patterns[i] << " " << Y[i] << std::endl;
             }
         }
     }
@@ -169,6 +174,11 @@ int doProcessTextSequence(indk::NeuralNet *NN,
                        std::string sequence,
                        int &space) {
     // parse sequence
+    auto defs = NN -> getEnsemble("DEFINITION");
+    for (const auto& dn: defs) {
+        dn -> setLearned(true);
+        dn -> doPrepare();
+    }
     bool qflag = sequence.back() == '?';
     auto related = doRecognizeInput(NN, sequence, 0, destinations);
 
@@ -193,9 +203,10 @@ int doProcessTextSequence(indk::NeuralNet *NN,
                 if (pos) n -> getReceptor(0) -> getPos() -> setPosition(pos);
                 for (int j = 0; j < definitions.size(); j++) {
                     if (j == (int)related[r][1]) {
-                        n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), related[r][0], n->getTime());
+                        std::cout << r << " " << related[r][0] << std::endl;
+                        n -> doSignalSendEntry(definitions[j], related[r][0], n->getTime());
                     } else {
-                        n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), 0, n->getTime());
+                        n -> doSignalSendEntry(definitions[j], 0, n->getTime());
                     }
                 }
                 pos = n -> getReceptor(0) -> getPos();

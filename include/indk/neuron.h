@@ -87,6 +87,7 @@ namespace indk {
         void setk2(float);
         void setk3(float);
         void setNID(int);
+        void setOutputMode(int);
         void setName(const std::string&);
         void setLearned(bool LearnedFlag);
         bool isLearned() const;
