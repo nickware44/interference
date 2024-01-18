@@ -158,9 +158,8 @@ auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type
         auto Y = NN -> doRecognise(data, true, {"ET"});
         auto patterns = NN -> doComparePatterns("DEFINITION");
         for (int i = 0; i < patterns.size(); i++) {
-//            std::cout << patterns.size() << std::endl;
             if (patterns[i] > 10e-6) {
-                related.push_back({patterns[i], static_cast<float>(i)});
+                related.push_back({Y[i], static_cast<float>(i)});
                 std::cout << i << ". " << patterns[i] << " " << Y[i] << std::endl;
             }
         }
@@ -176,8 +175,9 @@ int doProcessTextSequence(indk::NeuralNet *NN,
     // parse sequence
     auto defs = NN -> getEnsemble("DEFINITION");
     for (const auto& dn: defs) {
-        dn -> setLearned(true);
-        dn -> doPrepare();
+        dn -> setLambda(0.1);
+        dn -> setOutputMode(1);
+//        dn -> doReset();
     }
     bool qflag = sequence.back() == '?';
     auto related = doRecognizeInput(NN, sequence, 0, destinations);
@@ -203,7 +203,7 @@ int doProcessTextSequence(indk::NeuralNet *NN,
                 if (pos) n -> getReceptor(0) -> getPos() -> setPosition(pos);
                 for (int j = 0; j < definitions.size(); j++) {
                     if (j == (int)related[r][1]) {
-                        std::cout << r << " " << related[r][0] << std::endl;
+                        std::cout << r << " " << definitions[j] << " " << related[r][0] << std::endl;
                         n -> doSignalSendEntry(definitions[j], related[r][0], n->getTime());
                     } else {
                         n -> doSignalSendEntry(definitions[j], 0, n->getTime());
@@ -216,21 +216,23 @@ int doProcessTextSequence(indk::NeuralNet *NN,
         n -> doFinalize();
     } else {
         // check info in the context if this is a question
-
-        int found = 0;
-        std::vector<std::vector<float>> marks;
-
-        for (int r = 0; r < related.size(); r++) {
-            marks.emplace_back();
-            for (int j = 0; j < definitions.size(); j++) {
-                if (j == (int)related[r][1]) marks.back().push_back(related[r][0]);
-                else marks.back().push_back(0);
-            }
+        for (const auto& dn: defs) {
+            dn -> setOutputMode(0);
         }
+        int found = 0;
+//        std::vector<std::vector<float>> marks;
 
-        NN -> doRecognise(marks, true, {"SPACE_E1", "SPACE_E2", "SPACE_E3", "SPACE_E4", "SPACE_E5"});
+//        for (int r = 0; r < related.size(); r++) {
+//            marks.emplace_back();
+//            for (int j = 0; j < definitions.size(); j++) {
+//                if (j == (int)related[r][1]) marks.back().push_back(related[r][0]);
+//                else marks.back().push_back(0);
+//            }
+//        }
+//
+//        NN -> doRecognise(marks, true, {"SPACE_E1", "SPACE_E2", "SPACE_E3", "SPACE_E4", "SPACE_E5"});
         auto patterns = NN -> doComparePatterns( "CONTEXT");
-//        for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
+        for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
         auto r = std::min_element(patterns.begin(), patterns.end());
         if (r != patterns.end() && *r >= 0 && *r < 10e-6) found = 1;
 
