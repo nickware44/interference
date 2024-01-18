@@ -250,7 +250,7 @@
         },
         {
             "dimensions": 3,
-            "ensemble": "DEFINITION",
+            "ensemble": "",
             "input_signals": [
                 "N2"
             ],
@@ -273,7 +273,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 10,
+                    "k1": 100,
                     "neurotransmitter": "activation",
                     "position": [
                         5,
@@ -287,7 +287,7 @@
         },
         {
             "dimensions": 3,
-            "ensemble": "DEFINITION",
+            "ensemble": "",
             "input_signals": [
                 "N4"
             ],
@@ -310,7 +310,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 10,
+                    "k1": 100,
                     "neurotransmitter": "activation",
                     "position": [
                         5,
@@ -324,7 +324,7 @@
         },
         {
             "dimensions": 3,
-            "ensemble": "DEFINITION",
+            "ensemble": "",
             "input_signals": [
                 "N3"
             ],
@@ -347,7 +347,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 10,
+                    "k1": 100,
                     "neurotransmitter": "activation",
                     "position": [
                         5,
@@ -361,7 +361,7 @@
         },
         {
             "dimensions": 3,
-            "ensemble": "DEFINITION",
+            "ensemble": "",
             "input_signals": [
                 "N5"
             ],
@@ -384,7 +384,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 10,
+                    "k1": 100,
                     "neurotransmitter": "activation",
                     "position": [
                         5,
@@ -398,7 +398,7 @@
         },
         {
             "dimensions": 3,
-            "ensemble": "DEFINITION",
+            "ensemble": "",
             "input_signals": [
                 "N1"
             ],
@@ -421,7 +421,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 10,
+                    "k1": 100,
                     "neurotransmitter": "activation",
                     "position": [
                         5,

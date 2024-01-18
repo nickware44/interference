@@ -531,6 +531,8 @@ std::vector<float> indk::NeuralNet::doSignalReceive() {
  * @param integrate Link neuron to the same elements as the source neuron.
  */
 indk::Neuron* indk::NeuralNet::doReplicateNeuron(const std::string& from, const std::string& to, bool integrate) {
+    PrepareID = "";
+
     auto n = Neurons.find(from);
     if (n == Neurons.end()) return nullptr;
     if (Neurons.find(to) != Neurons.end()) return nullptr;
@@ -542,10 +544,14 @@ indk::Neuron* indk::NeuralNet::doReplicateNeuron(const std::string& from, const 
     if (integrate) {
         auto entries = nnew -> getEntries();
         for (auto &e: entries) {
-            std::string ename = e;
-            auto ne = doFindEntry(ename);
+            auto ne = doFindEntry(e);
             if (ne != -1) {
                 Entries[ne].second.push_back(to);
+            } else {
+                auto nfrom = Neurons.find(e);
+                if (nfrom != Neurons.end()) {
+                    nfrom -> second -> doLinkOutput(to);
+                }
             }
         }
 
@@ -711,6 +717,10 @@ void indk::NeuralNet::doReserveSignalBuffer(int64_t L) {
     for (auto &n: Neurons) {
         n.second -> doReserveSignalBuffer(L);
     }
+}
+
+void indk::NeuralNet::doClearCache() {
+    PrepareID = "";
 }
 
 /**

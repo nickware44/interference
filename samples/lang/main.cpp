@@ -158,9 +158,9 @@ auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type
         auto Y = NN -> doRecognise(data, true, {"ET"});
         auto patterns = NN -> doComparePatterns("DEFINITION");
         for (int i = 0; i < patterns.size(); i++) {
-            if (patterns[i] > 10e-6) {
+            if (Y[i] > 10e-6) {
+                std::cout << word << " " << i << ". " << patterns[i] << " " << Y[i] << std::endl;
                 related.push_back({Y[i], static_cast<float>(i)});
-                std::cout << i << ". " << patterns[i] << " " << Y[i] << std::endl;
             }
         }
     }
@@ -175,8 +175,8 @@ int doProcessTextSequence(indk::NeuralNet *NN,
     // parse sequence
     auto defs = NN -> getEnsemble("DEFINITION");
     for (const auto& dn: defs) {
-        dn -> setLambda(0.1);
-        dn -> setOutputMode(1);
+
+//        dn -> setOutputMode(1);
 //        dn -> doReset();
     }
     bool qflag = sequence.back() == '?';
@@ -203,7 +203,7 @@ int doProcessTextSequence(indk::NeuralNet *NN,
                 if (pos) n -> getReceptor(0) -> getPos() -> setPosition(pos);
                 for (int j = 0; j < definitions.size(); j++) {
                     if (j == (int)related[r][1]) {
-                        std::cout << r << " " << definitions[j] << " " << related[r][0] << std::endl;
+//                        std::cout << r << " " << definitions[j] << " " << related[r][0] << std::endl;
                         n -> doSignalSendEntry(definitions[j], related[r][0], n->getTime());
                     } else {
                         n -> doSignalSendEntry(definitions[j], 0, n->getTime());
@@ -217,7 +217,7 @@ int doProcessTextSequence(indk::NeuralNet *NN,
     } else {
         // check info in the context if this is a question
         for (const auto& dn: defs) {
-            dn -> setOutputMode(0);
+//            dn -> setOutputMode(0);
         }
         int found = 0;
 //        std::vector<std::vector<float>> marks;
@@ -288,6 +288,11 @@ int main() {
     std::cout << "Model desc  : " << NN->getDescription() << std::endl;
     std::cout << "Model ver   : " << NN->getVersion() << std::endl;
     std::cout << std::endl;
+
+    for (const auto& d: definitions) {
+        NN -> doIncludeNeuronToEnsemble(d, "DEFINITION");
+        NN -> getNeuron(d) -> setLambda(0.1);
+    }
 
     int space = 1;
     auto T = getTimestampMS();

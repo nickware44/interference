@@ -89,6 +89,7 @@ namespace indk {
         void doDeleteNeuron(const std::string& name);
         void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);
         void doReserveSignalBuffer(int64_t L);
+        void doClearCache();
         void setStructure(std::ifstream&);
         void setStructure(const std::string &Str);
         void setLearned(bool);

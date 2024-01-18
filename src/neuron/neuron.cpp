@@ -154,7 +154,7 @@ bool indk::Neuron::doSignalSendEntry(const std::string& From, float X, int64_t t
 
     for (auto &e: Entries) {
         if (!e.second->doCheckState(tn)) {
-//            std::cout << "In to entry of " << Name << " from " << e.first << " (" << tn << ") - not ready" << std::endl;
+//            std::cout << "In to entry of " << Name << " from " << e.first << " value " << X << " (" << tn << ") - not ready" << std::endl;
             return false;
         }
     }
