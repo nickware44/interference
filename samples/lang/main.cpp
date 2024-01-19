@@ -17,6 +17,8 @@
 #include <fstream>
 #include "bmp.hpp"
 
+#define DEFINITIONS_COUNT 5
+
 uint64_t getTimestampMS() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().
             time_since_epoch()).count();
@@ -76,10 +78,6 @@ std::vector<std::vector<float>> doBuildImageInputVector(std::vector<BMPImage> im
 auto doLearnVocabulary(indk::NeuralNet *NN,
                        const std::array<std::string, 5>& definitions,
                        const std::vector<std::string>& vocab) {
-    int d;
-    std::vector<std::vector<std::string>> destinations;
-    std::array<int, 5> stats = {0};
-
     for (int i = 0; i < definitions.size(); i++) NN -> getNeuron("N"+std::to_string(i+1)) -> setOutputMode(1);
 
     // learn the vocabulary
@@ -90,13 +88,11 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
         std::string definition = item.substr(item.find(';')+1);
         std::string source, destination;
 
-        for (d = 0; d < definitions.size(); d++) {
+        for (int d = 0; d < definitions.size(); d++) {
             if (definition == definitions[d]) {
                 source = "N"+std::to_string(d+1);
-                destination = "N"+std::to_string(d+1)+"-"+std::to_string(stats[d]);
-                destinations.push_back({destination, word, std::to_string(d)});
+                destination = "N"+std::to_string(definitions.size()+i);
                 NN -> doReplicateNeuron(source, destination, true);
-                stats[d]++;
                 break;
             }
         }
@@ -105,7 +101,6 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
         if (!n) break;
 
         NN -> doIncludeNeuronToEnsemble(n->getName(), "TEXT");
-//        NN -> doAddNewOutput(destination);
         auto dn = NN -> getNeuron(n->getLinkOutput()[0]);
         dn -> doCopyEntry(source, n->getName());
         n -> doLinkOutput(dn->getName());
@@ -116,11 +111,9 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
         n -> doFinalize();
         n -> setOutputMode(1);
     }
-    return destinations;
 }
 
-auto doLearnVisuals(indk::NeuralNet *NN,
-                   const std::vector<std::string>& paths) {
+auto doLearnVisuals(indk::NeuralNet *NN, const std::vector<std::string>& paths) {
     for (int p = 0; p < paths.size(); p++) {
         auto image = doReadBMP(paths[p]);
         auto input = doBuildImageInputVector({image});
@@ -141,8 +134,8 @@ auto doLearnVisuals(indk::NeuralNet *NN,
     }
 }
 
-auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type, const std::vector<std::vector<std::string>>& destinations) {
-    std::vector<std::vector<float>> related;
+auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type) {
+    std::vector<std::vector<float>> encoded;
     auto stripped = sequence.substr(0, sequence.size()-1);
     auto words = doStrSplit(stripped, " ", true);
 
@@ -158,96 +151,87 @@ auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type
         auto Y = NN -> doRecognise(data, true, {"ET"});
         auto patterns = NN -> doComparePatterns("DEFINITION");
         for (int i = 0; i < patterns.size(); i++) {
-            if (Y[i] > 10e-6) {
-                std::cout << word << " " << i << ". " << patterns[i] << " " << Y[i] << std::endl;
-                related.push_back({Y[i], static_cast<float>(i)});
+            if (Y[i] > 0) {
+//                std::cout << word << " " << i << ". " << patterns[i] << " " << Y[i] << std::endl;
+                encoded.push_back({Y[i], static_cast<float>(i)});
             }
         }
     }
-    return related;
+    return encoded;
 }
 
-int doProcessTextSequence(indk::NeuralNet *NN,
-                       const std::array<std::string, 5>& definitions,
-                       const std::vector<std::vector<std::string>>& destinations,
-                       std::string sequence,
-                       int &space) {
-    // parse sequence
-    auto defs = NN -> getEnsemble("DEFINITION");
-    for (const auto& dn: defs) {
+void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<float>>& encoded, int space) {
+    NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space), true);
+    auto n = NN -> getNeuron("_SPACE_"+std::to_string(space));
+    if (!n) return;
 
-//        dn -> setOutputMode(1);
-//        dn -> doReset();
+    n -> setLambda(1);
+    NN -> doIncludeNeuronToEnsemble(n->getName(), "CONTEXT");
+    n -> doReset();
+
+    int nstart = 0;
+    while (nstart < encoded.size()) {
+        indk::Position *pos = nullptr;
+
+        for (int r = nstart; r < encoded.size(); r++) {
+            n -> doCreateNewScope();
+            n -> doPrepare();
+            if (pos) n -> getReceptor(0) -> getPos() -> setPosition(pos);
+            for (int j = 0; j < DEFINITIONS_COUNT; j++) {
+                if (j == (int)encoded[r][1]) {
+//                        std::cout << r << " " << definitions[j] << " " << related[r][0] << std::endl;
+                    n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), encoded[r][0], n->getTime());
+                } else {
+                    n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), 0, n->getTime());
+                }
+            }
+            pos = n -> getReceptor(0) -> getPos();
+        }
+        nstart++;
     }
+    n -> doFinalize();
+}
+
+bool doReceiveResponse(indk::NeuralNet *NN, const std::vector<std::vector<float>>& encoded) {
+    bool found = false;
+    std::vector<std::vector<float>> marks;
+
+    for (int r = 0; r < encoded.size(); r++) {
+        marks.emplace_back();
+        for (int j = 0; j < DEFINITIONS_COUNT; j++) {
+            if (j == (int)encoded[r][1]) marks.back().push_back(encoded[r][0]);
+            else marks.back().push_back(0);
+        }
+    }
+
+    NN -> doRecognise(marks, true, {"SPACE_E1", "SPACE_E2", "SPACE_E3", "SPACE_E4", "SPACE_E5"});
+    auto patterns = NN -> doComparePatterns( "CONTEXT");
+//    for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
+    auto r = std::min_element(patterns.begin(), patterns.end());
+    if (r != patterns.end() && *r >= 0 && *r < 10e-6) found = true;
+
+    return found;
+}
+
+void doProcessTextSequence(indk::NeuralNet *NN, std::string sequence, int &space) {
+    // parse sequence
     bool qflag = sequence.back() == '?';
-    auto related = doRecognizeInput(NN, sequence, 0, destinations);
+    auto encoded = doRecognizeInput(NN, sequence, 0);
 
     if (!qflag) {
         // create new space in the context
-
-        NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space), true);
-        auto n = NN -> getNeuron("_SPACE_"+std::to_string(space));
-        if (!n) return -1;
-
-        n -> setLambda(1);
-        NN -> doIncludeNeuronToEnsemble(n->getName(), "CONTEXT");
-        n -> doReset();
-
-        int nstart = 0;
-        while (nstart < related.size()) {
-            indk::Position *pos = nullptr;
-
-            for (int r = nstart; r < related.size(); r++) {
-                n -> doCreateNewScope();
-                n -> doPrepare();
-                if (pos) n -> getReceptor(0) -> getPos() -> setPosition(pos);
-                for (int j = 0; j < definitions.size(); j++) {
-                    if (j == (int)related[r][1]) {
-//                        std::cout << r << " " << definitions[j] << " " << related[r][0] << std::endl;
-                        n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), related[r][0], n->getTime());
-                    } else {
-                        n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), 0, n->getTime());
-                    }
-                }
-                pos = n -> getReceptor(0) -> getPos();
-            }
-            nstart++;
-        }
-        n -> doFinalize();
+        std::cout << sequence << std::endl;
+        doCreateContextSpace(NN, encoded, space);
+        space++;
     } else {
         // check info in the context if this is a question
-        for (const auto& dn: defs) {
-//            dn -> setOutputMode(0);
-        }
-        int found = 0;
-        std::vector<std::vector<float>> marks;
-
-        for (int r = 0; r < related.size(); r++) {
-            marks.emplace_back();
-            for (int j = 0; j < definitions.size(); j++) {
-                if (j == (int)related[r][1]) marks.back().push_back(related[r][0]);
-                else marks.back().push_back(0);
-            }
-        }
-
-        NN -> doRecognise(marks, true, {"SPACE_E1", "SPACE_E2", "SPACE_E3", "SPACE_E4", "SPACE_E5"});
-        auto patterns = NN -> doComparePatterns( "CONTEXT");
-        for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
-        auto r = std::min_element(patterns.begin(), patterns.end());
-        if (r != patterns.end() && *r >= 0 && *r < 10e-6) found = 1;
-
+        auto response = doReceiveResponse(NN, encoded);
         std::cout << std::setw(50) << std::left << sequence;
-        if (found)
+        if (response)
             std::cout << " [ YES ]" << std::endl;
         else
             std::cout << " [ NO  ]" << std::endl;
-
-        return found;
     }
-
-    std::cout << sequence << std::endl;
-    space++;
-    return 0;
 }
 
 auto doInputWave(indk::NeuralNet *NN, const std::vector<std::string>& names) {
@@ -271,8 +255,7 @@ auto doInputWave(indk::NeuralNet *NN, const std::vector<std::string>& names) {
 int main() {
     constexpr char STRUCTURE_PATH[128] = "structures/structure.json";
     constexpr char VOCAB_PATH[128] = "texts/vocab.txt";
-    constexpr char IMAGES_PATH[128] = "images/";
-    std::array<std::string, 5> definitions = {"STATE", "OBJECT", "PROCESS", "PLACE", "PROPERTY"};
+    std::array<std::string, DEFINITIONS_COUNT> definitions = {"STATE", "OBJECT", "PROCESS", "PLACE", "PROPERTY"};
 
     // load vocabulary from text file
     auto vocab = doLoadVocabulary(VOCAB_PATH);
@@ -296,37 +279,37 @@ int main() {
 
     int space = 1;
     auto T = getTimestampMS();
-    auto destinations = doLearnVocabulary(NN, definitions, vocab);
+    doLearnVocabulary(NN, definitions, vocab);
     doLearnVisuals(NN, {"images/1.bmp", "images/2.bmp"});
 
     // creating context
-    doProcessTextSequence(NN, definitions, destinations, "The cat siting on the table.", space);
-    doProcessTextSequence(NN, definitions, destinations, "The cat is black and the table is wooden.", space);
-    doProcessTextSequence(NN, definitions, destinations, "Blue light falls from the window.", space);
-    doProcessTextSequence(NN, definitions, destinations, "The cat is also half blue.", space);
-    doProcessTextSequence(NN, definitions, destinations, "The cat is alien.", space);
-    doProcessTextSequence(NN, definitions, destinations, "Other aliens are coming for the cat.", space);
+    doProcessTextSequence(NN, "The cat siting on the table.", space);
+    doProcessTextSequence(NN, "The cat is black and the table is wooden.", space);
+    doProcessTextSequence(NN, "Blue light falls from the window.", space);
+    doProcessTextSequence(NN, "The cat is also half blue.", space);
+    doProcessTextSequence(NN, "The cat is alien.", space);
+    doProcessTextSequence(NN, "Other aliens are coming for the cat.", space);
     std::cout << std::endl;
 
     // checking
-    doProcessTextSequence(NN, definitions, destinations, "Is the cat gray?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the cat black?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the cat blue?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the table wooden?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the table black?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the cat lying on the table?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the cat siting on the chair?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the cat lying under the table?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the cat siting on the table?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the light falls from the monitor?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the light falls from the window?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Is the cat alien?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Are the other aliens coming?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Are the other aliens coming for human?", space);
-    doProcessTextSequence(NN, definitions, destinations, "Are the other aliens coming for the cat?", space);
+    doProcessTextSequence(NN, "Is the cat gray?", space);
+    doProcessTextSequence(NN, "Is the cat black?", space);
+    doProcessTextSequence(NN, "Is the cat blue?", space);
+    doProcessTextSequence(NN, "Is the table wooden?", space);
+    doProcessTextSequence(NN, "Is the table black?", space);
+    doProcessTextSequence(NN, "Is the cat lying on the table?", space);
+    doProcessTextSequence(NN, "Is the cat siting on the chair?", space);
+    doProcessTextSequence(NN, "Is the cat lying under the table?", space);
+    doProcessTextSequence(NN, "Is the cat siting on the table?", space);
+    doProcessTextSequence(NN, "Is the light falls from the monitor?", space);
+    doProcessTextSequence(NN, "Is the light falls from the window?", space);
+    doProcessTextSequence(NN, "Is the cat alien?", space);
+    doProcessTextSequence(NN, "Are the other aliens coming?", space);
+    doProcessTextSequence(NN, "Are the other aliens coming for human?", space);
+    doProcessTextSequence(NN, "Are the other aliens coming for the cat?", space);
     std::cout << std::endl;
 
-    doInputWave(NN, {"N3-3", "N3-4", "N2-10", "NV-2", "NV-3"});
+    doInputWave(NN, {"_SPACE_1", "NV-2", "NV-3"});
 
     NN -> doInterlinkSyncStructure();
     NN -> doInterlinkSyncData();

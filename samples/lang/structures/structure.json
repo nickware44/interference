@@ -18,7 +18,7 @@
     "neurons": [
         {
             "dimensions": 3,
-            "ensemble": "A1",
+            "ensemble": "",
             "input_signals": [
                 "ET"
             ],
@@ -41,7 +41,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 1,
+                    "k1": 4,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
@@ -55,7 +55,7 @@
         },
         {
             "dimensions": 3,
-            "ensemble": "A2",
+            "ensemble": "",
             "input_signals": [
                 "ET"
             ],
@@ -78,7 +78,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 1,
+                    "k1": 4,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
@@ -92,7 +92,7 @@
         },
         {
             "dimensions": 3,
-            "ensemble": "A3",
+            "ensemble": "",
             "input_signals": [
                 "ET"
             ],
@@ -115,7 +115,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 1,
+                    "k1": 4,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
@@ -129,7 +129,7 @@
         },
         {
             "dimensions": 3,
-            "ensemble": "A4",
+            "ensemble": "",
             "input_signals": [
                 "ET"
             ],
@@ -152,7 +152,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 1,
+                    "k1": 4,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
@@ -166,7 +166,7 @@
         },
         {
             "dimensions": 3,
-            "ensemble": "A5",
+            "ensemble": "",
             "input_signals": [
                 "ET"
             ],
@@ -189,7 +189,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 1,
+                    "k1": 4,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
