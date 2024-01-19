@@ -204,9 +204,9 @@ int doProcessTextSequence(indk::NeuralNet *NN,
                 for (int j = 0; j < definitions.size(); j++) {
                     if (j == (int)related[r][1]) {
 //                        std::cout << r << " " << definitions[j] << " " << related[r][0] << std::endl;
-                        n -> doSignalSendEntry(definitions[j], related[r][0], n->getTime());
+                        n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), related[r][0], n->getTime());
                     } else {
-                        n -> doSignalSendEntry(definitions[j], 0, n->getTime());
+                        n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), 0, n->getTime());
                     }
                 }
                 pos = n -> getReceptor(0) -> getPos();
