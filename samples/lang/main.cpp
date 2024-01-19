@@ -220,17 +220,17 @@ int doProcessTextSequence(indk::NeuralNet *NN,
 //            dn -> setOutputMode(0);
         }
         int found = 0;
-//        std::vector<std::vector<float>> marks;
+        std::vector<std::vector<float>> marks;
 
-//        for (int r = 0; r < related.size(); r++) {
-//            marks.emplace_back();
-//            for (int j = 0; j < definitions.size(); j++) {
-//                if (j == (int)related[r][1]) marks.back().push_back(related[r][0]);
-//                else marks.back().push_back(0);
-//            }
-//        }
-//
-//        NN -> doRecognise(marks, true, {"SPACE_E1", "SPACE_E2", "SPACE_E3", "SPACE_E4", "SPACE_E5"});
+        for (int r = 0; r < related.size(); r++) {
+            marks.emplace_back();
+            for (int j = 0; j < definitions.size(); j++) {
+                if (j == (int)related[r][1]) marks.back().push_back(related[r][0]);
+                else marks.back().push_back(0);
+            }
+        }
+
+        NN -> doRecognise(marks, true, {"SPACE_E1", "SPACE_E2", "SPACE_E3", "SPACE_E4", "SPACE_E5"});
         auto patterns = NN -> doComparePatterns( "CONTEXT");
         for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
         auto r = std::min_element(patterns.begin(), patterns.end());

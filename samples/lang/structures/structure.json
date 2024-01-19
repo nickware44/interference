@@ -7,7 +7,12 @@
         "EV3",
         "EV4",
         "EV5",
-        "EV6"
+        "EV6",
+        "SPACE_E1",
+        "SPACE_E2",
+        "SPACE_E3",
+        "SPACE_E4",
+        "SPACE_E5"
     ],
     "name": "lang model",
     "neurons": [
@@ -437,11 +442,11 @@
             "dimensions": 3,
             "ensemble": "",
             "input_signals": [
-                "STATE",
-                "OBJECT",
-                "PROCESS",
-                "PLACE",
-                "PROPERTY"
+                "SPACE_E1",
+                "SPACE_E2",
+                "SPACE_E3",
+                "SPACE_E4",
+                "SPACE_E5"
             ],
             "latency": 0,
             "name": "_SPACE_INIT",
