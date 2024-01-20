@@ -78,7 +78,8 @@ std::vector<std::vector<float>> doBuildImageInputVector(std::vector<BMPImage> im
 auto doLearnVocabulary(indk::NeuralNet *NN,
                        const std::array<std::string, 5>& definitions,
                        const std::vector<std::string>& vocab) {
-    for (int i = 0; i < definitions.size(); i++) NN -> getNeuron("N"+std::to_string(i+1)) -> setOutputMode(1);
+    for (int i = 0; i < definitions.size(); i++)
+        NN -> getNeuron("N"+std::to_string(i+1)) -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
 
     // learn the vocabulary
     for (int i = 1; i <= vocab.size(); i++) {
@@ -109,28 +110,7 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
             n -> doSignalSendEntry("ET", (float)ch, n->getTime());
         }
         n -> doFinalize();
-        n -> setOutputMode(1);
-    }
-}
-
-auto doLearnVisuals(indk::NeuralNet *NN, const std::vector<std::string>& paths) {
-    for (int p = 0; p < paths.size(); p++) {
-        auto image = doReadBMP(paths[p]);
-        auto input = doBuildImageInputVector({image});
-        auto destination = "NV-"+std::to_string(p+2);
-        auto n = NN -> doReplicateNeuron("NV-1", destination, true);
-        NN -> doIncludeNeuronToEnsemble(n->getName(), "VISION");
-
-        for (auto& in: input) {
-            n -> doSignalSendEntry("EV1", in[0], n->getTime());
-            n -> doSignalSendEntry("EV2", in[1], n->getTime());
-            n -> doSignalSendEntry("EV3", in[2], n->getTime());
-            n -> doSignalSendEntry("EV4", in[3], n->getTime());
-            n -> doSignalSendEntry("EV5", in[4], n->getTime());
-            n -> doSignalSendEntry("EV6", in[5], n->getTime());
-        }
-        n -> doFinalize();
-        NN -> doAddNewOutput(destination);
+        n -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
     }
 }
 
@@ -151,10 +131,7 @@ auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type
         auto Y = NN -> doRecognise(data, true, {"ET"});
         auto patterns = NN -> doComparePatterns("DEFINITION");
         for (int i = 0; i < patterns.size(); i++) {
-            if (Y[i] > 0) {
-//                std::cout << word << " " << i << ". " << patterns[i] << " " << Y[i] << std::endl;
-                encoded.push_back({Y[i], static_cast<float>(i)});
-            }
+            if (Y[i] > 0) encoded.push_back({Y[i], static_cast<float>(i)});
         }
     }
     return encoded;
@@ -179,7 +156,6 @@ void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<flo
             if (pos) n -> getReceptor(0) -> getPos() -> setPosition(pos);
             for (int j = 0; j < DEFINITIONS_COUNT; j++) {
                 if (j == (int)encoded[r][1]) {
-//                        std::cout << r << " " << definitions[j] << " " << related[r][0] << std::endl;
                     n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), encoded[r][0], n->getTime());
                 } else {
                     n -> doSignalSendEntry("SPACE_E"+std::to_string(j+1), 0, n->getTime());
@@ -206,7 +182,6 @@ bool doReceiveResponse(indk::NeuralNet *NN, const std::vector<std::vector<float>
 
     NN -> doRecognise(marks, true, {"SPACE_E1", "SPACE_E2", "SPACE_E3", "SPACE_E4", "SPACE_E5"});
     auto patterns = NN -> doComparePatterns( "CONTEXT");
-//    for (int i = 0; i < patterns.size(); i++) std::cout << (i+1) << ". " << patterns[i] << std::endl;
     auto r = std::min_element(patterns.begin(), patterns.end());
     if (r != patterns.end() && *r >= 0 && *r < 10e-6) found = true;
 
@@ -234,24 +209,6 @@ void doProcessTextSequence(indk::NeuralNet *NN, std::string sequence, int &space
     }
 }
 
-auto doInputWave(indk::NeuralNet *NN, const std::vector<std::string>& names) {
-    for (const auto& name: names) {
-        auto n = NN -> getNeuron(name);
-        if (!n) continue;
-
-        n -> doPrepare();
-        for (int i = 0; i < n->getReceptorsCount(); i++)
-            n -> getReceptor(i) -> setPos(n->getReceptor(i)->getPos());
-
-        auto we = n -> getWaitingEntries();
-        for (const auto &e: we) {
-            n -> doSignalSendEntry(e, 100, n->getTime());
-        }
-        n -> doFinalize();
-        std::cout << name << " \t" << n->doSignalReceive().second << std::endl;
-    }
-}
-
 int main() {
     constexpr char STRUCTURE_PATH[128] = "structures/structure.json";
     constexpr char VOCAB_PATH[128] = "texts/vocab.txt";
@@ -262,7 +219,7 @@ int main() {
 
     // load neural network structure from file
     auto NN = new indk::NeuralNet(STRUCTURE_PATH);
-    NN -> doInterlinkInit(4408, 1);
+//    NN -> doInterlinkInit(4408, 1);
 //    indk::System::setVerbosityLevel(2);
     NN -> doPrepare();
 
@@ -280,7 +237,6 @@ int main() {
     int space = 1;
     auto T = getTimestampMS();
     doLearnVocabulary(NN, definitions, vocab);
-    doLearnVisuals(NN, {"images/1.bmp", "images/2.bmp"});
 
     // creating context
     doProcessTextSequence(NN, "The cat siting on the table.", space);
@@ -309,10 +265,8 @@ int main() {
     doProcessTextSequence(NN, "Are the other aliens coming for the cat?", space);
     std::cout << std::endl;
 
-    doInputWave(NN, {"_SPACE_1", "NV-2", "NV-3"});
-
-    NN -> doInterlinkSyncStructure();
-    NN -> doInterlinkSyncData();
+//    NN -> doInterlinkSyncStructure();
+//    NN -> doInterlinkSyncData();
 
     T = getTimestampMS() - T;
     std::cout << "Done in " << T << " ms" << std::endl;
