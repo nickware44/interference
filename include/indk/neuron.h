@@ -55,7 +55,19 @@ namespace indk {
             /// Processing of neuron is done.
             Computed,
         } States;
+
+        /**
+         * Neuron recognition output modes.
+         */
+        typedef enum {
+            /// During recognition, the neuron works in stream mode - the output signal is available at every tick.
+            OutputModeStream,
+            /// During recognition, the neuron works in latch mode - the output signal is available only if pattern difference is 0.
+            OutputModeLatch,
+        } OutputModes;
+
         typedef std::tuple<float, float> PatternDefinition;
+
         Neuron();
         Neuron(const indk::Neuron&);
         Neuron(unsigned int, unsigned int, int64_t, const std::vector<std::string>& InputSignals);

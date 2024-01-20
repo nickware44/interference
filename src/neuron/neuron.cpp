@@ -174,7 +174,7 @@ std::pair<int64_t, float> indk::Neuron::doSignalReceive(int64_t tT) {
     auto d = tlocal - tT;
 
     if (d > 0 && OutputSignalPointer-d >= 0) {
-        if (OutputMode == 1 && Learned) {
+        if (OutputMode == indk::Neuron::OutputModes::OutputModeLatch && Learned) {
             auto patterns = doComparePattern();
             if (std::get<0>(patterns) < 10e-6) {
 //                std::cout << Name << " p " << std::get<0>(patterns) << " " << OutputSignal[OutputSignalPointer-d] << std::endl;
