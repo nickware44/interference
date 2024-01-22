@@ -345,10 +345,10 @@ void indk::NeuralNet::doParseLinks(const EntryList& entries, const std::string& 
         return false;
     });
 
-    std::cout << std::endl;
-    for (auto l: Links) {
-        std::cerr << std::get<0>(l) << " -> " << std::get<1>(l) << " " << std::get<4>(l) << std::endl;
-    }
+//    std::cout << std::endl;
+//    for (auto l: Links) {
+//        std::cerr << std::get<0>(l) << " -> " << std::get<1>(l) << " " << std::get<4>(l) << std::endl;
+//    }
 
     PrepareID = id;
 }
