@@ -9,7 +9,6 @@
 
 #include <chrono>
 #include <iomanip>
-#include <utility>
 #include <vector>
 #include <iostream>
 #include <indk/system.h>

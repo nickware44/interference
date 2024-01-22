@@ -396,6 +396,11 @@ std::vector<float> indk::NeuralNet::doSignalTransfer(const std::vector<std::vect
             if (ne != -1) {
                 eentries.emplace_back(Entries[ne]);
                 eseq.append(e);
+                if (StateSyncEnabled) {
+                    for (auto &nname: Entries[ne].second) {
+                        nsync.push_back(nname);
+                    }
+                }
             }
         }
         doParseLinks(eentries, eseq);
