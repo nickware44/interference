@@ -258,7 +258,7 @@ int main() {
 
     // load neural network structure from file
     auto NN = new indk::NeuralNet(STRUCTURE_PATH);
-//    NN -> doInterlinkInit(4408, 1);
+    NN -> doInterlinkInit(4408, 1);
 //    indk::System::setVerbosityLevel(2);
     NN -> doPrepare();
 
@@ -276,6 +276,7 @@ int main() {
     int space = 1;
     auto T = getTimestampMS();
     doLearnVocabulary(NN, definitions, vocab);
+    doLearnVisuals(NN, {"images/mug.bmp", "images/jar.bmp", "images/duck.bmp"});
 
     // creating context
     doProcessTextSequence(NN, "The cat siting on the table.", space);
@@ -304,10 +305,10 @@ int main() {
     doProcessTextSequence(NN, "Are the other aliens coming for the cat?", space);
     std::cout << std::endl;
 
-    doInputWave(NN, {"_SPACE_1", "NV-2", "NV-3"});
+    doInputWave(NN, {"_SPACE_1", "NV-2", "NV-3", "NV-4"});
 
-//    NN -> doInterlinkSyncStructure();
-//    NN -> doInterlinkSyncData();
+    NN -> doInterlinkSyncStructure();
+    NN -> doInterlinkSyncData();
 
     T = getTimestampMS() - T;
     std::cout << "Done in " << T << " ms" << std::endl;
