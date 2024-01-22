@@ -14,7 +14,6 @@
 #include <indk/system.h>
 #include <indk/neuralnet.h>
 #include <fstream>
-#include "bmp.hpp"
 
 #define DEFINITIONS_COUNT 5
 
@@ -52,26 +51,6 @@ auto doLoadVocabulary(const std::string& path) {
     }
 
     return data;
-}
-
-std::vector<std::vector<float>> doBuildImageInputVector(std::vector<BMPImage> images) {
-    std::vector<std::vector<float>> input;
-    for (int d = 0; d < images[0].size(); d+=2) {
-        input.emplace_back();
-        for (int i = 0; i < images.size(); i++) {
-            for (int s = 0; s < 2; s++) {
-                float r = images[i][d+s][0];
-                float g = images[i][d+s][1];
-                float b = images[i][d+s][2];
-                auto rgbn = std::vector<float>({r/255, g/255, b/255});
-                auto HSI = RGB2HSI(rgbn[0], rgbn[1], rgbn[2]);
-                input.back().emplace_back(HSI[0]/(2*M_PI));
-                input.back().emplace_back(HSI[1]);
-                input.back().emplace_back(HSI[2]);
-            }
-        }
-    }
-    return input;
 }
 
 auto doLearnVocabulary(indk::NeuralNet *NN,
