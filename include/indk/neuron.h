@@ -39,7 +39,7 @@ namespace indk {
         float *OutputSignal;
         int64_t OutputSignalSize;
         int64_t OutputSignalPointer;
-        int NID;
+        int NID, OutputMode;
         bool Learned;
         std::vector<float> doCompareCheckpoints();
         std::string Name;
@@ -55,7 +55,19 @@ namespace indk {
             /// Processing of neuron is done.
             Computed,
         } States;
+
+        /**
+         * Neuron recognition output modes.
+         */
+        typedef enum {
+            /// During recognition, the neuron works in stream mode - the output signal is available at every tick.
+            OutputModeStream,
+            /// During recognition, the neuron works in latch mode - the output signal is available only if pattern difference is 0.
+            OutputModeLatch,
+        } OutputModes;
+
         typedef std::tuple<float, float> PatternDefinition;
+
         Neuron();
         Neuron(const indk::Neuron&);
         Neuron(unsigned int, unsigned int, int64_t, const std::vector<std::string>& InputSignals);
@@ -76,6 +88,8 @@ namespace indk {
         void doLinkOutput(const std::string&);
         void doClearOutputLinks();
         void doClearEntries();
+        void doAddEntryName(const std::string&);
+        void doCopyEntry(const std::string&, const std::string&);
         void doReplaceEntryName(const std::string&, const std::string&);
         void doReserveSignalBuffer(int64_t);
         void setTime(int64_t);
@@ -85,6 +99,7 @@ namespace indk {
         void setk2(float);
         void setk3(float);
         void setNID(int);
+        void setOutputMode(int);
         void setName(const std::string&);
         void setLearned(bool LearnedFlag);
         bool isLearned() const;

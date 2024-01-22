@@ -65,6 +65,12 @@ namespace indk {
         void doInterlinkSyncData();
         std::vector<float> doComparePatterns(int CompareFlag = indk::PatternCompareFlags::CompareDefault,
                                              int ProcessingMethod = indk::ScopeProcessingMethods::ProcessMin);
+        std::vector<float> doComparePatterns(const std::string& ename,
+                                             int CompareFlag = indk::PatternCompareFlags::CompareDefault,
+                                             int ProcessingMethod = indk::ScopeProcessingMethods::ProcessMin);
+        std::vector<float> doComparePatterns(std::vector<std::string> nnames,
+                                             int CompareFlag = indk::PatternCompareFlags::CompareDefault,
+                                             int ProcessingMethod = indk::ScopeProcessingMethods::ProcessMin);
         void doCreateNewScope();
         void doChangeScope(uint64_t);
         void doAddNewOutput(const std::string&);
@@ -72,17 +78,18 @@ namespace indk {
         void doReset();
         void doPrepare();
         void doStructurePrepare();
-        std::vector<float> doSignalTransfer(const std::vector<std::vector<float>>&, const std::string& ensemble = "");
-        void doSignalTransferAsync(const std::vector<std::vector<float>>&, const std::string& ensemble = "", const std::function<void(std::vector<float>)>& Callback = nullptr);
-        std::vector<float> doLearn(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true);
-        std::vector<float> doRecognise(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true);
-        void doLearnAsync(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true, const std::function<void(std::vector<float>)>& Callback = nullptr);
-        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::string& ensemble = "", bool prepare = true, const std::function<void(std::vector<float>)>& Callback = nullptr);
+        std::vector<float> doSignalTransfer(const std::vector<std::vector<float>>& X, const std::vector<std::string>& inputs = {});
+        void doSignalTransferAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr, const std::vector<std::string>& inputs = {});
+        std::vector<float> doLearn(const std::vector<std::vector<float>>&, bool prepare = true, const std::vector<std::string>& inputs = {});
+        std::vector<float> doRecognise(const std::vector<std::vector<float>>&, bool prepare = true, const std::vector<std::string>& inputs = {});
+        void doLearnAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr, bool prepare = true, const std::vector<std::string>& inputs = {});
+        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr, bool prepare = true, const std::vector<std::string>& inputs = {});
         std::vector<float> doSignalReceive();
-        void doReplicateNeuron(const std::string& from, const std::string& to, bool integrate);
+        indk::Neuron* doReplicateNeuron(const std::string& from, const std::string& to, bool integrate);
         void doDeleteNeuron(const std::string& name);
         void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);
         void doReserveSignalBuffer(int64_t L);
+        void doClearCache();
         void setStructure(std::ifstream&);
         void setStructure(const std::string &Str);
         void setLearned(bool);
