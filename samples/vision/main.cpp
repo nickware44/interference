@@ -60,7 +60,7 @@ int main() {
     std::ifstream structure(STRUCTURE_PATH);
     auto NN = new indk::NeuralNet(STRUCTURE_PATH);
     NN -> setStateSyncEnabled();
-    NN -> doInterlinkInit(4408);
+//    NN -> doInterlinkInit(4408, 1);
 
     // replicate neurons for classification
     for (int i = 2; i <= TEACH_COUNT; i++) NN -> doReplicateEnsemble("A1", "A"+std::to_string(i), true);
@@ -74,6 +74,8 @@ int main() {
 
     // load the images
     auto T = getTimestampMS();
+    uint64_t Ttotal = 0;
+
     std::vector<BMPImage> images;
     for (int b = 1; b <= TEACH_COUNT; b++) {
         auto image = doReadBMP(IMAGES_TEACHING_PATH+std::to_string(b)+".bmp");
@@ -93,7 +95,8 @@ int main() {
     T = getTimestampMS() - T;
 
     // Compute speed
-    auto S = (IMAGE_SIZE*TEACH_COUNT*24./1024/1024)*1000 / T;
+    auto S = (IMAGE_SIZE*TEACH_COUNT*24.f/1024/1024)*1000 / T;
+    float Stotal = 0;
     doLog("Teaching neural network", T, S);
 
     // recognize the images
@@ -105,11 +108,13 @@ int main() {
             auto rinput = doBuildInputVector({image});
 
             T = getTimestampMS();
-            NN -> doRecognise(rinput, "A1");
+            NN -> doRecognise(rinput, true, {"E1", "E2", "E3", "E4", "E5", "E6"});
             T = getTimestampMS() - T;
+            Ttotal += T;
 
             // Compute speed
             S = (IMAGE_SIZE*24./1024/1024)*1000 / T;
+            Stotal += S;
             doLog("Recognizing "+std::to_string(b)+"-"+std::to_string(e)+".bmp", T, S, false);
 
             auto patterns = NN -> doComparePatterns(indk::PatternCompareFlags::CompareNormalized);
@@ -129,5 +134,7 @@ int main() {
     std::cout << std::endl;
     std::cout << "================================== SUMMARY ==================================" << std::endl;
     std::cout << "Recognition accuracy: " << rcount/(TEST_COUNT*TEST_ELEMENTS) << " (" << rcount << "/" << TEST_COUNT*TEST_ELEMENTS << ")" << std::endl;
+    std::cout << "Recognition time: " << Ttotal << " ms" << std::endl;
+    std::cout << "Recognition speed: " << Stotal/(TEST_COUNT*TEST_ELEMENTS) << " mbit/s (" << 1000/(Ttotal/float(TEST_COUNT*TEST_ELEMENTS))  << " FPS)" << std::endl;
     return 0;
 }
