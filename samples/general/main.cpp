@@ -98,6 +98,7 @@ auto doLearnVocabulary(indk::NeuralNet *NN,
             }
         }
 
+        NN -> doReplicateNeuron("ND-1", "ND-"+std::to_string(i+1), true);
         auto n = NN -> getNeuron(destination);
         if (!n) break;
 

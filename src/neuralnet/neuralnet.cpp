@@ -539,8 +539,16 @@ indk::Neuron* indk::NeuralNet::doReplicateNeuron(const std::string& from, const 
     PrepareID = "";
 
     auto n = Neurons.find(from);
-    if (n == Neurons.end()) return nullptr;
-    if (Neurons.find(to) != Neurons.end()) return nullptr;
+    if (n == Neurons.end()) {
+        if (indk::System::getVerbosityLevel() > 0)
+            std::cout << "Neuron replication error: element " << from << " not found" << std::endl;
+        return nullptr;
+    }
+    if (Neurons.find(to) != Neurons.end()) {
+        if (indk::System::getVerbosityLevel() > 0)
+            std::cout << "Neuron replication error: element " << to << " already exists" << std::endl;
+        return nullptr;
+    }
 
     auto nnew = new indk::Neuron(*n->second);
     nnew -> setName(to);
