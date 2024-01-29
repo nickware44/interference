@@ -8,12 +8,8 @@
         "EV4",
         "EV5",
         "EV6",
-        "SPACE_E1",
-        "SPACE_E2",
-        "SPACE_E3",
-        "SPACE_E4",
-        "SPACE_E5",
-        "ED"
+        "ED",
+        "ES"
     ],
     "name": "general model",
     "neurons": [
@@ -42,7 +38,7 @@
             "synapses": [
                 {
                     "entry": 0,
-                    "k1": 4,
+                    "k1": 6,
                     "neurotransmitter": "activation",
                     "position": [
                         50,
@@ -55,152 +51,28 @@
             ]
         },
         {
-            "dimensions": 3,
+            "dimensions": 2,
             "ensemble": "",
             "input_signals": [
-                "ET"
+                "ED"
             ],
             "latency": 0,
-            "name": "N2",
-            "receptors": [
-                {
-                    "count": 2,
-                    "data_scopes": [],
-                    "position": [
-                        50,
-                        50,
-                        0
-                    ],
-                    "radius": 20,
-                    "type": "cluster"
-                }
-            ],
+            "name": "ND",
+            "receptors": [],
             "size": 100,
-            "synapses": [
-                {
-                    "entry": 0,
-                    "k1": 4,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        50,
-                        50,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "cluster"
-                }
-            ]
+            "synapses": []
         },
         {
-            "dimensions": 3,
+            "dimensions": 2,
             "ensemble": "",
             "input_signals": [
-                "ET"
+                "ND"
             ],
             "latency": 0,
-            "name": "N3",
-            "receptors": [
-                {
-                    "count": 2,
-                    "data_scopes": [],
-                    "position": [
-                        50,
-                        50,
-                        0
-                    ],
-                    "radius": 20,
-                    "type": "cluster"
-                }
-            ],
+            "name": "ND-1",
+            "receptors": [],
             "size": 100,
-            "synapses": [
-                {
-                    "entry": 0,
-                    "k1": 4,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        50,
-                        50,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "cluster"
-                }
-            ]
-        },
-        {
-            "dimensions": 3,
-            "ensemble": "",
-            "input_signals": [
-                "ET"
-            ],
-            "latency": 0,
-            "name": "N4",
-            "receptors": [
-                {
-                    "count": 2,
-                    "data_scopes": [],
-                    "position": [
-                        50,
-                        50,
-                        0
-                    ],
-                    "radius": 20,
-                    "type": "cluster"
-                }
-            ],
-            "size": 100,
-            "synapses": [
-                {
-                    "entry": 0,
-                    "k1": 4,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        50,
-                        50,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "cluster"
-                }
-            ]
-        },
-        {
-            "dimensions": 3,
-            "ensemble": "",
-            "input_signals": [
-                "ET"
-            ],
-            "latency": 0,
-            "name": "N5",
-            "receptors": [
-                {
-                    "count": 2,
-                    "data_scopes": [],
-                    "position": [
-                        50,
-                        50,
-                        0
-                    ],
-                    "radius": 20,
-                    "type": "cluster"
-                }
-            ],
-            "size": 100,
-            "synapses": [
-                {
-                    "entry": 0,
-                    "k1": 4,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        50,
-                        50,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "cluster"
-                }
-            ]
+            "synapses": []
         },
         {
             "dimensions": 3,
@@ -258,196 +130,7 @@
             "dimensions": 3,
             "ensemble": "",
             "input_signals": [
-                "N2"
-            ],
-            "latency": 0,
-            "name": "OBJECT",
-            "receptors": [
-                {
-                    "count": 10,
-                    "data_scopes": [],
-                    "position": [
-                        4,
-                        4,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                }
-            ],
-            "size": 10,
-            "synapses": [
-                {
-                    "entry": 0,
-                    "k1": 100,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        5,
-                        5,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                }
-            ]
-        },
-        {
-            "dimensions": 3,
-            "ensemble": "",
-            "input_signals": [
-                "N4"
-            ],
-            "latency": 0,
-            "name": "PLACE",
-            "receptors": [
-                {
-                    "count": 10,
-                    "data_scopes": [],
-                    "position": [
-                        4,
-                        4,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                }
-            ],
-            "size": 10,
-            "synapses": [
-                {
-                    "entry": 0,
-                    "k1": 100,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        5,
-                        5,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                }
-            ]
-        },
-        {
-            "dimensions": 3,
-            "ensemble": "",
-            "input_signals": [
-                "N3"
-            ],
-            "latency": 0,
-            "name": "PROCESS",
-            "receptors": [
-                {
-                    "count": 10,
-                    "data_scopes": [],
-                    "position": [
-                        4,
-                        4,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                }
-            ],
-            "size": 10,
-            "synapses": [
-                {
-                    "entry": 0,
-                    "k1": 100,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        5,
-                        5,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                }
-            ]
-        },
-        {
-            "dimensions": 3,
-            "ensemble": "",
-            "input_signals": [
-                "N5"
-            ],
-            "latency": 0,
-            "name": "PROPERTY",
-            "receptors": [
-                {
-                    "count": 10,
-                    "data_scopes": [],
-                    "position": [
-                        4,
-                        4,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                }
-            ],
-            "size": 10,
-            "synapses": [
-                {
-                    "entry": 0,
-                    "k1": 100,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        5,
-                        5,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                }
-            ]
-        },
-        {
-            "dimensions": 3,
-            "ensemble": "",
-            "input_signals": [
-                "N1"
-            ],
-            "latency": 0,
-            "name": "STATE",
-            "receptors": [
-                {
-                    "count": 10,
-                    "data_scopes": [],
-                    "position": [
-                        4,
-                        4,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                }
-            ],
-            "size": 10,
-            "synapses": [
-                {
-                    "entry": 0,
-                    "k1": 100,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        5,
-                        5,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                }
-            ]
-        },
-        {
-            "dimensions": 3,
-            "ensemble": "",
-            "input_signals": [
-                "SPACE_E1",
-                "SPACE_E2",
-                "SPACE_E3",
-                "SPACE_E4",
-                "SPACE_E5"
+                "ES"
             ],
             "latency": 0,
             "name": "_SPACE_INIT",
@@ -471,94 +154,18 @@
                     "k1": 100,
                     "neurotransmitter": "activation",
                     "position": [
-                        0,
-                        0,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                },
-                {
-                    "entry": 1,
-                    "k1": 100,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        0,
-                        10,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                },
-                {
-                    "entry": 2,
-                    "k1": 100,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        7,
-                        0,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                },
-                {
-                    "entry": 3,
-                    "k1": 100,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        3,
-                        10,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "single"
-                },
-                {
-                    "entry": 4,
-                    "k1": 100,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        10,
-                        5,
+                        4,
+                        4,
                         0
                     ],
                     "radius": 10,
                     "type": "single"
                 }
             ]
-        },
-        {
-            "dimensions": 2,
-            "ensemble": "",
-            "input_signals": [
-                "ED"
-            ],
-            "latency": 0,
-            "name": "ND",
-            "receptors": [],
-            "size": 100,
-            "synapses": []
-        },
-        {
-            "dimensions": 2,
-            "ensemble": "",
-            "input_signals": [
-                "ND"
-            ],
-            "latency": 0,
-            "name": "ND-1",
-            "receptors": [],
-            "size": 100,
-            "synapses": []
         }
     ],
     "output_signals": [
-        "STATE",
-        "OBJECT",
-        "PROCESS",
-        "PLACE",
-        "PROPERTY",
+        "N1",
         "ND-1"
     ],
     "version": "1.1"

@@ -580,7 +580,7 @@ indk::Neuron* indk::NeuralNet::doReplicateNeuron(const std::string& from, const 
 //            if (found) break;
 //        }
     } else {
-        nnew ->  doClearEntries();
+//        nnew ->  doClearEntries();
     }
     return nnew;
 }
