@@ -78,17 +78,12 @@ auto doLoadVocabulary(const std::string& path) {
 void doLearnVocabulary(indk::NeuralNet *NN,
                        const std::array<std::string, 5>& definitions,
                        const std::vector<std::string>& vocab) {
-    auto n = NN -> getNeuron("N1");
-    if (!n) return;
-
-    n -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
-
     // learn the vocabulary
     for (int i = 1; i <= vocab.size(); i++) {
         const auto& item = vocab[i-1];
 
         std::string word = item.substr(0, item.find(';'));
-//        std::string definition = item.substr(item.find(';')+1);
+        std::string definition = item.substr(item.find(';')+1);
 //        std::string source, destination;
 
 //        for (int d = 0; d < definitions.size(); d++) {
@@ -108,6 +103,11 @@ void doLearnVocabulary(indk::NeuralNet *NN,
 //        auto dn = NN -> getNeuron(n->getLinkOutput()[0]);
 //        dn -> doCopyEntry(source, n->getName());
 //        n -> doLinkOutput(dn->getName());
+
+        auto n = NN -> getNeuron(definition);
+        if (!n) return;
+
+        n -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
         n -> doPrepare();
         for (const auto& ch: word) {
             n -> doSignalSendEntry("ET", (float)ch, n->getTime());
@@ -115,7 +115,8 @@ void doLearnVocabulary(indk::NeuralNet *NN,
         n -> doCreateNewScope();
 //        n -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
     }
-    n -> doFinalize();
+
+    for (auto &d: definitions) NN -> getNeuron(d) -> doFinalize();
 }
 
 auto doLearnVisuals(indk::NeuralNet *NN, const std::vector<std::string>& paths) {
@@ -272,13 +273,13 @@ int main() {
     doLearnVisuals(NN, {"images/mug.bmp", "images/jar.bmp", "images/duck.bmp"});
 
     // creating context
-    doProcessTextSequence(NN, "The cat siting on the table.", space);
-    doProcessTextSequence(NN, "The cat is black and the table is wooden.", space);
-    doProcessTextSequence(NN, "Blue light falls from the window.", space);
-    doProcessTextSequence(NN, "The cat is also half blue.", space);
-    doProcessTextSequence(NN, "The cat is alien.", space);
-    doProcessTextSequence(NN, "Other aliens are coming for the cat.", space);
-    std::cout << std::endl;
+//    doProcessTextSequence(NN, "The cat siting on the table.", space);
+//    doProcessTextSequence(NN, "The cat is black and the table is wooden.", space);
+//    doProcessTextSequence(NN, "Blue light falls from the window.", space);
+//    doProcessTextSequence(NN, "The cat is also half blue.", space);
+//    doProcessTextSequence(NN, "The cat is alien.", space);
+//    doProcessTextSequence(NN, "Other aliens are coming for the cat.", space);
+//    std::cout << std::endl;
 //
 //    // checking
 //    doProcessTextSequence(NN, "Is the cat gray?", space);

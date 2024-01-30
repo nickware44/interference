@@ -14,43 +14,6 @@
     "name": "general model",
     "neurons": [
         {
-            "dimensions": 3,
-            "ensemble": "",
-            "input_signals": [
-                "ET"
-            ],
-            "latency": 0,
-            "name": "N1",
-            "receptors": [
-                {
-                    "count": 2,
-                    "data_scopes": [],
-                    "position": [
-                        50,
-                        50,
-                        0
-                    ],
-                    "radius": 20,
-                    "type": "cluster"
-                }
-            ],
-            "size": 100,
-            "synapses": [
-                {
-                    "entry": 0,
-                    "k1": 6,
-                    "neurotransmitter": "activation",
-                    "position": [
-                        50,
-                        50,
-                        0
-                    ],
-                    "radius": 10,
-                    "type": "cluster"
-                }
-            ]
-        },
-        {
             "dimensions": 2,
             "ensemble": "",
             "input_signals": [
@@ -162,10 +125,199 @@
                     "type": "single"
                 }
             ]
+        },
+        {
+            "dimensions": 3,
+            "ensemble": "",
+            "input_signals": [
+                "ET"
+            ],
+            "latency": 0,
+            "name": "STATE",
+            "receptors": [
+                {
+                    "count": 2,
+                    "data_scopes": [],
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 20,
+                    "type": "cluster"
+                }
+            ],
+            "size": 100,
+            "synapses": [
+                {
+                    "entry": 0,
+                    "k1": 6,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "cluster"
+                }
+            ]
+        },
+        {
+            "dimensions": 3,
+            "ensemble": "",
+            "input_signals": [
+                "ET"
+            ],
+            "latency": 0,
+            "name": "OBJECT",
+            "receptors": [
+                {
+                    "count": 2,
+                    "data_scopes": [],
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 20,
+                    "type": "cluster"
+                }
+            ],
+            "size": 100,
+            "synapses": [
+                {
+                    "entry": 0,
+                    "k1": 6,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "cluster"
+                }
+            ]
+        },
+        {
+            "dimensions": 3,
+            "ensemble": "",
+            "input_signals": [
+                "ET"
+            ],
+            "latency": 0,
+            "name": "PROCESS",
+            "receptors": [
+                {
+                    "count": 2,
+                    "data_scopes": [],
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 20,
+                    "type": "cluster"
+                }
+            ],
+            "size": 100,
+            "synapses": [
+                {
+                    "entry": 0,
+                    "k1": 6,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "cluster"
+                }
+            ]
+        },
+        {
+            "dimensions": 3,
+            "ensemble": "",
+            "input_signals": [
+                "ET"
+            ],
+            "latency": 0,
+            "name": "PLACE",
+            "receptors": [
+                {
+                    "count": 2,
+                    "data_scopes": [],
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 20,
+                    "type": "cluster"
+                }
+            ],
+            "size": 100,
+            "synapses": [
+                {
+                    "entry": 0,
+                    "k1": 6,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "cluster"
+                }
+            ]
+        },
+        {
+            "dimensions": 3,
+            "ensemble": "",
+            "input_signals": [
+                "ET"
+            ],
+            "latency": 0,
+            "name": "PROPERTY",
+            "receptors": [
+                {
+                    "count": 2,
+                    "data_scopes": [],
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 20,
+                    "type": "cluster"
+                }
+            ],
+            "size": 100,
+            "synapses": [
+                {
+                    "entry": 0,
+                    "k1": 6,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "cluster"
+                }
+            ]
         }
     ],
     "output_signals": [
-        "N1",
+        "STATE",
+        "OBJECT",
+        "PROCESS",
+        "PLACE",
+        "PROPERTY",
         "ND-1"
     ],
     "version": "1.1"
