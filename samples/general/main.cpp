@@ -107,16 +107,18 @@ void doLearnVocabulary(indk::NeuralNet *NN,
         auto n = NN -> getNeuron(definition);
         if (!n) return;
 
-        n -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
         n -> doPrepare();
         for (const auto& ch: word) {
             n -> doSignalSendEntry("ET", (float)ch, n->getTime());
         }
         n -> doCreateNewScope();
-//        n -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
     }
 
-    for (auto &d: definitions) NN -> getNeuron(d) -> doFinalize();
+    for (auto &d: definitions) {
+        auto n = NN -> getNeuron(d);
+        n -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
+        n -> doFinalize();
+    }
 }
 
 auto doLearnVisuals(indk::NeuralNet *NN, const std::vector<std::string>& paths) {
@@ -155,8 +157,13 @@ auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type
         }
 
         auto Y = NN -> doRecognise(data, true, {"ET"});
-//        std::cout << Y[0] << std::endl;
-        if (!Y.empty() && Y[0] > 0) encoded.push_back({Y[0], static_cast<float>(0)});
+
+        for (int i = 0; i < DEFINITIONS_COUNT; i++) {
+            if (Y.size() > i && Y[i] > 0) {
+//                std::cout << i << " " << Y[i] << std::endl;
+                encoded.push_back({Y[i], static_cast<float>(i)});
+            };
+        }
     }
     return encoded;
 }
@@ -172,13 +179,27 @@ void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<flo
 
     std::cout << encoded.size() << std::endl;
 
+    // rules
+//    std::vector<std::pair<std::string, std::string>> rules;
+//    rules.emplace_back("OBJECT", "PROPERTY");
+//    rules.emplace_back("OBJECT", "PLACE");
+//    rules.emplace_back("OBJECT", "PROCESS");
+//    rules.emplace_back("PLACE", "OBJECT");
+//    rules.emplace_back("PROCESS", "PROPERTY");
+//    rules.emplace_back("PROCESS", "PLACE");
+
     for (int r = 0; r < encoded.size(); r++) {
         n -> doCreateNewScope();
         n -> doPrepare();
         auto dn = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space)+"_"+std::to_string(r), false);
-        dn -> doReplaceEntryName("ES", n->getName());
-        n -> doLinkOutput(dn->getName());
+
+        if (encoded[r][1] == 1) {
+            dn -> doReplaceEntryName("ES", n->getName());
+            n -> doLinkOutput(dn->getName());
+        }
+
         n -> doSignalSendEntry("ES", encoded[r][0], n->getTime());
+        std::cout <<  encoded[r][0] << " " << encoded[r][1] << std::endl;
     }
     n -> doFinalize();
 }
@@ -273,7 +294,7 @@ int main() {
     doLearnVisuals(NN, {"images/mug.bmp", "images/jar.bmp", "images/duck.bmp"});
 
     // creating context
-//    doProcessTextSequence(NN, "The cat siting on the table.", space);
+    doProcessTextSequence(NN, "The cat siting on the table.", space);
 //    doProcessTextSequence(NN, "The cat is black and the table is wooden.", space);
 //    doProcessTextSequence(NN, "Blue light falls from the window.", space);
 //    doProcessTextSequence(NN, "The cat is also half blue.", space);
