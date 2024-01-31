@@ -169,6 +169,16 @@ auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type
 }
 
 void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<float>>& encoded, int space) {
+    // rules
+    enum {STATE, OBJECT, PROCESS, PLACE, PROPERTY};
+    std::vector<std::pair<int, std::vector<int>>> rules;
+    rules.emplace_back(STATE, std::vector<int>{});
+    rules.emplace_back(OBJECT, std::vector<int>{PROPERTY, PLACE, PROCESS});
+    rules.emplace_back(PROCESS, std::vector<int>{PROPERTY, PLACE, PROCESS});
+    rules.emplace_back(PLACE, std::vector<int>{OBJECT});
+    rules.emplace_back(PROPERTY, std::vector<int>{});
+
+
     NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space), true);
     auto n = NN -> getNeuron("_SPACE_"+std::to_string(space));
     if (!n) return;
@@ -179,27 +189,26 @@ void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<flo
 
     std::cout << encoded.size() << std::endl;
 
-    // rules
-//    std::vector<std::pair<std::string, std::string>> rules;
-//    rules.emplace_back("OBJECT", "PROPERTY");
-//    rules.emplace_back("OBJECT", "PLACE");
-//    rules.emplace_back("OBJECT", "PROCESS");
-//    rules.emplace_back("PLACE", "OBJECT");
-//    rules.emplace_back("PROCESS", "PROPERTY");
-//    rules.emplace_back("PROCESS", "PLACE");
-
+    bool swap = false;
+    indk::Neuron *nprev = nullptr;
     for (int r = 0; r < encoded.size(); r++) {
         n -> doCreateNewScope();
         n -> doPrepare();
         auto dn = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space)+"_"+std::to_string(r), false);
 
-        if (encoded[r][1] == 1) {
+        if (!r && (encoded[r][1] == PROPERTY || encoded[r][1] == PROCESS))
+            swap = true;
+
+        if (!r && encoded[r][1] == OBJECT) {
             dn -> doReplaceEntryName("ES", n->getName());
             n -> doLinkOutput(dn->getName());
+        } else {
+
         }
 
         n -> doSignalSendEntry("ES", encoded[r][0], n->getTime());
         std::cout <<  encoded[r][0] << " " << encoded[r][1] << std::endl;
+        nprev = dn;
     }
     n -> doFinalize();
 }
