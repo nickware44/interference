@@ -197,10 +197,22 @@ void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<flo
                 l2 -> doReplaceEntryName("ES", l1->getName());
                 fname = l1->getName();
             } else
-                l2 ->doCopyEntry(fname, l1->getName());
+                l2 -> doCopyEntry(fname, l1->getName());
             l1 -> doLinkOutput(l2->getName());
 
             l0 -> doSignalSendEntry("ES", encoded[r][0], l0->getTime());
+
+            l1 -> setLambda(1);
+            l1 -> doReset();
+            l1 -> doCreateNewScope();
+            l1 -> doSignalSendEntry(l0->getName(), encoded[r][0], l1->getTime());
+            l1 -> doFinalize();
+        } else {
+//            auto l1 = NN -> getNeuron(ne->second);
+//            if (!l1) continue;
+//            l1 -> doCreateNewScope();
+//            l1 -> doPrepare();
+//            l1 -> doSignalSendEntry(l0->getName(), encoded[r][0], l1->getTime());
         }
         std::cout << definitions[encoded[r][1]] << " ";
 //        std::cout <<  encoded[r][0] << " " << encoded[r][1] << std::endl;
