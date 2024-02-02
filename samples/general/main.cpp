@@ -166,6 +166,7 @@ auto doRecognizeInput(indk::NeuralNet *NN, std::vector<std::vector<float>> &enco
 }
 
 void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<float>>& encoded, int space, const std::array<std::string, DEFINITIONS_COUNT>& definitions) {
+    enum {STATE, OBJECT, PROCESS, PLACE, PROPERTY};
     auto l0 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space)+"_L0", true);
     auto l2 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space)+"_L2", false);
     if (!l0 || !l2) return;
@@ -179,16 +180,18 @@ void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<flo
 //    std::cout << encoded.size() << std::endl;
     std::string fname;
     for (int r = 0; r < encoded.size(); r++) {
+        if (encoded[r][0] == -1) continue;
         auto code = encoded[r][0];
         auto ne = std::find_if(added.begin(), added.end(), [code](const std::pair<float, std::string>& e){
             return std::fabs(e.first-code) < 10e-6;
         });
 
+        indk::Neuron *l1;
         if (ne == added.end()) {
             l0 -> doCreateNewScope();
             l0 -> doPrepare();
 
-            auto l1 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space)+"_"+std::to_string(r), false);
+            l1 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(space)+"_"+std::to_string(r), false);
             l1 -> doReplaceEntryName("ES", l0->getName());
             added.emplace_back(code, l1->getName());
             l0 -> doLinkOutput(l1->getName());
@@ -206,15 +209,21 @@ void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<flo
             l1 -> doReset();
             l1 -> doCreateNewScope();
             l1 -> doSignalSendEntry(l0->getName(), encoded[r][0], l1->getTime());
-            l1 -> doFinalize();
+//            l1 -> doFinalize();
         } else {
-//            auto l1 = NN -> getNeuron(ne->second);
-//            if (!l1) continue;
-//            l1 -> doCreateNewScope();
-//            l1 -> doPrepare();
-//            l1 -> doSignalSendEntry(l0->getName(), encoded[r][0], l1->getTime());
+            l1 = NN -> getNeuron(ne->second);
+            if (!l1) continue;
         }
-        std::cout << definitions[encoded[r][1]] << " ";
+
+        if (r-1 >= 0 && encoded[r-1][0] != -1) {
+//            std::cout << r-1 << " " << encoded[r-1][0] << std::endl;
+            l1 -> doCreateNewScope();
+            l1 -> doPrepare();
+            for (int i = r-1; i <= r; i++)
+                l1 -> doSignalSendEntry(l0->getName(), encoded[i][0], l1->getTime());
+        }
+
+//        std::cout << definitions[encoded[r][1]] << " " << std::endl;
 //        std::cout <<  encoded[r][0] << " " << encoded[r][1] << std::endl;
     }
     std::cout << std::endl;
@@ -251,6 +260,7 @@ void doCreateSequenceContext(indk::NeuralNet *NN, const std::string& sequence, i
 
     for (const auto& str: sentences) {
         doRecognizeInput(NN, encoded, str, 0);
+        encoded.push_back({-1, -1});
     }
 
     doCreateContextSpace(NN, encoded, space, definitions);
