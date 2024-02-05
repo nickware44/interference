@@ -179,8 +179,12 @@ void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<flo
 
 //    std::cout << encoded.size() << std::endl;
     std::string fname;
+    int start = 0;
     for (int r = 0; r < encoded.size(); r++) {
-        if (encoded[r][0] == -1) continue;
+        if (encoded[r][0] == -1) {
+            start = r;
+            continue;
+        }
         auto code = encoded[r][0];
         auto ne = std::find_if(added.begin(), added.end(), [code](const std::pair<float, std::string>& e){
             return std::fabs(e.first-code) < 10e-6;
@@ -219,7 +223,7 @@ void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<flo
 //            std::cout << r-1 << " " << encoded[r-1][0] << std::endl;
             l1 -> doCreateNewScope();
             l1 -> doPrepare();
-            for (int i = r-1; i <= r; i++)
+            for (int i = start; i <= r; i++)
                 l1 -> doSignalSendEntry(l0->getName(), encoded[i][0], l1->getTime());
         }
 
