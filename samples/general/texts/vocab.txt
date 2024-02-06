@@ -1,4 +1,5 @@
-color;PROPERTY
+color;OBJECT
+colors;OBJECT
 black;PROPERTY
 gray;PROPERTY
 white;PROPERTY
@@ -27,3 +28,5 @@ on;PLACE
 under;PLACE
 at;PLACE
 from;PLACE
+and;LOGIC
+or;LOGIC

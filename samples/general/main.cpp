@@ -16,7 +16,7 @@
 #include <fstream>
 #include "bmp.hpp"
 
-#define DEFINITIONS_COUNT 5
+#define DEFINITIONS_COUNT 6
 
 uint64_t getTimestampMS() {
     return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().
@@ -75,8 +75,26 @@ auto doLoadVocabulary(const std::string& path) {
     return data;
 }
 
+auto doLoadRules(const std::string& path) {
+    std::vector<std::string> data;
+
+    std::ifstream f(path);
+    if (!f.is_open()) {
+        std::cerr << "Can't load the rules file" << std::endl;
+        return std::vector<std::string>();
+    }
+    while (!f.eof()) {
+        std::string rstr;
+        getline(f, rstr);
+
+        data.push_back(rstr);
+    }
+
+    return data;
+}
+
 void doLearnVocabulary(indk::NeuralNet *NN,
-                       const std::array<std::string, 5>& definitions,
+                       const std::array<std::string, DEFINITIONS_COUNT>& definitions,
                        const std::vector<std::string>& vocab) {
     // learn the vocabulary
     for (int i = 1; i <= vocab.size(); i++) {
@@ -84,25 +102,6 @@ void doLearnVocabulary(indk::NeuralNet *NN,
 
         std::string word = item.substr(0, item.find(';'));
         std::string definition = item.substr(item.find(';')+1);
-//        std::string source, destination;
-
-//        for (int d = 0; d < definitions.size(); d++) {
-//            if (definition == definitions[d]) {
-//                source = "N"+std::to_string(d+1);
-//                destination = "N"+std::to_string(definitions.size()+i);
-//                NN -> doReplicateNeuron(source, destination, true);
-//                break;
-//            }
-//        }
-
-//        NN -> doReplicateNeuron("ND-1", "ND-"+std::to_string(i+1), true);
-//        auto n = NN -> getNeuron(destination);
-
-
-//        NN -> doIncludeNeuronToEnsemble(n->getName(), "TEXT");
-//        auto dn = NN -> getNeuron(n->getLinkOutput()[0]);
-//        dn -> doCopyEntry(source, n->getName());
-//        n -> doLinkOutput(dn->getName());
 
         auto n = NN -> getNeuron(definition);
         if (!n) return;
@@ -146,7 +145,10 @@ auto doRecognizeInput(indk::NeuralNet *NN, std::vector<std::vector<float>> &enco
     auto words = doStrSplit(sequence, " ", true);
 
     // recognize sequence
-    for (const auto &word: words) {
+    for (auto &word: words) {
+        if (word.back() == ',') {
+            word = word.substr(0, word.size()-1);
+        }
         std::vector<std::vector<float>> data;
 
         for (const auto& ch: word) {
@@ -182,6 +184,7 @@ void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<flo
     int start = 0;
     for (int r = 0; r < encoded.size(); r++) {
         if (encoded[r][0] == -1) {
+            std::cout << ".";
             start = r;
             continue;
         }
@@ -213,27 +216,35 @@ void doCreateContextSpace(indk::NeuralNet *NN, const std::vector<std::vector<flo
             l1 -> doReset();
             l1 -> doCreateNewScope();
             l1 -> doSignalSendEntry(l0->getName(), encoded[r][0], l1->getTime());
-//            l1 -> doFinalize();
         } else {
             l1 = NN -> getNeuron(ne->second);
             if (!l1) continue;
         }
 
         if (r-1 >= 0 && encoded[r-1][0] != -1) {
-//            std::cout << r-1 << " " << encoded[r-1][0] << std::endl;
+//            std::cout << start << " " << encoded[r-1][0] << std::endl;
             l1 -> doCreateNewScope();
             l1 -> doPrepare();
             for (int i = start; i <= r; i++)
                 l1 -> doSignalSendEntry(l0->getName(), encoded[i][0], l1->getTime());
         }
 
-//        std::cout << definitions[encoded[r][1]] << " " << std::endl;
+        std::cout << " " << definitions[encoded[r][1]];
 //        std::cout <<  encoded[r][0] << " " << encoded[r][1] << std::endl;
     }
     std::cout << std::endl;
 
     l0 -> doFinalize();
     l0 -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
+
+    for (auto &a: added) {
+        auto n = NN -> getNeuron(a.second);
+        if (n) {
+            n -> doFinalize();
+        }
+    }
+
+    l2 -> doFinalize();
 }
 
 bool doReceiveResponse(indk::NeuralNet *NN, const std::vector<std::vector<float>>& encoded) {
@@ -268,6 +279,7 @@ void doCreateSequenceContext(indk::NeuralNet *NN, const std::string& sequence, i
     }
 
     doCreateContextSpace(NN, encoded, space, definitions);
+    space++;
 }
 
 void doProcessTextSequence(indk::NeuralNet *NN, const std::string& sequence, int &space, const std::array<std::string, DEFINITIONS_COUNT>& definitions) {
@@ -306,10 +318,12 @@ auto doInputWave(indk::NeuralNet *NN, const std::vector<std::string>& names) {
 int main() {
     constexpr char STRUCTURE_PATH[128] = "structures/structure.json";
     constexpr char VOCAB_PATH[128] = "texts/vocab.txt";
-    std::array<std::string, DEFINITIONS_COUNT> definitions = {"STATE", "OBJECT", "PROCESS", "PLACE", "PROPERTY"};
+    constexpr char RULES_PATH[128] = "texts/rules.txt";
+    std::array<std::string, DEFINITIONS_COUNT> definitions = {"STATE", "OBJECT", "PROCESS", "PLACE", "PROPERTY", "LOGIC"};
 
     // load vocabulary from text file
     auto vocab = doLoadVocabulary(VOCAB_PATH);
+    auto rules = doLoadRules(RULES_PATH);
 
     // load neural network structure from file
     auto NN = new indk::NeuralNet(STRUCTURE_PATH);
@@ -334,6 +348,8 @@ int main() {
     doLearnVisuals(NN, {"images/mug.bmp", "images/jar.bmp", "images/duck.bmp"});
 
     // creating context
+    doCreateSequenceContext(NN, "The color can be black, gray, white, orange and blue.", space, definitions);
+
     doCreateSequenceContext(NN, "The cat siting on the table."
                                         "The cat is black and the table is wooden."
                                         "Blue light falls from the window."
