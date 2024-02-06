@@ -9,7 +9,8 @@
         "EV5",
         "EV6",
         "ED",
-        "ES"
+        "ES",
+        "ER"
     ],
     "name": "general model",
     "neurons": [
@@ -347,6 +348,42 @@
                     "type": "cluster"
                 }
             ]
+        },
+        {
+            "dimensions": 3,
+            "ensemble": "",
+            "input_signals": [
+                "ER"
+            ],
+            "latency": 0,
+            "name": "NR",
+            "receptors": [
+                {
+                    "count": 10,
+                    "position": [
+                        50,
+                        50,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "single"
+                }
+            ],
+            "size": 100,
+            "synapses": [
+                {
+                    "entry": 0,
+                    "k1": 500,
+                    "neurotransmitter": "activation",
+                    "position": [
+                        40,
+                        40,
+                        0
+                    ],
+                    "radius": 10,
+                    "type": "single"
+                }
+            ]
         }
     ],
     "output_signals": [
@@ -356,7 +393,8 @@
         "PLACE",
         "PROPERTY",
         "LOGIC",
-        "ND-1"
+        "ND-1",
+        "NR"
     ],
     "version": "1.1"
 }

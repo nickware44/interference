@@ -93,6 +93,32 @@ auto doLoadRules(const std::string& path) {
     return data;
 }
 
+void doLearnRules(indk::NeuralNet *NN,
+                       const std::array<std::string, DEFINITIONS_COUNT>& definitions,
+                       const std::vector<std::string>& rules) {
+    // learn the rules
+    auto n = NN -> getNeuron("NR");
+    if (!n) return;
+
+    for (int i = 1; i <= rules.size(); i++) {
+        const auto& item = rules[i-1];
+        auto rule = doStrSplit(item, ";", true);
+
+        n -> doPrepare();
+        for (const auto& r: rule) {
+            auto it = std::find_if(definitions.begin(), definitions.end(), [r](const std::string& value) {
+                return r == value;
+            });
+            if (it == definitions.end()) continue;
+            n -> doSignalSendEntry("ER", (float)std::distance(definitions.begin(), it), n->getTime());
+        }
+        n -> doCreateNewScope();
+    }
+
+    n -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
+    n -> doFinalize();
+}
+
 void doLearnVocabulary(indk::NeuralNet *NN,
                        const std::array<std::string, DEFINITIONS_COUNT>& definitions,
                        const std::vector<std::string>& vocab) {
@@ -317,13 +343,13 @@ auto doInputWave(indk::NeuralNet *NN, const std::vector<std::string>& names) {
 
 int main() {
     constexpr char STRUCTURE_PATH[128] = "structures/structure.json";
-    constexpr char VOCAB_PATH[128] = "texts/vocab.txt";
     constexpr char RULES_PATH[128] = "texts/rules.txt";
+    constexpr char VOCAB_PATH[128] = "texts/vocab.txt";
     std::array<std::string, DEFINITIONS_COUNT> definitions = {"STATE", "OBJECT", "PROCESS", "PLACE", "PROPERTY", "LOGIC"};
 
-    // load vocabulary from text file
-    auto vocab = doLoadVocabulary(VOCAB_PATH);
+    // load rules and vocabulary from text file
     auto rules = doLoadRules(RULES_PATH);
+    auto vocab = doLoadVocabulary(VOCAB_PATH);
 
     // load neural network structure from file
     auto NN = new indk::NeuralNet(STRUCTURE_PATH);
@@ -344,6 +370,7 @@ int main() {
 
     int space = 1;
     auto T = getTimestampMS();
+    doLearnRules(NN, definitions, rules);
     doLearnVocabulary(NN, definitions, vocab);
     doLearnVisuals(NN, {"images/mug.bmp", "images/jar.bmp", "images/duck.bmp"});
 
