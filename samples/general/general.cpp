@@ -45,11 +45,11 @@ std::vector<std::vector<float>> doBuildImageInputVector(std::vector<BMPImage> im
 }
 
 General::TypedData General::TypeText(const std::string& text) {
-    return {text, 0};
+    return {text, TypedDataText};
 }
 
 General::TypedData General::TypeVisual(const std::string& path) {
-    return {path, 1};
+    return {path, TypedDataVisual};
 }
 
 std::vector<std::string> General::doLoadVocabulary(const std::string& path) {
@@ -75,7 +75,7 @@ bool General::doCheckRule(const std::vector<std::string>& rule) {
         rstr.append(rule[i]);
         if (i < rule.size()-1) rstr.append(";");
     }
-
+    std::cout << rstr << std::endl;
     auto ne = std::find_if(Rules.begin(), Rules.end(), [rstr](const std::string& e){
         return e == rstr;
     });
@@ -144,7 +144,7 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
     for (int r = 0; r < encoded.size(); r++) {
         if (encoded[r][0] == -1) {
             std::cout << ".";
-            start = r;
+            start = r+1;
             continue;
         }
         auto code = encoded[r][0];
@@ -184,11 +184,23 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
 //            std::cout << start << " " << encoded[r-1][0] << std::endl;
             l1 -> doCreateNewScope();
             l1 -> doPrepare();
-            for (int i = start; i <= r; i++)
-                l1 -> doSignalSendEntry(l0->getName(), encoded[i][0], l1->getTime());
+
+            std::vector<float> values;
+            values.emplace_back(encoded[r][0]);
+
+            for (int i = r-1; i >= start; i--) {
+                auto checked = doCheckRule({Definitions[encoded[i][1]], Definitions[encoded[r][1]]});
+                if (checked) {
+                    std::cout << encoded[i][1] << " " << encoded[r][1] << std::endl;
+                    values.emplace_back(encoded[i][0]);
+                }
+            }
+
+            for (int i = values.size()-1; i >= 0; i--)
+                l1 -> doSignalSendEntry(l0->getName(), values[i], l1->getTime());
         }
 
-        std::cout << " " << Definitions[encoded[r][1]];
+//        std::cout << " " << Definitions[encoded[r][1]];
 //        std::cout <<  encoded[r][0] << " " << encoded[r][1] << std::endl;
     }
     std::cout << std::endl;
