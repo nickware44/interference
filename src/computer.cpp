@@ -54,7 +54,7 @@ float indk::Computer::getReceptorInfluenceValue(bool Active, float dFi, indk::Po
 }
 
 float indk::Computer::getRcValue(float k3, float Rs, float Fi, float dFi) {
-    if (Fi >= Rs && dFi > 0) Rs += dFi;
+    if (Fi >= Rs && dFi > 0) Rs += dFi / k3;
     else Rs = Rs / (k3*Rs+1);
     return Rs;
 }

@@ -135,15 +135,17 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
     std::vector<std::pair<float, std::string>> added;
 
     l0 -> setLambda(1);
+    l2 -> setLambda(3);
     NN -> doIncludeNeuronToEnsemble(l0->getName(), "CONTEXT");
     l0 -> doReset();
+    l2 -> doReset();
 
 //    std::cout << encoded.size() << std::endl;
     std::string fname;
     int start = 0;
     for (int r = 0; r < encoded.size(); r++) {
         if (encoded[r][0] == -1) {
-            std::cout << ".";
+//            std::cout << ".";
             start = r+1;
             continue;
         }
@@ -172,9 +174,19 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
             l0 -> doSignalSendEntry("ES", encoded[r][0], l0->getTime());
 
             l1 -> setLambda(1);
+            l1 -> setk3(100);
             l1 -> doReset();
             l1 -> doCreateNewScope();
             l1 -> doSignalSendEntry(l0->getName(), encoded[r][0], l1->getTime());
+            std::cout << "Y0: " << l1->doSignalReceive().second << std::endl;
+
+            l2 -> doCreateNewScope();
+            l2 -> doPrepare();
+            std::cout << "Yx: " << l1->doSignalReceive().second << std::endl;
+            l2 -> doSignalSendEntry(l1->getName(), l1->doSignalReceive().second,  l2->getTime());
+            for (const auto &ew: l2->getWaitingEntries()) {
+                l2 -> doSignalSendEntry(NN->getNeuron(ew)->getName(), 0, l2->getTime());
+            }
         } else {
             l1 = NN -> getNeuron(ne->second);
             if (!l1) continue;
@@ -191,15 +203,26 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
             for (int i = r-1; i >= start; i--) {
                 auto checked = doCheckRule({Definitions[encoded[i][1]], Definitions[encoded[r][1]]});
                 if (checked) {
-                    std::cout << encoded[i][1] << " " << encoded[r][1] << std::endl;
+//                    std::cout << encoded[i][0] << " " << encoded[r][1] << std::endl;
                     values.emplace_back(encoded[i][0]);
                 }
             }
 
-            for (int i = values.size()-1; i >= 0; i--)
+            for (int i = values.size()-1; i >= 0; i--) {
+//                std::cout << values[i] << std::endl;
                 l1 -> doSignalSendEntry(l0->getName(), values[i], l1->getTime());
-        }
+                std::cout << "Y1: " << l1->doSignalReceive().second << std::endl;
+            }
 
+            l2 -> doCreateNewScope();
+            l2 -> doPrepare();
+            std::cout << "Yx: " << l1->doSignalReceive().second << std::endl;
+            l2 -> doSignalSendEntry(l1->getName(), l1->doSignalReceive().second,  l2->getTime());
+            for (const auto &ew: l2->getWaitingEntries()) {
+                l2 -> doSignalSendEntry(NN->getNeuron(ew)->getName(), 0, l2->getTime());
+            }
+
+        }
 //        std::cout << " " << Definitions[encoded[r][1]];
 //        std::cout <<  encoded[r][0] << " " << encoded[r][1] << std::endl;
     }
