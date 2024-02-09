@@ -87,8 +87,8 @@ void indk::Neuron::Synapse::doReset() {
     QCounter = 0;
     QSize = 0;
     GammaQ.clear();
-    k1 = ok1;
-    k2 = ok2;
+//    k1 = ok1;
+//    k2 = ok2;
 }
 
 void indk::Neuron::Synapse::setGamma(float gamma) {

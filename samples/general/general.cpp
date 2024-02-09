@@ -128,6 +128,15 @@ void General::doRecognizeInput(std::vector<std::vector<float>> &encoded, const s
 
 void General::doCreateContextSpace(const std::vector<std::vector<float>>& encoded) {
     enum {STATE, OBJECT, PROCESS, PLACE, PROPERTY};
+
+    for (const auto &e: encoded) {
+        if (e[0] != -1) {
+            std::cout << e[0] << std::endl;
+            auto Y =  NN -> doRecognise({{e[0]}}, true, {"ES"});
+            if (Y.size() > 11) std::cout << Y[11] << std::endl;
+        }
+    }
+;
     auto l0 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(Space)+"_L0", true);
     auto l2 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(Space)+"_L2", false);
     if (!l0 || !l2) return;
@@ -239,6 +248,9 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
     }
 
     l2 -> doFinalize();
+
+    NN -> doAddNewOutput(l2->getName());
+    NN -> doIncludeNeuronToEnsemble(l2->getName(), "L2");
 }
 
 

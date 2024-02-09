@@ -206,7 +206,7 @@ void indk::Neuron::doFinalizeInput(float P) {
  * Prepare synapses for new signal.
  */
 void indk::Neuron::doPrepare() {
-    t = 0;
+    t.store(0);
     for (auto E: Entries) E.second -> doPrepare();
     for (auto R: Receptors) R -> doPrepare();
 }
@@ -229,7 +229,9 @@ void indk::Neuron::doChangeScope(uint64_t scope) {
  * Reset neuron state. During the reset, the neuron parameters (time, receptors, synapses) will be reset to the default state.
  */
 void indk::Neuron::doReset() {
+    t.store(0);
     Learned = false;
+    for (auto E: Entries) E.second -> doPrepare();
     for (auto R: Receptors) R -> doReset();
 }
 
