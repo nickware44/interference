@@ -52,9 +52,9 @@ int doTest(float ref) {
 
     bool passed = true;
     for (auto &y: Y) {
-        if (std::fabs(y-ref) > 1e-3) {
+        if (std::fabs(y.first-ref) > 1e-3) {
             std::cout << "[FAILED]" << std::endl;
-            std::cout << "Output value " << y << " is not " << ref << std::endl;
+            std::cout << "Output value " << y.first << " is not " << ref << std::endl;
             std::cout << std::endl;
             passed = false;
             break;

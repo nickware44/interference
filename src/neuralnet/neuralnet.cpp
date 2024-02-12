@@ -381,7 +381,7 @@ void indk::NeuralNet::doStructurePrepare() {
  * @param Xx Input data vector that contain signals.
  * @return Output signals.
  */
-std::vector<float> indk::NeuralNet::doSignalTransfer(const std::vector<std::vector<float>>& Xx, const std::vector<std::string>& inputs) {
+std::vector<indk::OutputValue> indk::NeuralNet::doSignalTransfer(const std::vector<std::vector<float>>& Xx, const std::vector<std::string>& inputs) {
     std::vector<void*> v;
     std::vector<std::string> nsync;
     EntryList eentries;
@@ -453,7 +453,7 @@ std::vector<float> indk::NeuralNet::doSignalTransfer(const std::vector<std::vect
  * @param Xx Input data vector that contain signals.
  * @param callback callback function for output signals.
  */
-void indk::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<float>)>& callback, const std::vector<std::string>& inputs) {
+void indk::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<indk::OutputValue>)>& callback, const std::vector<std::string>& inputs) {
     std::function<void()> tCallback([this, Xx, callback, inputs] () {
         auto Y = doSignalTransfer(Xx, inputs);
 
@@ -470,7 +470,7 @@ void indk::NeuralNet::doSignalTransferAsync(const std::vector<std::vector<float>
  * @param Xx Input data vector that contain signals for learning.
  * @return Output signals.
  */
-std::vector<float> indk::NeuralNet::doLearn(const std::vector<std::vector<float>>& Xx, bool prepare, const std::vector<std::string>& inputs) {
+std::vector<indk::OutputValue> indk::NeuralNet::doLearn(const std::vector<std::vector<float>>& Xx, bool prepare, const std::vector<std::string>& inputs) {
     if (InterlinkService && InterlinkService->isInterlinked()) {
         InterlinkService -> doUpdateStructure(getStructure());
     }
@@ -485,7 +485,7 @@ std::vector<float> indk::NeuralNet::doLearn(const std::vector<std::vector<float>
  * @param Xx Input data vector that contain signals for recognizing.
  * @return Output signals.
  */
-std::vector<float> indk::NeuralNet::doRecognise(const std::vector<std::vector<float>>& Xx, bool prepare, const std::vector<std::string>& inputs) {
+std::vector<indk::OutputValue> indk::NeuralNet::doRecognise(const std::vector<std::vector<float>>& Xx, bool prepare, const std::vector<std::string>& inputs) {
     setLearned(true);
     t = 0;
     if (prepare) doPrepare();
@@ -497,7 +497,7 @@ std::vector<float> indk::NeuralNet::doRecognise(const std::vector<std::vector<fl
  * @param Xx Input data vector that contain signals for learning.
  * @param callback Callback function for output signals.
  */
-void indk::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<float>)>& callback, bool prepare, const std::vector<std::string>& inputs) {
+void indk::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<indk::OutputValue>)>& callback, bool prepare, const std::vector<std::string>& inputs) {
     setLearned(false);
     t = 0;
     if (prepare) doPrepare();
@@ -509,7 +509,7 @@ void indk::NeuralNet::doLearnAsync(const std::vector<std::vector<float>>& Xx, co
  * @param Xx Input data vector that contain signals for recognizing.
  * @param callback Callback function for output signals.
  */
-void indk::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<float>)>& callback, bool prepare, const std::vector<std::string>& inputs) {
+void indk::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx, const std::function<void(std::vector<indk::OutputValue>)>& callback, bool prepare, const std::vector<std::string>& inputs) {
     setLearned(true);
     t = 0;
     if (prepare) doPrepare();
@@ -520,11 +520,11 @@ void indk::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx
  * Get output signals.
  * @return Output signals vector.
  */
-std::vector<float> indk::NeuralNet::doSignalReceive() {
-    std::vector<float> ny;
+std::vector<indk::OutputValue> indk::NeuralNet::doSignalReceive() {
+    std::vector<indk::OutputValue> ny;
     for (const auto& oname: Outputs) {
         auto n = Neurons.find(oname);
-        if (n != Neurons.end()) ny.push_back(n->second->doSignalReceive().second);
+        if (n != Neurons.end()) ny.emplace_back(n->second->doSignalReceive().second, n->second->getName());
     }
     return ny;
 }

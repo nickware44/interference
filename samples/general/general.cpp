@@ -75,7 +75,7 @@ bool General::doCheckRule(const std::vector<std::string>& rule) {
         rstr.append(rule[i]);
         if (i < rule.size()-1) rstr.append(";");
     }
-    std::cout << rstr << std::endl;
+//    std::cout << rstr << std::endl;
     auto ne = std::find_if(Rules.begin(), Rules.end(), [rstr](const std::string& e){
         return e == rstr;
     });
@@ -119,8 +119,8 @@ void General::doRecognizeInput(std::vector<std::vector<float>> &encoded, const s
         auto Y = NN -> doRecognise(data, true, {"ET"});
 
         for (int i = 0; i < Definitions.size(); i++) {
-            if (Y.size() > i && Y[i] > 0) {
-                encoded.push_back({Y[i], static_cast<float>(i)});
+            if (Y.size() > i && Y[i].first > 0) {
+                encoded.push_back({Y[i].first, static_cast<float>(i)});
             }
         }
     }
@@ -131,14 +131,23 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
 
     for (const auto &e: encoded) {
         if (e[0] != -1) {
-            std::cout << e[0] << std::endl;
             auto Y =  NN -> doRecognise({{e[0]}}, true, {"ES"});
-            if (Y.size() > 11) std::cout << Y[11] << std::endl;
+            if (Y.size() > 11 && Y[11].first > 0) {
+                std::cout << e[0] << std::endl;
+
+                auto ename = Y[11].second.substr(7);
+                ename = ename.substr(0, ename.size()-3);
+                auto n = NN -> getNeuron("_SPACE_"+ename+"_L0");
+                if (n) {
+
+                }
+                std::cout << Y[11].first << " " << ename << std::endl;
+            }
         }
     }
-;
-    auto l0 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(Space)+"_L0", true);
-    auto l2 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(Space)+"_L2", false);
+
+    auto l0 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_C"+std::to_string(Space)+"_L0", true);
+    auto l2 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_C"+std::to_string(Space)+"_L2", false);
     if (!l0 || !l2) return;
 
     std::vector<std::pair<float, std::string>> added;
@@ -168,7 +177,7 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
             l0 -> doCreateNewScope();
             l0 -> doPrepare();
 
-            l1 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_"+std::to_string(Space)+"_"+std::to_string(r), false);
+            l1 = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_C"+std::to_string(Space)+"_"+std::to_string(r), false);
             l1 -> doReplaceEntryName("ES", l0->getName());
             added.emplace_back(code, l1->getName());
             l0 -> doLinkOutput(l1->getName());
@@ -187,11 +196,11 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
             l1 -> doReset();
             l1 -> doCreateNewScope();
             l1 -> doSignalSendEntry(l0->getName(), encoded[r][0], l1->getTime());
-            std::cout << "Y0: " << l1->doSignalReceive().second << std::endl;
+//            std::cout << "Y0: " << l1->doSignalReceive().second << std::endl;
 
             l2 -> doCreateNewScope();
             l2 -> doPrepare();
-            std::cout << "Yx: " << l1->doSignalReceive().second << std::endl;
+//            std::cout << "Yx: " << l1->doSignalReceive().second << std::endl;
             l2 -> doSignalSendEntry(l1->getName(), l1->doSignalReceive().second,  l2->getTime());
             for (const auto &ew: l2->getWaitingEntries()) {
                 l2 -> doSignalSendEntry(NN->getNeuron(ew)->getName(), 0, l2->getTime());
@@ -220,12 +229,12 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
             for (int i = values.size()-1; i >= 0; i--) {
 //                std::cout << values[i] << std::endl;
                 l1 -> doSignalSendEntry(l0->getName(), values[i], l1->getTime());
-                std::cout << "Y1: " << l1->doSignalReceive().second << std::endl;
+//                std::cout << "Y1: " << l1->doSignalReceive().second << std::endl;
             }
 
             l2 -> doCreateNewScope();
             l2 -> doPrepare();
-            std::cout << "Yx: " << l1->doSignalReceive().second << std::endl;
+//            std::cout << "Yx: " << l1->doSignalReceive().second << std::endl;
             l2 -> doSignalSendEntry(l1->getName(), l1->doSignalReceive().second,  l2->getTime());
             for (const auto &ew: l2->getWaitingEntries()) {
                 l2 -> doSignalSendEntry(NN->getNeuron(ew)->getName(), 0, l2->getTime());
@@ -250,7 +259,7 @@ void General::doCreateContextSpace(const std::vector<std::vector<float>>& encode
     l2 -> doFinalize();
 
     NN -> doAddNewOutput(l2->getName());
-    NN -> doIncludeNeuronToEnsemble(l2->getName(), "L2");
+    NN -> doIncludeNeuronToEnsemble(l2->getName(), "C"+std::to_string(Space));
 }
 
 

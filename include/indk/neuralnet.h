@@ -27,6 +27,7 @@ namespace indk {
 
     typedef std::queue<std::tuple<std::string, std::string, void*, int64_t>> NQueue;
     typedef std::vector<std::pair<std::string, std::vector<std::string>>> EntryList;
+    typedef std::pair<float, std::string> OutputValue;
 
     /**
      * Main neural net class.
@@ -78,13 +79,13 @@ namespace indk {
         void doReset();
         void doPrepare();
         void doStructurePrepare();
-        std::vector<float> doSignalTransfer(const std::vector<std::vector<float>>& X, const std::vector<std::string>& inputs = {});
-        void doSignalTransferAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr, const std::vector<std::string>& inputs = {});
-        std::vector<float> doLearn(const std::vector<std::vector<float>>&, bool prepare = true, const std::vector<std::string>& inputs = {});
-        std::vector<float> doRecognise(const std::vector<std::vector<float>>&, bool prepare = true, const std::vector<std::string>& inputs = {});
-        void doLearnAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr, bool prepare = true, const std::vector<std::string>& inputs = {});
-        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<float>)>& Callback = nullptr, bool prepare = true, const std::vector<std::string>& inputs = {});
-        std::vector<float> doSignalReceive();
+        std::vector<indk::OutputValue> doSignalTransfer(const std::vector<std::vector<float>>& X, const std::vector<std::string>& inputs = {});
+        void doSignalTransferAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<indk::OutputValue>)>& Callback = nullptr, const std::vector<std::string>& inputs = {});
+        std::vector<indk::OutputValue> doLearn(const std::vector<std::vector<float>>&, bool prepare = true, const std::vector<std::string>& inputs = {});
+        std::vector<indk::OutputValue> doRecognise(const std::vector<std::vector<float>>&, bool prepare = true, const std::vector<std::string>& inputs = {});
+        void doLearnAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<indk::OutputValue>)>& Callback = nullptr, bool prepare = true, const std::vector<std::string>& inputs = {});
+        void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<indk::OutputValue>)>& Callback = nullptr, bool prepare = true, const std::vector<std::string>& inputs = {});
+        std::vector<indk::OutputValue> doSignalReceive();
         indk::Neuron* doReplicateNeuron(const std::string& from, const std::string& to, bool integrate);
         void doDeleteNeuron(const std::string& name);
         void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);

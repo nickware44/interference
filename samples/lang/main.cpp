@@ -109,7 +109,7 @@ auto doRecognizeInput(indk::NeuralNet *NN, const std::string& sequence, int type
         auto Y = NN -> doRecognise(data, true, {"ET"});
         auto patterns = NN -> doComparePatterns("DEFINITION");
         for (int i = 0; i < patterns.size(); i++) {
-            if (Y[i] > 0) encoded.push_back({Y[i], static_cast<float>(i)});
+            if (Y[i].first > 0) encoded.push_back({Y[i].first, static_cast<float>(i)});
         }
     }
     return encoded;
