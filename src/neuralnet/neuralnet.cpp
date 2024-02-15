@@ -520,11 +520,29 @@ void indk::NeuralNet::doRecogniseAsync(const std::vector<std::vector<float>>& Xx
  * Get output signals.
  * @return Output signals vector.
  */
-std::vector<indk::OutputValue> indk::NeuralNet::doSignalReceive() {
+std::vector<indk::OutputValue> indk::NeuralNet::doSignalReceive(const std::string& ensemble) {
     std::vector<indk::OutputValue> ny;
+    std::vector<std::string> elist;
+
+    if (!ensemble.empty()) {
+        auto en = Ensembles.find(ensemble);
+        if (en == Ensembles.end()) return {};
+        elist = en -> second;
+        if (elist.empty()) return {};
+    }
+
     for (const auto& oname: Outputs) {
         auto n = Neurons.find(oname);
-        if (n != Neurons.end()) ny.emplace_back(n->second->doSignalReceive().second, n->second->getName());
+        if (n != Neurons.end()) {
+            if (!elist.empty()) {
+                auto item = std::find_if(elist.begin(), elist.end(), [oname](const std::string &value) {
+                    return oname == value;
+                });
+                if (item == elist.end()) continue;
+            }
+
+            ny.emplace_back(n->second->doSignalReceive().second, oname);
+        }
     }
     return ny;
 }

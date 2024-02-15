@@ -19,6 +19,7 @@ class General {
 private:
     std::array<std::string, 6> Definitions = {"STATE", "OBJECT", "PROCESS", "PLACE", "PROPERTY", "LOGIC"};
     typedef std::pair<std::string, int> TypedData;
+    typedef std::tuple<float, int, std::vector<std::string>> EncodeData;
     enum {
         TypedDataText,
         TypedDataVisual
@@ -31,8 +32,8 @@ private:
     static std::vector<std::string> doLoadVocabulary(const std::string& path);
     bool doCheckRule(const std::vector<std::string>& rule);
     void doInputWave(const std::vector<std::string>& names);
-    void doRecognizeInput(std::vector<std::vector<float>> &encoded, const std::string& sequence, int type);
-    void doCreateContextSpace(const std::vector<std::vector<float>>& encoded);
+    void doRecognizeInput(std::vector<EncodeData> &encoded, const std::string& sequence, int type);
+    void doCreateContextSpace(std::vector<EncodeData>& encoded);
 public:
     static TypedData TypeText(const std::string&);
     static TypedData TypeVisual(const std::string&);

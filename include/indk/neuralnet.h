@@ -85,7 +85,7 @@ namespace indk {
         std::vector<indk::OutputValue> doRecognise(const std::vector<std::vector<float>>&, bool prepare = true, const std::vector<std::string>& inputs = {});
         void doLearnAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<indk::OutputValue>)>& Callback = nullptr, bool prepare = true, const std::vector<std::string>& inputs = {});
         void doRecogniseAsync(const std::vector<std::vector<float>>&, const std::function<void(std::vector<indk::OutputValue>)>& Callback = nullptr, bool prepare = true, const std::vector<std::string>& inputs = {});
-        std::vector<indk::OutputValue> doSignalReceive();
+        std::vector<indk::OutputValue> doSignalReceive(const std::string& ensemble = "");
         indk::Neuron* doReplicateNeuron(const std::string& from, const std::string& to, bool integrate);
         void doDeleteNeuron(const std::string& name);
         void doReplicateEnsemble(const std::string& From, const std::string& To, bool CopyEntries = false);
