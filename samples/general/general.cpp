@@ -24,6 +24,20 @@ inline std::vector<std::string> doStrSplit(std::string str, const std::string& d
     return R;
 }
 
+inline std::string doStrReplace(const std::string& source, const std::string& from, const std::string& to) {
+    if(from.empty())
+        return "";
+
+    auto str = source;
+    size_t start_pos = 0;
+    while((start_pos = str.find(from, start_pos)) != std::string::npos) {
+        str.replace(start_pos, from.length(), to);
+        start_pos += to.length();
+    }
+
+    return str;
+}
+
 std::vector<std::vector<float>> doBuildImageInputVector(std::vector<BMPImage> images) {
     std::vector<std::vector<float>> input;
     for (int d = 0; d < images[0].size(); d+=2) {
@@ -132,7 +146,7 @@ void General::doCreateContextSpace(std::vector<EncodeData>& encoded) {
     for (auto &e: encoded) {
         if (std::get<0>(e) != -1) {
             NN -> doRecognise({{std::get<0>(e)}}, true, {"ES"});
-            auto Y = NN -> doSignalReceive("CONTEXT");
+            auto Y = NN -> doSignalReceive("RELATED");
             for (const auto& y: Y) {
                 if (y.first > 0) {
                     std::get<2>(e).push_back(y.second);
@@ -158,12 +172,13 @@ void General::doCreateContextSpace(std::vector<EncodeData>& encoded) {
     std::string fname;
     int start = 0;
     for (int r = 0; r < encoded.size(); r++) {
-        if (std::get<0>(encoded[r]) == -1) {
+        auto code = std::get<0>(encoded[r]);
+        if (code == -1) {
 //            std::cout << ".";
             start = r+1;
             continue;
         }
-        auto code = std::get<0>(encoded[r]);
+
         auto ne = std::find_if(added.begin(), added.end(), [code](const std::pair<float, std::string>& e){
             return std::fabs(e.first-code) < 10e-6;
         });
@@ -185,25 +200,36 @@ void General::doCreateContextSpace(std::vector<EncodeData>& encoded) {
                 l2 -> doCopyEntry(fname, l1->getName());
             l1 -> doLinkOutput(l2->getName());
 
-            for (const auto& clink: std::get<2>(encoded[r])) {
+            for (int i = 0; i < std::get<2>(encoded[r]).size(); i++) {
+                auto clink = std::get<2>(encoded[r])[i];
                 auto related = NN -> getNeuron(clink);
                 if (!related) continue;
 
-                auto rn = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_R"+std::to_string(Space)+"_"+std::to_string(r), false);
+                auto rn = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_R"+std::to_string(Space)+"_"+std::to_string(r)+"_"+std::to_string(i), false);
                 related -> doLinkOutput(rn->getName());
                 rn -> doReplaceEntryName("ES", related->getName());
                 rn -> doCopyEntry(related->getName(), l1->getName());
                 NN -> doAddNewOutput(rn->getName());
+                rn -> setLambda(1);
+                rn -> setk3(100);
+                rn -> doReset();
+                rn -> doCreateNewScope();
+                rn -> doSignalSendEntry(l1->getName(), code, rn->getTime());
+                rn -> doSignalSendEntry(related->getName(), 0, rn->getTime());
+                rn -> doFinalize();
             }
 
-            l0 -> doSignalSendEntry("ES", std::get<0>(encoded[r]), l0->getTime());
+            l0 -> doSignalSendEntry("ES", code, l0->getTime());
 
             l1 -> setLambda(1);
             l1 -> setk3(100);
             l1 -> doReset();
             l1 -> doCreateNewScope();
-            l1 -> doSignalSendEntry(l0->getName(), std::get<0>(encoded[r]), l1->getTime());
-//            std::cout << "Y0: " << l1->doSignalReceive().second << std::endl;
+            l1 -> doSignalSendEntry(l0->getName(), l0->doSignalReceive().second, l1->getTime());
+            l1 -> setOutputMode(indk::Neuron::OutputModes::OutputModeLatch);
+            NN -> doAddNewOutput(l1->getName());
+            NN -> doIncludeNeuronToEnsemble(l1->getName(), "RELATED");
+//            std::cout << "X0 " << code << " Y0: " << l1->doSignalReceive().second << std::endl;
 
             l2 -> doCreateNewScope();
             l2 -> doPrepare();
@@ -223,7 +249,7 @@ void General::doCreateContextSpace(std::vector<EncodeData>& encoded) {
             l1 -> doPrepare();
 
             std::vector<float> values;
-            values.emplace_back(std::get<0>(encoded[r]));
+            values.emplace_back(code);
 
             for (int i = r-1; i >= start; i--) {
                 auto checked = doCheckRule({Definitions[std::get<1>(encoded[i])], Definitions[std::get<1>(encoded[r])]});
@@ -236,7 +262,7 @@ void General::doCreateContextSpace(std::vector<EncodeData>& encoded) {
             for (int i = values.size()-1; i >= 0; i--) {
 //                std::cout << values[i] << std::endl;
                 l1 -> doSignalSendEntry(l0->getName(), values[i], l1->getTime());
-//                std::cout << "Y1: " << l1->doSignalReceive().second << std::endl;
+//                std::cout << "X1 " << values[i] << " Y1: " << l1->doSignalReceive().second << std::endl;
             }
 
             l2 -> doCreateNewScope();
@@ -248,7 +274,7 @@ void General::doCreateContextSpace(std::vector<EncodeData>& encoded) {
             }
         }
 //        std::cout << " " << Definitions[std::get<1>(encoded[r])];
-//        std::cout <<  std::get<0>(encoded[r]) << " " << std::get<1>(encoded[r]) << std::endl;
+//        std::cout << code << " " << std::get<1>(encoded[r]) << std::endl;
     }
     std::cout << std::endl;
 
@@ -266,6 +292,28 @@ void General::doCreateContextSpace(std::vector<EncodeData>& encoded) {
 
     NN -> doAddNewOutput(l2->getName());
     NN -> doIncludeNeuronToEnsemble(l2->getName(), "CONTEXT");
+}
+
+std::vector<General::EncodeData>  General::doParseSequence(const std::vector<TypedData> &sequence) {
+    std::vector<EncodeData> encoded;
+
+    for (const auto &seq: sequence) {
+        std::cout << seq.first << std::endl;
+
+        if (seq.second == General::TypedDataText) {
+            auto replaced = doStrReplace(seq.first, "?", ".");
+            auto sentences = doStrSplit(replaced, ".", true);
+            for (const auto &str: sentences) {
+                doRecognizeInput(encoded, str, seq.second);
+                encoded.emplace_back(-1, -1, std::vector<std::string>());
+            }
+        } else if (seq.second == General::TypedDataVisual) {
+            doRecognizeInput(encoded, seq.first, seq.second);
+            encoded.emplace_back(-1, -1, std::vector<std::string>());
+        }
+    }
+
+    return encoded;
 }
 
 
@@ -350,25 +398,32 @@ void General::doLoadRules(const std::string& path) {
 }
 
 void General::doCreateContext(const std::vector<TypedData> &sequence) {
-    std::vector<EncodeData> encoded;
-
-    for (const auto &seq: sequence) {
-        std::cout << seq.first << std::endl;
-
-        if (seq.second == General::TypedDataText) {
-            auto sentences = doStrSplit(seq.first, ".", true);
-            for (const auto &str: sentences) {
-                doRecognizeInput(encoded, str, seq.second);
-                encoded.emplace_back(-1, -1, std::vector<std::string>());
-            }
-        } else if (seq.second == General::TypedDataVisual) {
-            doRecognizeInput(encoded, seq.first, seq.second);
-            encoded.emplace_back(-1, -1, std::vector<std::string>());
-        }
-    }
+    auto encoded = doParseSequence(sequence);
 
     doCreateContextSpace(encoded);
     Space++;
+}
+
+void General::doProcessSequence(const std::vector<TypedData> &sequence) {
+    auto encoded = doParseSequence(sequence);
+
+    for (auto &e: encoded) {
+        std::cout << std::get<0>(e) << std::endl;
+        if (std::get<0>(e) == -1) {
+            NN -> doPrepare();
+            continue;
+        }
+
+        NN -> doRecognise({{std::get<0>(e)}}, false, {"ES"});
+        std::cout << std::get<0>(e) << std::endl;
+        auto Y = NN -> doSignalReceive("RELATED");
+        for (const auto& y: Y) {
+            if (y.first > 0) {
+                std::get<2>(e).push_back(y.second);
+                std::cout << std::get<0>(e) << " " << y.first << " " << y.second << std::endl;
+            }
+        }
+    }
 }
 
 void General::doInterlinkDebug() {

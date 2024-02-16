@@ -24,47 +24,6 @@ uint64_t getTimestampMS() {
             time_since_epoch()).count();
 }
 
-//
-//
-//
-//bool doReceiveResponse(indk::NeuralNet *NN, const std::vector<std::vector<float>>& encoded) {
-//    bool found = false;
-//    std::vector<std::vector<float>> marks;
-//
-//    for (int r = 0; r < encoded.size(); r++) {
-//        marks.emplace_back();
-//        for (int j = 0; j < DEFINITIONS_COUNT; j++) {
-//            if (j == (int)encoded[r][1]) marks.back().push_back(encoded[r][0]);
-//            else marks.back().push_back(0);
-//        }
-//    }
-//
-//    NN -> doRecognise(marks, true, {"SPACE_E1", "SPACE_E2", "SPACE_E3", "SPACE_E4", "SPACE_E5"});
-//    auto patterns = NN -> doComparePatterns( "CONTEXT");
-//    auto r = std::min_element(patterns.begin(), patterns.end());
-//    if (r != patterns.end() && *r >= 0 && *r < 10e-6) found = true;
-//
-//    return found;
-//}
-//
-//
-//
-//void doProcessTextSequence(indk::NeuralNet *NN, const std::string& sequence, int &space, const std::array<std::string, DEFINITIONS_COUNT>& definitions) {
-//    // parse sequence
-//    std::vector<std::vector<float>> encoded;
-//    bool qflag = sequence.back() == '?';
-//    if (!qflag) return;
-//
-//    doRecognizeInput(NN, encoded, sequence, 0);
-//    auto response = doReceiveResponse(NN, encoded);
-//    std::cout << std::setw(50) << std::left << sequence;
-//    if (response)
-//        std::cout << " [ YES ]" << std::endl;
-//    else
-//        std::cout << " [ NO  ]" << std::endl;
-//}
-
-
 int main() {
     // load the neural network structure from file
     General general("structures/structure.json");
@@ -93,7 +52,7 @@ int main() {
 //    std::cout << std::endl;
 //
 //    // checking
-//    doProcessTextSequence(NN, "Is the cat gray?", space);
+    general.doProcessSequence({General::TypeText("Is the cat gray?")});
 //    doProcessTextSequence(NN, "Is the cat black?", space);
 //    doProcessTextSequence(NN, "Is the cat blue?", space);
 //    doProcessTextSequence(NN, "Is the table wooden?", space);

@@ -34,6 +34,7 @@ private:
     void doInputWave(const std::vector<std::string>& names);
     void doRecognizeInput(std::vector<EncodeData> &encoded, const std::string& sequence, int type);
     void doCreateContextSpace(std::vector<EncodeData>& encoded);
+    std::vector<EncodeData> doParseSequence(const std::vector<TypedData> &sequence);
 public:
     static TypedData TypeText(const std::string&);
     static TypedData TypeVisual(const std::string&);
@@ -45,6 +46,7 @@ public:
     void doLearnVisuals(const std::vector<std::string>& paths);
     void doLoadRules(const std::string& path);
     void doCreateContext(const std::vector<TypedData>& sequence);
+    void doProcessSequence(const std::vector<TypedData> &sequence);
     void doInterlinkDebug();
     ~General();
 };
