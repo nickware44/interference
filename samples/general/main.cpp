@@ -41,7 +41,7 @@ int main() {
     auto T = getTimestampMS();
 
     // creating contexts
-    general.doCreateContext({General::TypeText("The color can be black, gray, white, orange and blue.")});
+    general.doCreateContext({General::TypeText("The color can be black gray white orange and blue.")});
 
     general.doCreateContext({General::TypeText("The cat siting on the table."
                                                         "The cat is black and the table is wooden."
@@ -53,7 +53,7 @@ int main() {
 //
 //    // checking
     general.doProcessSequence({General::TypeText("Is the cat gray?")});
-//    doProcessTextSequence(NN, "Is the cat black?", space);
+    general.doProcessSequence({General::TypeText("Is the cat black?")});
 //    doProcessTextSequence(NN, "Is the cat blue?", space);
 //    doProcessTextSequence(NN, "Is the table wooden?", space);
 //    doProcessTextSequence(NN, "Is the table black?", space);

@@ -207,6 +207,8 @@ void General::doCreateContextSpace(std::vector<EncodeData>& encoded) {
 
                 auto rn = NN -> doReplicateNeuron("_SPACE_INIT", "_SPACE_R"+std::to_string(Space)+"_"+std::to_string(r)+"_"+std::to_string(i), false);
                 related -> doLinkOutput(rn->getName());
+                l1 -> doLinkOutput(rn->getName());
+
                 rn -> doReplaceEntryName("ES", related->getName());
                 rn -> doCopyEntry(related->getName(), l1->getName());
                 NN -> doAddNewOutput(rn->getName());
@@ -214,6 +216,7 @@ void General::doCreateContextSpace(std::vector<EncodeData>& encoded) {
                 rn -> setk3(100);
                 rn -> doReset();
                 rn -> doCreateNewScope();
+
                 rn -> doSignalSendEntry(l1->getName(), code, rn->getTime());
                 rn -> doSignalSendEntry(related->getName(), 0, rn->getTime());
                 rn -> doFinalize();
@@ -408,16 +411,17 @@ void General::doProcessSequence(const std::vector<TypedData> &sequence) {
     auto encoded = doParseSequence(sequence);
 
     for (auto &e: encoded) {
-        std::cout << std::get<0>(e) << std::endl;
         if (std::get<0>(e) == -1) {
             NN -> doPrepare();
             continue;
         }
 
-        NN -> doRecognise({{std::get<0>(e)}}, false, {"ES"});
         std::cout << std::get<0>(e) << std::endl;
-        auto Y = NN -> doSignalReceive("RELATED");
+
+        NN -> doRecognise({{std::get<0>(e)}}, false, {"ES"});
+        auto Y = NN -> doSignalReceive("CONTEXT");
         for (const auto& y: Y) {
+            std::cout << std::get<0>(e) << " " << y.first << " " << y.second << std::endl;
             if (y.first > 0) {
                 std::get<2>(e).push_back(y.second);
                 std::cout << std::get<0>(e) << " " << y.first << " " << y.second << std::endl;
