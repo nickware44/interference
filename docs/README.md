@@ -6,22 +6,23 @@
 
 
 ## Platforms
-|                                | x86 | armle.v7 | PowerPC | e2k | MIPS |
-|:------------------------------:|:---:|:--------:|:-------:|:---:|:----:|
-|          **Windows**           |  +  |          |         |     |      |
-|           **Linux**            |  +  |    +     |         |     |      |
-|            **QNX**             |  +  |    +     |         |     |      |
-| **Secured RTOS KPDA 10964-01** |  +  |    +     |    +    |  +  |  +   |
+|                                | x86 | aarch64 | armle.v7 | PowerPC | e2k | MIPS |
+|:------------------------------:|:---:|:-------:|:--------:|:-------:|:---:|:----:|
+|          **Windows**           |  +  |         |          |         |     |      |
+|           **Linux**            |  +  |    +    |    +     |         |  +  |      |
+|            **QNX**             |  +  |         |    +     |         |     |      |
+| **Secured RTOS KPDA 10964-01** |  +  |    +    |    +     |    +    |  +  |  +   |
 
 
 ## Computing
 - Native CPU (single thread)
 - Native CPU (multithread)
+- OpenCL
 
 
 ## Requirements
 - CMake 3.12 or newer
-- g++ 4.8.3 or newer (MinGW under Windows)
+- g++ 8.3.0 or newer (MinGW under Windows)
 
 ----------------------------------------------------------------
 ## Building library and samples

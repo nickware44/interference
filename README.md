@@ -1,18 +1,18 @@
 <p align="center">
   <img width="750" height="200" src="https://nickware.group/repository/products/indk/logo.png"><br><br>
 Cross-platform C++ library - universal neurobiology-based machine learning framework.<br>
-Version 2.0.0
+Version 2.1.0
 </p>
 
 
 ----------------------------------------------------------------
 ### PLATFORMS
-|                                | x86 | armle.v7 | PowerPC | e2k | MIPS |
-|:------------------------------:|:---:|:--------:|:-------:|:---:|:----:|
-|          **Windows**           |  +  |          |         |     |      |
-|           **Linux**            |  +  |    +     |         |     |      |
-|            **QNX**             |  +  |    +     |         |     |      |
-| **Secured RTOS KPDA 10964-01** |  +  |    +     |    +    |  +  |  +   |
+|                                | x86 | aarch64 | armle.v7 | PowerPC | e2k | MIPS |
+|:------------------------------:|:---:|:-------:|:--------:|:-------:|:---:|:----:|
+|          **Windows**           |  +  |         |          |         |     |      |
+|           **Linux**            |  +  |    +    |    +     |         |  +  |      |
+|            **QNX**             |  +  |         |    +     |         |     |      |
+| **Secured RTOS KPDA 10964-01** |  +  |    +    |    +     |    +    |  +  |  +   |
 
 ----------------------------------------------------------------
 ### COMPUTING
@@ -23,7 +23,7 @@ Version 2.0.0
 ----------------------------------------------------------------
 ### REQUIREMENTS
 - CMake 3.12 or newer
-- g++ 4.8.3 or newer (MinGW under Windows)
+- g++ 8.3.0 or newer (MinGW under Windows)
 
 ----------------------------------------------------------------
 ### LICENCE

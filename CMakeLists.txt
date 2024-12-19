@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(interference VERSION 2.0.0 DESCRIPTION "Interference library")
+project(interference VERSION 2.1.0 DESCRIPTION "Interference library")
 
 set(CMAKE_CXX_STANDARD 14)
 
