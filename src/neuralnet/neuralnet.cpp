@@ -487,8 +487,10 @@ std::vector<indk::OutputValue> indk::NeuralNet::doLearn(const std::vector<std::v
  */
 std::vector<indk::OutputValue> indk::NeuralNet::doRecognise(const std::vector<std::vector<float>>& Xx, bool prepare, const std::vector<std::string>& inputs) {
     setLearned(true);
-    t = 0;
-    if (prepare) doPrepare();
+    if (prepare) {
+        t = 0;
+        doPrepare();
+    }
     return doSignalTransfer(Xx, inputs);
 }
 

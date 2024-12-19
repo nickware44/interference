@@ -55,6 +55,8 @@ indk::Neuron::Synapse::Synapse(indk::Position *_SPos, float _k1, float _Lambda, 
 
 void indk::Neuron::Synapse::doIn(float X) {
     float nGamma = indk::Computer::getGammaFunctionValue(Gamma, k1, k2, X);
+    lGamma = Gamma;
+    ldGamma = dGamma;
     dGamma = nGamma - Gamma;
     Gamma = nGamma;
 }
@@ -89,6 +91,11 @@ void indk::Neuron::Synapse::doReset() {
     GammaQ.clear();
 //    k1 = ok1;
 //    k2 = ok2;
+}
+
+void indk::Neuron::Synapse::doRollback() {
+    dGamma = ldGamma;
+    Gamma = lGamma;
 }
 
 void indk::Neuron::Synapse::setGamma(float gamma) {

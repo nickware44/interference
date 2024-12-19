@@ -21,7 +21,8 @@ indk::Neuron::Neuron() {
     OutputSignalSize = 1;
     OutputSignalPointer = 0;
     NID = 0;
-    OutputMode = 0;
+    ProcessingMode = indk::Neuron::ProcessingModes::ProcessingModeDefault;
+    OutputMode = indk::Neuron::OutputModes::OutputModeStream;
     Learned = false;
 //    ReceptorPositionComputer = nullptr;
 }
@@ -35,7 +36,8 @@ indk::Neuron::Neuron(const indk::Neuron &N) {
     OutputSignalPointer = 0;
     DimensionsCount = N.getDimensionsCount();
     NID = 0;
-    OutputMode = 0;
+    ProcessingMode = N.getProcessingMode();
+    OutputMode = N.getOutputMode();
     Learned = false;
     auto elabels = N.getEntries();
     for (int64_t i = 0; i < N.getEntriesCount(); i++) Entries.emplace_back(elabels[i], new Entry(*N.getEntry(i)));
@@ -52,7 +54,8 @@ indk::Neuron::Neuron(unsigned int XSize, unsigned int DC, int64_t Tl, const std:
     OutputSignalSize = 1;
     OutputSignalPointer = 0;
     NID = 0;
-    OutputMode = 0;
+    ProcessingMode = indk::Neuron::ProcessingModes::ProcessingModeDefault;
+    OutputMode = indk::Neuron::OutputModes::OutputModeStream;
     Learned = false;
     for (auto &i: InputNames) {
         auto *E = new Entry();
@@ -174,11 +177,19 @@ std::pair<int64_t, float> indk::Neuron::doSignalReceive(int64_t tT) {
     auto d = tlocal - tT;
 
     if (d > 0 && OutputSignalPointer-d >= 0) {
-        if (OutputMode == indk::Neuron::OutputModes::OutputModeLatch && Learned) {
+        if (OutputMode != indk::Neuron::OutputModes::OutputModeStream && Learned) {
             auto patterns = doComparePattern();
-            if (std::get<0>(patterns) < 10e-6) {
-//                std::cout << Name << " p " << std::get<0>(patterns) << " " << OutputSignal[OutputSignalPointer-d] << std::endl;
-                return std::make_pair(tT, OutputSignal[OutputSignalPointer-d]);
+            if (std::get<0>(patterns) < 10e-4) {
+                switch (OutputMode) {
+                    case indk::Neuron::OutputModes::OutputModeLatch:
+                        return std::make_pair(tT, OutputSignal[OutputSignalPointer-d]);
+
+                    case indk::Neuron::OutputModes::OutputModePredefined:
+                        if (std::get<1>(patterns) >= OutputsPredefined.size())
+                            return std::make_pair(tT, 0);
+                        else
+                            return std::make_pair(tT, OutputsPredefined[std::get<1>(patterns)]);
+                }
             } else
                 return std::make_pair(tT, 0);
         }
@@ -188,10 +199,6 @@ std::pair<int64_t, float> indk::Neuron::doSignalReceive(int64_t tT) {
             std::cerr << "[" << Name << "] Output for time " << tT << " is not ready yet" << std::endl;
         return std::make_pair(tT, 0);
     }
-}
-
-void indk::Neuron::doCreateCheckpoint() {
-    for (auto R: Receptors) R -> doSavePos();
 }
 
 void indk::Neuron::doFinalizeInput(float P) {
@@ -217,8 +224,9 @@ void indk::Neuron::doFinalize() {
     Learned = true;
 }
 
-void indk::Neuron::doCreateNewScope() {
+void indk::Neuron::doCreateNewScope(float output) {
     for (auto R: Receptors) R -> doCreateNewScope();
+    OutputsPredefined.push_back(output);
 }
 
 void indk::Neuron::doChangeScope(uint64_t scope) {
@@ -233,24 +241,7 @@ void indk::Neuron::doReset() {
     Learned = false;
     for (auto E: Entries) E.second -> doPrepare();
     for (auto R: Receptors) R -> doReset();
-}
-
-std::vector<float> indk::Neuron::doCompareCheckpoints() {
-    std::vector<float> Result, CPR;
-    std::vector<indk::Position*> CP, CPf;
-    for (auto R: Receptors) {
-        if (R->isLocked()) {
-            CP = R -> getCP();
-            CPf = R -> getCPf();
-            if (Result.empty()) Result = indk::Computer::doCompareCPFunction(CP, CPf);
-            else {
-                CPR = indk::Computer::doCompareCPFunction(CP, CPf);
-                for (int j = 0; j < Result.size(); j++) Result[j] += CPR[j];
-            }
-        }
-    }
-    for (auto R: Result) R /= Receptors.size();
-    return Result;
+    OutputsPredefined.clear();
 }
 
 /**
@@ -262,6 +253,7 @@ indk::Neuron::PatternDefinition indk::Neuron::doComparePattern(int ProcessingMet
     auto ssize = Receptors[0]->getReferencePosScopes().size();
     std::vector<float> results;
     float value = 0;
+    int num = -1;
     float rmin = -1;
 
     for (uint64_t i = 0; i < ssize; i++) results.push_back(0);
@@ -278,8 +270,11 @@ indk::Neuron::PatternDefinition indk::Neuron::doComparePattern(int ProcessingMet
     switch (ProcessingMethod) {
         default:
         case indk::ScopeProcessingMethods::ProcessMin:
-            for (auto r: results) {
-                if (rmin == -1 || r < rmin) rmin = r;
+            for (int r = 0; r < results.size(); r++) {
+                if (rmin == -1 || results[r] < rmin) {
+                    rmin = results[r];
+                    num = r;
+                }
             }
             value = rmin;
             break;
@@ -292,7 +287,7 @@ indk::Neuron::PatternDefinition indk::Neuron::doComparePattern(int ProcessingMet
             break;
     }
 
-    return {value, 0};
+    return {value, num};
 }
 
 void indk::Neuron::doLinkOutput(const std::string& NName) {
@@ -386,6 +381,10 @@ void indk::Neuron::setk3(float _k3) {
 
 void indk::Neuron::setNID(int _NID) {
     NID = _NID;
+}
+
+void indk::Neuron::setProcessingMode(int mode) {
+    ProcessingMode = mode;
 }
 
 void indk::Neuron::setOutputMode(int mode) {
@@ -540,6 +539,14 @@ int indk::Neuron::getState(int64_t tT) const {
     }
     if (tT >= t.load()) return States::Pending;
     return States::Computed;
+}
+
+int indk::Neuron::getProcessingMode() const {
+    return ProcessingMode;
+}
+
+int indk::Neuron::getOutputMode() const {
+    return OutputMode;
 }
 
 indk::Neuron::~Neuron() {

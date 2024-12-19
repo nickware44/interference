@@ -11,7 +11,7 @@ set(TARGET_SOURCE
         src/backends/default.cpp include/indk/backends/default.h
         src/backends/multithread.cpp include/indk/backends/multithread.h
         src/backends/opencl.cpp include/indk/backends/opencl.h src/interlink.cpp include/indk/interlink.h
-        src/profiler.cpp include/indk//profiler.h)
+        src/profiler.cpp include/indk/profiler.h)
 
 add_library(objlib OBJECT ${TARGET_SOURCE})
 set_property(TARGET objlib PROPERTY POSITION_INDEPENDENT_CODE ON)
@@ -74,4 +74,3 @@ add_subdirectory(samples/test)
 add_subdirectory(samples/vision)
 add_subdirectory(samples/multimodal)
 add_subdirectory(samples/lang)
-add_subdirectory(samples/general)

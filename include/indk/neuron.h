@@ -39,9 +39,9 @@ namespace indk {
         float *OutputSignal;
         int64_t OutputSignalSize;
         int64_t OutputSignalPointer;
-        int NID, OutputMode;
+        int NID, ProcessingMode, OutputMode;
         bool Learned;
-        std::vector<float> doCompareCheckpoints();
+        std::vector<float> OutputsPredefined;
         std::string Name;
     public:
         /**
@@ -57,6 +57,18 @@ namespace indk {
         } States;
 
         /**
+         * Neuron recognition processing modes.
+         */
+        typedef enum {
+            /// During recognition, the neuron receptors work as usual.
+            ProcessingModeDefault,
+            /// During recognition, the neuron receptors work in auto reset mode - receptors automatically return to their default position after each movement.
+            ProcessingModeAutoReset,
+            /// During recognition, the neuron receptors work in auto rollback mode - receptors automatically return to their previous position after movement only if output signal (for current tick) is 0.
+            ProcessingModeAutoRollback,
+        } ProcessingModes;
+
+        /**
          * Neuron recognition output modes.
          */
         typedef enum {
@@ -64,9 +76,11 @@ namespace indk {
             OutputModeStream,
             /// During recognition, the neuron works in latch mode - the output signal is available only if pattern difference is 0.
             OutputModeLatch,
+            /// During recognition, the neuron works in predefined mode - the predefined output signal is available only if pattern difference is 0.
+            OutputModePredefined
         } OutputModes;
 
-        typedef std::tuple<float, float> PatternDefinition;
+        typedef std::tuple<float, int> PatternDefinition;
 
         Neuron();
         Neuron(const indk::Neuron&);
@@ -80,10 +94,9 @@ namespace indk {
         void doFinalizeInput(float);
         void doPrepare();
         void doFinalize();
-        void doCreateNewScope();
+        void doCreateNewScope(float output = 0);
         void doChangeScope(uint64_t);
         void doReset();
-        void doCreateCheckpoint();
         indk::Neuron::PatternDefinition doComparePattern(int ProcessingMethod = indk::ScopeProcessingMethods::ProcessMin) const;
         void doLinkOutput(const std::string&);
         void doClearOutputLinks();
@@ -99,6 +112,7 @@ namespace indk {
         void setk2(float);
         void setk3(float);
         void setNID(int);
+        void setProcessingMode(int);
         void setOutputMode(int);
         void setName(const std::string&);
         void setLearned(bool LearnedFlag);
@@ -119,6 +133,8 @@ namespace indk {
         std::string getName();
         int64_t getSignalBufferSize() const;
         int getState(int64_t) const;
+        int getProcessingMode() const;
+        int getOutputMode() const;
         ~Neuron();
     };
 
@@ -138,6 +154,7 @@ namespace indk {
         void doProcess();
         void doPrepare();
         void doFinalize();
+        void doRollback();
         void doReserveSignalBuffer(uint64_t);
         void setLambda(float);
         void setk1(float);
@@ -156,6 +173,7 @@ namespace indk {
         int NeurotransmitterType;
         int64_t Tl;
         float Gamma, dGamma;
+        float lGamma, ldGamma;
         long long QCounter;
         std::vector<float> GammaQ;
         std::atomic<int64_t> QSize;
@@ -168,6 +186,7 @@ namespace indk {
         bool doInFromQueue(int64_t);
         void doPrepare();
         void doReset();
+        void doRollback();
         void setGamma(float);
         void setk1(float);
         void setk2(float);

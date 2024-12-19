@@ -82,6 +82,10 @@ void indk::Neuron::Entry::doReserveSignalBuffer(uint64_t L) {
     SignalPointer = 0;
 }
 
+void indk::Neuron::Entry::doRollback() {
+    for (auto S: Synapses) S -> doRollback();
+}
+
 void indk::Neuron::Entry::setLambda(float _l) {
     for (auto S: Synapses) S ->setLambda(_l);
 }

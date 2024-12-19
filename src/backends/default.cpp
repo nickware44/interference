@@ -45,6 +45,11 @@ void indk::ComputeBackendDefault::doProcess(void* Object) {
 
     for (int i = 0; i < N->getReceptorsCount(); i++) {
         auto R = N->getReceptor(i);
+
+        if (R->isLocked() && N->getProcessingMode() == indk::Neuron::ProcessingModeAutoReset) {
+            R -> doPrepare();
+        }
+
         if (!R->isLocked()) RPos = R -> getPos();
         else RPos = R -> getPosf();
         indk::Position *SPos;
@@ -68,6 +73,20 @@ void indk::ComputeBackendDefault::doProcess(void* Object) {
             }
         }
 
+        if (R->isLocked() && N->getProcessingMode() == indk::Neuron::ProcessingModeAutoRollback) {
+            auto NPos = indk::Position(*RPos);
+            NPos.doAdd(dRPos);
+            auto scopes = R -> getReferencePosScopes();
+            float dmin = -1;
+
+            for (auto s: scopes) {
+                auto d = indk::Position::getDistance(&NPos, s);
+                if (dmin == -1 || d <= dmin) dmin = d;
+            }
+            if (dmin > 10e-6)
+                continue;
+        }
+
         R -> setFi(FiSum);
         R -> doUpdatePos(dRPos);
         P += indk::Computer::getReceptorInfluenceValue(R->doCheckActive(), R->getdFi(), dRPos, zPos);
@@ -76,6 +95,18 @@ void indk::ComputeBackendDefault::doProcess(void* Object) {
     P /= (float)N->getReceptorsCount();
 
     N -> doFinalizeInput(P);
+
+    if (N->isLearned() && N->getProcessingMode() == indk::Neuron::ProcessingModeAutoRollback) {
+        if (P == 0) {
+            for (int j = 0; j < N->getEntriesCount(); j++) {
+                N -> getEntry(j) -> doRollback();
+            }
+        }
+    } else if (N->isLearned() && N->getProcessingMode() == indk::Neuron::ProcessingModeAutoReset) {
+        for (int j = 0; j < N->getEntriesCount(); j++) {
+            N -> getEntry(j) -> doFinalize();
+        }
+    }
 }
 
 void indk::ComputeBackendDefault::doUnregisterHost() {
